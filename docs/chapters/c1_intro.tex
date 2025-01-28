@@ -1,0 +1,47 @@
+\chapter{Introduction} \label{chap:intro}
+
+
+\section{Context} \label{sec:context}
+
+Lung cancer is the leading cause of cancer-related deaths, often diagnosed in an advanced stage, resulting in a low 5-year survival rate of less than 10\%, which occurs in 70\% of cases, but if detected in an early stage, it is greater than 90\%~\cite{bahmer_benefits_2011}. In 2022, lung cancer had the highest incidence and mortality rates of all cancers worldwide~\cite{gco_lung_2024}. In particular, in upper-middle-income countries, there has been a significant increase in lung cancer-related deaths, with a rise of 442,000 deaths, more than 2.5 times the increase in deaths of the combined three other income groups~\cite{who_death_cause_2024}.
+
+Efforts to reduce lung cancer mortality by screening have been hampered by the aggressive and diverse nature of the disease~\cite{NLST}, for example, CT scans help diagnose lung cancer more precisely and produce a reduction of 20\% in mortality. Today, the classification of a pulmonary nodule is dependent on measuring the growth rate of that nodule from multiple CT scans and following it for approximately two years to avoid performing a biopsy, which is an invasive procedure for diagnosis. Another downside of slice-by-slice CT scans in lung cancer detection is that they are challenging for doctors, since the amount of data saved in this medical procedure is time-consuming, expensive, prone to reader bias, and requires a high degree of competency and concentration~\cite{Shaffie2022}.
+
+As medical data becomes more complex, there is a growing need for models that can effectively integrate and analyze these data to support clinical decision-making~\cite{Iqbal2023}. Computer-aided diagnosis (CAD) is increasingly being investigated as an alternative and complementary approach to conventional reading, as it avoids many of these issues. Automated nodule diagnostic systems can save both time and money while avoiding the risks of invasive surgical procedures. The noninvasive CAD system for lung nodule diagnosis is promising and has achieved very high accuracy measures from a single CT scan ~\cite{Shaffie2022}.
+
+The combined gains in medical imaging and deep learning complement new approaches that are accurate and safer ways of recognizing diseases. Deep learning models can overcome projections that show how medical images have been analyzed to locate and determine the type of lung abnormalities that are a common cause of cancer.
+
+
+\section{Problem}
+This thesis addresses the need for a more accurate and reliable diagnostic tool. Existing diagnostic systems, largely based on deep learning models, have certain limitations when it comes to accuracy and generalization in regards towards medical image datasets. This sort of models are often based on deep features from neural networks, which can overshadow superficial features such as texture and shape that are important for accurately classifying nodules.
+
+In addition, the lack of explainability of the model poses a challenge in clinical contexts, which can limit its reliability in making critical medical decisions. The inability to provide interpretable information hinders the adoption of these methods for the diagnosis of lung cancer.
+
+
+\section{Hypothesis}
+Feature extraction is critical for the characterization task, which involves both shallow features (texture and shape descriptors) and deep features learned by deep neural networks (DNNs). The state of the art demonstrates that performance through the application of information fusion techniques could be more efficient in deep learning models when applied in lung nodule characterization~\cite{Yutong2018}.
+These advancements highlight the need for further research in deep learning and information fusion to prompt early detection and reduce mortality as well as to provide more effective treatment strategies for lung cancer.
+
+We hypothesize that this information fusion-based model approach, with shallow and deep features, will result in a more accurate and reliable model for lung cancer characterization, making it better suited for early detection and precision diagnosis. We seek to overcome the current state-of-the-art limitations in automatic lung cancer diagnostics, offering a solution that not only improves prediction accuracy but also has the potential to assist in clinical decision-making and medical practice.
+
+
+\section{Motivation} \label{sec:Motivation}
+
+Promoting the improvement of human life and health through early detection of diseases continues to be a concern throughout the world and is also the main objective of Goal 3 (Ensure healthy lives and promote well-being for all at all ages) of the Sustainable Development Goals (SDGs) of the United Nations~\cite{un_sdg}. Lung cancer is an enemy of public health care and the development of early and accurate diagnostic tools will help improve survival rates.
+This research aims to contribute to the goal of promoting health by harnessing modern technologies to address one of the greatest diagnostic issues in oncology today. Through the development of models that support more precise care, this dissertation aligns with the global imperative to promote well-being for all.
+
+
+\section{Research Questions}
+To bring clarity and precision to the hypothesis, we will break it down into three research questions. These questions will guide the investigation, helping us to understand the main points of our hypothesis.
+
+\begin{enumerate}
+    \item Does fusing information from shallow and deep feature extractors bring any improvement (classification performance, generalization, reduction in the number of model parameters) compared to using only a deep feature extractor?
+    \item How does this approach compare with an approach that only uses a deep feature extractor when varying the dataset? (e.g. training on one set of data and testing on another, using different amounts of data, among others)
+    \item In what ways can information-fusion-based models contribute to improving the explainability of lung nodule malignancy predictions?
+
+\end{enumerate}
+
+
+
+
+

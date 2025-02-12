@@ -1,6 +1,5 @@
-%% TODO: change this name
-\chapter{Method Planning }\label{chap:chap4}
-
+\chapter{Methodology planning }\label{chap:chap4}
+In summary, this workplan outlines a systematic and rigorous approach to developing a robust pulmonary nodule classification system. By integrating advanced deep learning models with complementary shallow feature extractors and employing sophisticated fusion methods, the study aims to achieve significant improvements in diagnostic accuracy and robustness, with clear pathways for addressing potential limitations and risks.
 %% Detailed Work Plan / Activity cards
     %% Task Identification
     %% Duration, begin and end dates
@@ -8,17 +7,31 @@
     %% Detailed description (may include materials and methods)
     %% Deliverables
     %% Milestones
-        %% Include a Gantt chart.
-        
 %% Description
 %% Experimental process & Evaluation Design
     %% Introduction
     %% Research design
     %% Research context
-\section{Population and sampling}
     %% Population and sampling
-    The lung nodule classification study will use a population of CT images from publicly available and clinically validated datasets, generally used for this purpose. We will fully trust in their assignment of labels (benign/malignant) to conduct experiments. 
     % LIDC-IDRI as example
+%% Expected Results
+
+%% Conclusion
+    %% Ethical considerations
+    
+    %% Problem and goals
+    %% Limitations Acknowledge
+    
+    %% Conclusions drawn from the related work and gap analysis
+    
+    %% SMART analysis of the project goals
+    %% SWOT analysis of the project proposal
+    
+    
+    %% Mitigation plan
+    %% Risk assessment and contingency plan
+\section{Population and sampling}
+    The lung nodule classification study will use a population of CT images from publicly available and clinically validated datasets, generally used for this purpose. We will fully trust in their assignment of labels (benign/malignant) to conduct experiments. 
     
     To retrieve insights into the characteristics and quality of the data we will submit it to an analysis and provide some visualization for easier interpretation. Computing and summarizing statistics such as mean, median, and standard deviation, for nodule size, patient demographics, and other clinical variables and distribution of classifications in the used datasets to evaluate balance and ascertain the need to perform sampling techniques. For each dataset selected, pre-processing will be carried out in order to improve the quality of the images: ensuring uniformity if necessary, such as applying resampling techniques, and removing, for example, noise and other irrelevant information.
     
@@ -41,62 +54,92 @@ The integration of deep learning outputs with shallow feature sets is crucial fo
 \section{Experimentation}
 The experimentation phase is designed to systematically evaluate the performance of different combinations of deep learning models, shallow feature extractors, and fusion techniques in classifying pulmonary nodules. A flexible workflow will be developed to facilitate the testing of these combinations. This workflow begins by selecting one of the three top-performing deep learning models identified earlier, followed by choosing one to all five shallow feature extractors. The selected outputs are then combined using one of the chosen fusion methods. The pipeline processes the input CT images, extracts features, applies fusion, and trains the combined model. For each configuration, the model's performance will be assessed using metrics such as accuracy, sensitivity, specificity, F1-score, area under the curve (AUC), and false-positive rate (FPR).
 This systematic approach ensures that all potential interactions between deep learning models, shallow feature extractors, and fusion techniques are explored. The goal is to identify the configurations that deliver the highest classification accuracy, outperforming both standalone deep learning models and traditional classifiers. The experimental results will provide valuable insights into the synergies between deep and shallow methods, establishing a robust foundation for future advancements in pulmonary nodule classification.
-%% Expected Results
 
-%% Conclusion
-    %% Ethical considerations
-    
-    %% Problem and goals
-    %% Limitations Acknowledge
-    
-    %% Conclusions drawn from the related work and gap analysis
-    
-    %% SMART analysis of the project goals
-    %% SWOT analysis of the project proposal
-    
-    
-    %% Mitigation plan
-    %% Risk assessment and contingency plan
+\section{Expected Results}
 
+We anticipate that the proposed model will demonstrate significant improvements over baseline methods. Specifically, the study expects: to improve the accuracy, sensitivity, specificity, and AUC-ROC of defined baselines and other state of the art approaches; to achieve a robust performance on unseen datasets, indicating effective generalization; to prove the combined use of deep learning and shallow features will result in a model with an higher discriminative ability; to enhance interpretability and manage computational demands through design and potential use of specialist models.
+
+
+\section{Conclusion}
+
+The research will exclusively use publicly available datasets, ensuring compliance with ethical standards and privacy guidelines. Since no new patient data will be collected and because no sensitive data is located in the datasets, the ethical risks are negligible.
+
+We knowledge that the research could be held back due to parameter configurations difficulties, challenges on accurately segmenting complex nodule cases and the possibility that the selected data sets might not fully represent the diversity found in the clinical contexts required for implementation in diagnostics.
+
+
+To address potential challenges, techniques will be applied to mitigate overfitting and in case of training or data challenges, the approach includes the flexibility to simplify the model or adopt alternative (or simpler) methods.
+Other risks, such as delays, dataset issues, or training difficulties will be monitored, in order to mitigate them and resolve problems before they cause major delays and other conflicts that are more difficult to predict and control.
+
+\subsection{SWOT Analysis}
+\begin{tcbraster}[raster columns=2, boxrule=0mm, arc=0mm]
+\begin{tcolorbox}[equal height group=A, size=fbox, colback=swotS!60, colframe=swotS!80!black, title=\textsc{strengths}]
+\begin{enumerate}
+    \item Use of deep and shallow extractors fused with advanced strategies.
+    \item Access to clinically validated, publicly available datasets.
+    \item Rigorous evaluation protocols.
+\end{enumerate}
+\end{tcolorbox}
+\begin{tcolorbox}[equal height group=A, size=fbox, colback=swotW!60, colframe=swotW!80!black, title=\textsc{weaknesses}]
+\begin{enumerate}
+    \item Highly dependent on training set demographics representation.
+    \item High computational resource requirements.
+    \item Complexity in integrating multiple methodologies.
+\end{enumerate}
+\end{tcolorbox}
+\begin{tcolorbox}[equal height group=B, size=fbox, colback=swotO!60, colframe=swotO!80!black, title=\textsc{opportunities}]
+\begin{enumerate}
+    \item Development of novel fusion strategies and architectures.
+    \item Contribution to advancements in CAD systems.
+\end{enumerate}
+\end{tcolorbox}
+\begin{tcolorbox}[equal height group=B, size=fbox, colback=swotT!60, colframe=swotT!80!black, title=\textsc{threats}]
+\begin{enumerate}
+    \item New competing methods and research in the field.
+    \item Variability in image data that could impact model performance.
+    \item Compliance with clinical and regulatory requirements.
+\end{enumerate}
+\end{tcolorbox}
+\end{tcbraster}
+
+\subsection{Work Plan}
 \begin{ganttchart}[
-    hgrid,       % Horizontal grid lines
-    vgrid,       % Vertical grid lines
-    title height=1, % Adjust height of titles if necessary
-    bar height=0.6 % Adjust bar height for clarity
-]{0}{20} % Specify range of the chart (weeks 0 to 20)
-
+    hgrid,
+    vgrid,
+    title height=1,
+    bar height=0.6
+]{0}{20}
     \gantttitle{Work Plan by Week}{21} \\
     \gantttitlelist{0,...,20}{1}{} \\
+
+    % SOTA and Data Collection Phase
     \ganttbar{SOTA Revision and Improvement}{0}{1} \\
     \ganttmilestone{SOTA Finalized}{1} \\
+    \ganttbar{Data Selection and Sampling}{1}{2} \\
+    \ganttbar{Data Analysis and Visualization}{2}{3} \\
     
-    \ganttbar{Data Selection}{1}{1} \\
-    
-    \ganttbar{Data Analysis and Visualization}{1}{2} \\ 
-    
-    \ganttbar{Data Pre-Process}{1}{3} \\
-    \ganttmilestone{Prepared Data}{3} \\
-    
-    \ganttbar{Evaluation Workflow}{3}{6} \\
-    
-    \ganttbar{DL Selection}{5}{6} \\
-    
-    \ganttbar{Shallow Features}{6}{6} \\
-    
-    \ganttbar{Fusion Methods Selection}{6}{8} \\
-    \ganttmilestone{Experiment Subjects}{8} \\
-    
-    \ganttbar{Experimentation}{7}{18} \\
-    
-    \ganttbar{Model Tuning}{13}{18} \\
-    \ganttmilestone{Model Experimentation Completed}{18} \\
-    
-    \ganttbar{Thesis writing}{5}{18} \\
-    \ganttmilestone{Thesis Draft}{18} \\
-    
-    \ganttbar{Contingencies and Adjustments}{18}{20} \\
+    % Data Pre-Processing Phase
+    \ganttbar{Data Pre-Processing}{3}{4} \\
+    \ganttmilestone{Prepared Data}{4} \\
+
+    % Evaluation and Model Development
+    \ganttbar{Evaluation Workflow Development}{4}{6} \\
+    \ganttbar{Deep Learning Selection}{5}{6} \\
+    \ganttbar{Shallow Feature Extraction}{6}{7} \\
+    \ganttbar{Fusion Methods Selection}{7}{8} \\
+    \ganttmilestone{Experiment Subjects Finalized}{8} \\
+
+    % Experimentation and Tuning
+    \ganttbar{Experimentation Phase}{8}{16} \\
+    \ganttbar{Model Tuning}{10}{16} \\
+    \ganttmilestone{Experimentation Completed}{16} \\
+
+    % Thesis Writing and Final Adjustments
+    \ganttbar{Thesis Writing Draft}{7}{16} \\
+    \ganttmilestone{Thesis Draft Finalized}{16} \\
+    \ganttbar{Contingencies and Final Adjustments}{16}{20} \\
     \ganttmilestone{Final Adjustments Completed}{20} \\
     
 \end{ganttchart}
+
 
 

@@ -1,123 +1,8 @@
-\chapter{State of the Art}\label{chap:sota}
-
-\section{Lung Nodule Characterization}
-
-TODO
-
-
-\section{Datasets Overview}
-This section presents some of the most well-known and widely used datasets in lung nodule characterization tasks. These datasets were used by studies present in the state of the art, are public and complete, and can be easily accessed either through The Cancer Imaging Archive (TCIA) or Grand Challenge.
-
-\subsection{LIDC-IDRI}\label{lidc}
-The Lung Image Database Consortium Image Collection (LIDC-IDRI) is a comprehensive collection of CT scans of the thorax, designed for diagnosing lung cancer and detecting visualized lesions. This internationally accessible database serves as a valuable resource for the development of computer-aided detection (CAD) systems focused on lung cancer diagnosis and evaluation. Launched by the National Cancer Institute (NCI) and further developed by the Foundation for the National Institutes of Health (FNIH), with support from the Food and Drug Administration (FDA), this public-private partnership exemplifies the success of a consensus-based consortium.
-
-The creation of this data registry involved collaboration among seven academic research centers and eight major medical imaging companies, resulting in a total of 1,018 cases. Each case includes clinical thoracic CT scan images for individual subjects, accompanied by an XML file that details the results of a two-phase image annotation process. In the first phase, four radiologists independently reviewed CT images and annotated lesions into one of three categories: "nodule >=3 mm," "nodule <3 mm," and "non-nodule >=3 mm." During the second phase, the radiologists reviewed their annotations alongside the anonymized annotations of their peers to reach a consensus. This process was designed to allow for the accurate tallying of lung nodules on a CT scan with minimal human intervention, without requiring forced agreement among the radiologists~\cite{Armato2015}.
-
-\subsection{LUNA16}\label{luna16}
-The Lung Nodule Analysis 2016 dataset utilizes the publicly available LIDC-IDRI database mentioned earlier. Scans with a slice thickness greater than 2.5 mm were excluded from the dataset. In total, there are 888 CT scans included. The reference standard for this challenge consists of all nodules that are 3 mm or larger, which were accepted by at least 3 out of 4 radiologists. Annotations that are not part of the reference standard, such as non-nodules, nodules smaller than 3 mm, and nodules annotated by only 1 or 2 radiologists, are classified as irrelevant findings~\cite{LUNA16}.
-
-\subsection{NLST}\label{nlst}
-The National Lung Screening Trial was a randomized controlled trial conducted by the Lung Screening Study Group (LSS) and the American College of Radiology Imaging Network (ACRIN). The purpose of the trial was to evaluate whether screening for lung cancer with low-dose helical computed tomography (CT) reduces mortality compared to screening with chest radiography in high-risk individuals. 
-Approximately 54,000 participants were enrolled between August 2002 and April 2004. Data collection for the study has concluded, with the final information gathered by December 31, 2009, having low-dose CT scans from 26,254 of these subjects~\cite{NLST2013, NLST}.
-
-\subsection{ANODE09}\label{anode09}
-The ANODE09 dataset gathers 55 anonymized CT scans provided by the University Medical Center Utrecht from the NELSON screening program. Five of those exams are supplemented by radiologists' annotations and serve as examples for optimizations, while the remaining 50 scans are reserved for testing only, with their reference annotations not publicly available. The dataset primarily includes scans from current and former heavy smokers aged 50–75, acquired using 16- or 64-slice CT scanners set for low-dose readings.
-
-The dataset was randomly selected from a small subset chosen among the scans with the highest number of annotations. Scans with evident interstitial lung disease were excluded to avoid excessive small nodular findings. Although ANODE09 emphasizes larger nodules, unlike other datasets, it contains fewer scans, making it more representative of findings in asymptomatic heavy smokers. Given its design, the dataset is intended exclusively for testing and is not recommended for training CAD algorithms~\cite{ANODE09}.
-
-\subsection{LUNGx}\label{lungx}
-The LUNGx Challenge aimed to compare the performance of participants’ computerized methods for lung nodule characterization with that of six radiologists who participated in an observer study performing the same tasks on the same dataset. The scans were obtained from the clinical archive at The University of Chicago with Institutional Review Board approval, having removed all protected health information before being uploaded to The Cancer Imaging Archive. %TODO: Maybe redo this phrase
-
-The Challenge required participants to use pre-trained algorithms to proceed with classification tasks. Ten scans were given for calibration purposes (5 benign, 5 malignant) and were followed by a test set of 60 scans with 73 nodules (containing 37 benign and 36 malignant) nodules. 
-Nodule sizes were measured through Response Evaluation Criteria in Solid Tumours guidelines, with benign nodules averaging 15.8 mm and malignant nodules 18.6 mm in diameter. This design was made to provide some balance in nodule's size, since it could be a malignancy indicator. In addition, spatial coordinates of each nodule were provided, without its sizes or diagnoses~\cite{LUNGx}.
-
-\subsection{Limitations Acknowledge}
-
-It is important to recognize that medical imaging datasets significantly contribute to developing and validating computer-aided detection (CAD) systems for lung cancer diagnosis. Nevertheless, even the most used datasets, such as LIDC-IDRI and LUNA16, have some limitations that can impact model performance and generalizability. These challenges include a lack of annotated data, subjectivity in labeling, inter-observer variability, and potential biases within the datasets. These factors complicate the creation of robust and broadly applicable models. Additionally, we acknowledge that the process of annotating medical images is both time-consuming and costly, often leading to datasets that are limited in size. This limitation is further exacerbated by patient data privacy regulations, which restrict access to larger datasets.~\cite{Gu2021}
-
-\section{Fusion Techniques}
-Exploring the state-of-the-art methodologies, we focus on feature fusion techniques that integrate texture, shape, and deep features. Fusion-based models~\cite{Liu2023, Xie2018} that combine handcrafted features with deep learning representations have shown promise in reducing false positives and improving sensitivity, supporting their potential in clinical scenarios.
-
-We aim to provide a comprehensive understanding of the advancements in nodule characterization. The focus is placed on the role of feature fusion techniques in enhancing diagnostic performance, particularly in terms of accuracy, sensitivity, and robustness against imaging artifacts.
-
-
-%The following studies focus on the extraction and fusion of radiomic features to improve diagnostic accuracy, combining traditional image analysis approaches with advanced processing techniques. 
-% Standard
-\citet{Farag2017} explored feature fusion by extracting texture descriptors (Gabor filters and Local Binary Patterns - LBP) and shape (signed distance transform fused with LBP). They showed that Gabor filters when implemented on a two-level cascaded framework with Support Vector Machines (SVM) classifiers, obtained the best performance: a mean area under the ROC curve (AUC) of 99\% and an F1-score of 97.5\%. Although this approach does not conclude that feature fusion is optimal, it does encourage the hypothesis that feature fusion, particularly with Gabor filters, can improve classification. We can also take from this study the possibility of carrying out the classification tasks separately, into nodule or non-nodule, and benign or manlignant, with the aim of improving the cascade classifier.
-% Deep 
-\citet{Shaffie2018} proposed a framework to accurately diagnose lung nodules by integrating two types of features: appearance features from a seventh-order Gibbs random field model, that captures spatial heterogeneity in nodules, and geometric features, defining their shape. Then, a deep autoencoder classifier uses these features to distinguish between malignant and benign nodules. Evaluated with data from the LIDC, which included 727 nodules from 467 patients, the system demonstrated potential for lung cancer detection, achieving a classification accuracy of 91.20\%. This reflects a clear improvement over using only geometric or appearance features, which just achieved an accuracy of 85.83\% and 90.51\% respectively.
-% NN
-\citet{Xie2018} gave us an algorithm, Fuse-TSD, that takes texture, shape, and deep features to automatically classify lung nodules in chest CT images. It uses a texture descriptor based on the GLCM, a Fourier shape descriptor, and a DCNN to extract features. Then classifiers, AdaBoosted Back Propagation Neural Network (BPNN), are applied for each feature and the decision is made by the fusion of the respective results. Evaluated on the LIDC-IDRI dataset, Fuse-TSD achieved an AUC of 96.65\% when nodules with a composite malignancy rate of 3 were discarded (D1), 94.45\% when they were considered benign (D2), and 81.24\% when they were considered malignant (D3). If for each D1, D2 and D3 we compare the fusion with the respective best AUC results of the test set that does not use fusion, we obtain increments of 0,41, 1,54\%, and 4,58\% respectively.
-% Multiple?
-\citet{Saba2019} proposed a method for early-stage lung nodule detection, consisting of three main phases: nodule segmentation using Otsu's thresholding and morphological operations, feature extraction of geometric, texture, and deep learning features to select optimal features, and serial fusion of the optimal features for classifying nodules as malignant or benign. The study experiments with the LIDC-IDRI dataset, using Otsu's algorithm and morphological erosion for segmentation. Handcrafted geometric and texture features are combined with deep learning features extracted using a VGG-19 model. Feature optimization is performed using PCA, and the fused features are classified using multiple classifiers. Experimental results show the proposed method outperforms existing approaches, achieving an accuracy of 99.0\%,  a sensitivity of 99.0\%, and a specificity of 100\% applying fused features. It was able to surpass by 1\% and 2\% the sensitivity and specificity of the work done in \cite{Naqi2018}, which, despite using segmentation, has not used fusion.
-% CNN
-\citet{Ali2020} propose a Transferable Texture Convolutional Neural Network (CNN) for lung nodule classification, whose architecture consists of three convolutional layers and an Energy Layer (EL), omitting pooling layers to reduce trainable parameters and computational complexity. The EL preserves texture information and learns during both forward and backward propagation. The model was evaluated on the LIDC-IDRI and LUNGx Challenge datasets. The texture CNN achieved an accuracy of 96.69\% ± 0.72\% and an error rate of 3.30\% ± 0.72\% on LIDC-IDRI. Transfer learning improved accuracy on LUNGx from 86.14\% to 90.91\%.  
-
-% Standart and NN
-\citet{Muzammil2021} investigates different fusion approaches based on feature fusion and ensemble learning to classify lung nodules in CT scans. The authors propose two heterogeneous fusion techniques: fusion based on the average prediction score (AVG-Predict) and fusion based on majority voting (MAX-VOTE). The results showed that the MAX-VOTE technique, combining the predictions of twelve individual classifiers, achieved the highest accuracy in binary classification, with 95.59\% ± 0.27\% against the 91.12\% achieved by the AdaBoostM2 classifier, without fusion and trained on deep features from AlexNet. While in multi-classification, the SVM-FFCAT (Feature Fusion by Concatenation) method achieved superior performance, with an accuracy of 96.89\%, an AUC of 99.21\%, and a specificity of 97.70\%. These results emphasize that fusion features with ensemble learning can significantly enhance the performance of lung nodule classification.
-
-% Standart SVM
-The study by \citet{Ali2021} evaluated the performance of Support Vector Machine and AdaBoostM2 algorithms using deep features from VGG-16, VGG-19, GoogLeNet, Inception-V3, ResNet-18, ResNet-50, ResNet-101 e InceptionResNet-V2 by identifying the optimal layers. Their results showed that SVM was more efficient for deep features as compared to AdaBoostM2. The proposed decision-level fusion technique demonstrates better results in terms of accuracy (90.46 ± 0.25\%), recovery (90.10 ± 0.44\%), and AUC (94.46 ± 0.11\%). Although it was ranked second in terms of specificity (92.56 ± 0.18\%), the deviation is notably lower compared to the Texture CNN approach~\cite{Ali2020}. Furthermore, the classification accuracy based on the simple average of the prediction scores is also computed at 89.10\%, which highlights the robustness and effectiveness of the decision fusion technique compared to other methods. For reference, the  higher accuracy achieved for the non-fusion classifications tested was 86.28\%, with ResNet-101 through SVM.
-
-
-The CAD system proposed by \citet{Shaffie2022} uses an appearance features descriptor, comprising a Histogram of Oriented Gradients, Multi-view Analytical Local Binary Patterns, and a Markov Gibbs Random Field. In addition, employs a shape feature descriptor that includes Multi-view Peripheral Sum Curvature Scale Space, Spherical Harmonics Expansion, and a set of fundamental morphological features. Then a stacked auto-encoder followed by a soft-max classifier is applied to generate the initial malignancy probability. All of the resultant probabilities are fed to the last network that returns the diagnosis. When comparing with a previous study, they refer that the increase in the accuracy is small (from 93.97\% to 94.73\%), which is predictable, since the features used model the same nodule characteristics. However, the increase in system sensitivity from 90.48\% to 93.97\% represents a notable improvement, demonstrating that the new system, with additional features, is less affected by the segmentation process and image artifacts.
-
-%We establish that the fusion of radiomic features, particularly texture, and shape descriptors, can significantly improve the performance of lung nodule classification systems. These results highlight the significance of incorporating more comprehensive features as a strategy to increase diagnostic accuracy.
-
-%The CNNs can automatically learn complex hierarchical features from raw image data, eliminating the need for complex manual feature engineering. Going deeper, both \citet{Halder2020} and \citet{Gu2021} recognize the paradigm shift to deep learning-based approaches for detecting and diagnosing pulmonary nodules.
-
-
-% Information Retrieved Only using deep learning models without fusion
-While studying the identification of COVID-19 cases, \citet{Mahmoud2022}, explored several different learning Deep-Learning Networks for thoracic image retrieval. It used two sets of data focused on the thorax: X-ray and  CT scans. Pre-trained models were used, like ResNet-50, AlexNet, and GoogleNet, as feature extractors. Similarity between images was assessed using measures such as City Block and Cosine. ResNet-50 achieved the best accuracy, reaching 99\% for positive COVID-19 cases and 98\% for negative cases in chest X-rays. 
-
-
-%\subsection{Advanced Fusion-Based Approaches}
-%This present section overviews various approaches, including convolutional neural networks, feature fusion methods, attention models, and multimodal learning techniques. These studies range from the application of deep learning methods for classification to the integration of textural and visual information and other more complex approaches. As previously, the primary goal is to enhance the ability to distinguish between benign and malignant nodules, enabling earlier and more accurate diagnosis.
- 
-
-
-% 4
-%NN
-The CAD system presented by \citet{Yuan2022} uses a multi-branch classification network with an effective attention mechanism (3D ECA-ResNet) to extract features from 3D images of nodules, adapting dynamically to improve the extraction of key information. Structured data, such as diameter and other radiological characteristics, are transformed into a feature vector. The experimental results show that the system achieves an accuracy of 94.89\%, a sensitivity of 94.91\%, and an F1-score of 94.65\%, with a false positive rate of 5.55\%. The increase becomes evident if we compare the results obtained with the baseline defined for accuracy in 2D~\cite{Xie2018} and 3D~\cite{Zhao2020} methods: 	
-89.53\% and 93.92\%. The study concludes that the combination of multimodal data increases the effectiveness of the CAD system, making it more likely to be able to assist doctors in diagnosing pulmonary nodules.
-
-% -
-% CNN
-The study by \citet{Liu2022} emphasizes the need to consider the temporal aspect in analyzing pulmonary nodules. It employs a Faster R-CNN to generate regions of interest and extract temporal and spatial features from lung nodule data. A 3D CNN fuses these features, and a time-modulated long short-term memory (T-LSTM) model analyzes trends and predicts the evolution and malignancy of lung lesions, incrementing the accuracy to 92.8\% when compared with the LSTM (91.1\%), RNN (87.1\%) and SVM (81.2\%) methods.
-
-% -
-\citet{Zhao2022} proposed a lung nodule detection method that integrates multi-scale feature fusion. Candidate nodules are detected using a Faster R-CNN with multi-scale features, achieving a sensitivity of 98.6\%, a 10\% improvement over single-scale models. For false positive reduction, a 3D CNN based on multi-scale fusion achieved 90.5\% sensitivity at 4 false positives per scan.
-
-
-% 7
-\citet{Munoz2022} used a predictive model, such as XGBoost, based on morphological characteristics extracted from CT scans, an approach called “3D-MORPHOMICS”. Its premise is that morphological changes can be quantified and used in the diagnostic process since irregularities in the nodules are indicators of malignancy. The classification model, using only 3D-morphomic features, achieved an AUC (Area Under the ROC Curve) of 96.4\% on the NLST test set, and the combination with radiomic features resulted in even better performance, with an AUC of 97.8\% on the NLST test set and 95.8\% on the LIDC dataset.
-
-% 10
-Based on Hybrid Deep Learning models, \citet{Li2022} proposed a CAD system that integrates deep learning techniques for feature extraction and feature fusion. The system uses VGG16 and VGG19 networks with a Convolutional Block Attention Module (CBAM) to extract relevant features. These features are reduced using Principal Component Analysis (PCA) and fused via Canonical Correlation Analysis (CCA) to create effective representations. The final analysis is performed using an optimized Multiple Kernel Learning Support Vector Machine - Improved Particle Swarm Optimization (MKL-SVM-IPSO). The proposed system achieved 99.56\% accuracy, 99.3\% sensitivity, and an F1-score of 99.65\% on the LUNA16 dataset, surpassing the baseline algorithms of other lung CAD systems by 3.68\% in accuracy and by 7.33\% in sensitivity. These results demonstrate its competitiveness in reducing false positives and negatives in nodule detection.
-
-% 11
-\citet{XueLi2022} evaluated the effectiveness of fusion models in predicting axillary lymph node (ALN) metastases in breast cancer, comparing traditional radiomics models, deep learning radiomics models, and fusion models using dynamic contrast-enhanced MRI (DCE-MRI) images. The imaging data were sourced from TCIA via the Duke-Breast-Cancer-MRI project. Handcrafted radiomic features and deep learning features were extracted from 3062 DCE-MRI images, with feature selection performed using mutual information algorithms and recursive feature elimination. The study found that the decision fusion model, integrating radiomic and deep learning features, outperforms traditional and deep learning models in all metrics, with increments of 2.81\% and 2.58\% in accuracy over them.
-Adding clinical features to the decision fusion model further increased the AUC. The findings demonstrate the efficacy of fusion models in predicting ALN metastases, with the decision fusion model showing significant potential to aid clinical decision-making in early-stage breast cancer treatment.
-
-\citet{Alksas2023} employ an approach that modifies the local ternary pattern (LTP) to use three levels instead of two and a new pattern identification algorithm to capture the heterogeneity and morphology of the nodule. Then the features were given as training data to a classification architecture based on hyper-tuned stacked generalization to classify nodules, achieving an overall accuracy of 96.17\%, with 97.14\% sensitivity and 95.33\% specificity. On the other hand, the original LBP and other classification structures resulted in lower performance when compared to the proposed approach.
-We can perceive an improvement of 4.56\%, 4.12\%, and 4.95\% in accuracy, sensitivity, and specificity respectively, over the deep learning-based model used on the same proposed two-stage stacking-based classification. As for radiomics features, we observed an improvement of 5.89\%, 6.66\%, and 5.22\% on the same metrics.
-
-% 7
-\citet{Liu2023} present a novel method for classifying benign and malignant lung nodules by combining shallow visual features and deep learning features. The approach utilizes separate pipelines for feature extraction and classification. Shallow features, including texture and morphology, are extracted using statistical 3D data analysis and Haralick's texture model, while morphological features are derived from parameters such as size and shape. Support Vector Machines (SVMs) are employed to classify these extracted features. The deep learning branch uses neural architecture search to design a deep model with three sub-branches and integrates a Convolutional Block Attention Module (CBAM) for enhanced feature learning. The classification results from both shallow and deep models are fused using a weighted voting method, achieving an accuracy\ of 91,21\%, sensitivity of 90,27\%, a specificity of 91,98\% and an F1-score of 91,04\%, evaluated with LIDC-IDRI data. This represents a 1.27\% accuracy improvement over the best stand-alone branch, along with the highest specificity among all approaches. 
-
-% 11
-\citet{Iqbal2023}, present with this study an innovative technique for classifying medical image modalities by combining visual and textural features. A pre-trained CNN extracts deep features, while manual methods like Zernike moments, Haralick features, and Global-Local Pyramid Pattern (GLPP) capture relevant textural and statistical attributes. These fused features are used to train ML classifiers such as SVM, KNN, and Decision Trees. The proposed approach outperformed standalone pre-trained CNNs, from 93.32\% to 96.08\% in accuracy and from 93.34\% to 96.31\% in sensitivity.
-
-
 %TODO
 %%Multi-Orientation_Local_Texture_Features_for_Guided_Attention-Base
 %%propuseram um módulo de atenção guiada por múltiplas orientações (MOGAM) para modelar a distribuição da textura dos nódulos em diferentes orientações. O MOGAM combina características de textura extraídas localmente (TFDs) através de um mecanismo de atenção guiada.
 %Multi-Orientation Local Texture Features for Guided Attention-Based
 %Shewaye et al. combinou características geométricas e de histograma para classificação de nódulos com SVM linear, regressão logística, kNN, random forest, e classificadores AdaBoost
-
-%TODO:
-%%s12890-023-02708-w.pdf
-%%propuseram um algoritmo de fusão (RGD) que combina Radiomics e Graph Convolutional Networks (GCN) com modelos Deep CNN. O modelo RGD, avaliado no conjunto de dados LIDC-IDRI com validação cruzada de 10 vezes, alcançou 93.25% de precisão, 89.22% de sensibilidade, 95.82% de especificidade e 0.9629 de AUC.
 
 %%TODO:
 %%Multimodal_Feature_Fusion_and_Knowledge-Driven_Learning_via_Exp
@@ -127,9 +12,154 @@ We can perceive an improvement of 4.56\%, 4.12\%, and 4.95\% in accuracy, sensit
 %% Zhao2020
 %% 
 
+
+% Information Retrieved Only using deep learning models without fusion
+%While studying the identification of COVID-19 cases, \citet{mahmoud_chest_2022}, explored several different learning Deep-Learning Networks for thoracic image retrieval. It used two sets of data focused on the thorax: X-ray and  CT scans. Pre-trained models were used, like ResNet-50, AlexNet, and GoogleNet, as feature extractors. Similarity between images was assessed using measures such as City Block and Cosine. ResNet-50 achieved the best accuracy, reaching 99\% for positive COVID-19 cases and 98\% for negative cases in chest X-rays. 
+
+\chapter{State of the Art}\label{chap:sota}
+Our purpose with the State of the Art chapter is to provide a solid base in the research filed of this work. With that in mind, we present a broader analysis of the techniques used in the diagnosis of medical conditions through imaging, specifically the characterization of lung nodules through CT scans with purpose in diagnosis.
+
+
+\section{Datasets Overview}
+This section presents some of the most well-known and widely used datasets in lung nodule characterization tasks. These datasets were used by studies present in the state of the art, are public and complete, and can be easily accessed either through The Cancer Imaging Archive (TCIA) or Grand Challenge.
+
+\subsection{LIDC-IDRI}\label{lidc}
+The Lung Image Database Consortium Image Collection (LIDC-IDRI) is a comprehensive collection of CT scans of the thorax, designed for diagnosing lung cancer and detecting visualized lesions. This internationally accessible database serves as a valuable resource for the development of computer-aided detection (CAD) systems focused on lung cancer diagnosis and evaluation. Launched by the National Cancer Institute (NCI) and further developed by the Foundation for the National Institutes of Health (FNIH), with support from the Food and Drug Administration (FDA), this public-private partnership exemplifies the success of a consensus-based consortium.
+
+The creation of this data registry involved collaboration among seven academic research centers and eight major medical imaging companies, resulting in a total of 1,018 cases. Each case includes clinical thoracic CT scan images for individual subjects, accompanied by an XML file that details the results of a two-phase image annotation process. In the first phase, four radiologists independently reviewed CT images and annotated lesions into one of three categories: "nodule >=3 mm," "nodule <3 mm," and "non-nodule >=3 mm." During the second phase, the radiologists reviewed their annotations alongside the anonymized annotations of their peers to reach a consensus. This process was designed to allow for the accurate tallying of lung nodules on a CT scan with minimal human intervention, without requiring forced agreement among the radiologists~\cite{armato_iii_data_2015}.
+
+\subsection{LUNA16}\label{luna16}
+The Lung Nodule Analysis 2016 dataset utilizes the publicly available LIDC-IDRI database mentioned earlier. Scans with a slice thickness greater than 2.5 mm were excluded from the dataset. In total, there are 888 CT scans included. The reference standard for this challenge consists of all nodules that are 3 mm or larger, which were accepted by at least 3 out of 4 radiologists. Annotations that are not part of the reference standard, such as non-nodules, nodules smaller than 3 mm, and nodules annotated by only 1 or 2 radiologists, are classified as irrelevant findings~\cite{setio_luna16_2016}.
+
+\subsection{NLST}\label{nlst}
+The National Lung Screening Trial was a randomized controlled trial conducted by the Lung Screening Study Group (LSS) and the American College of Radiology Imaging Network (ACRIN). The purpose of the trial was to evaluate whether screening for lung cancer with low-dose helical computed tomography (CT) reduces mortality compared to screening with chest radiography in high-risk individuals. 
+Approximately 54,000 participants were enrolled between August 2002 and April 2004. Data collection for the study has concluded, with the final information gathered by December 31, 2009, having low-dose CT scans from 26,254 of these subjects~\cite{national_lung_screening_trial_research_team_data_2013, national_lung_screening_trial_research_team_reduced_2011}.
+
+\subsection{ANODE09}\label{anode09}
+The ANODE09 dataset gathers 55 anonymized CT scans provided by the University Medical Center Utrecht from the NELSON screening program. Five of those exams are supplemented by radiologists' annotations and serve as examples for optimizations, while the remaining 50 scans are reserved for testing only, with their reference annotations not publicly available. The dataset primarily includes scans from current and former heavy smokers aged 50–75, acquired using 16- or 64-slice CT scanners set for low-dose readings.
+
+The dataset was randomly selected from a small subset chosen among the scans with the highest number of annotations. Scans with evident interstitial lung disease were excluded to avoid excessive small nodular findings. Although ANODE09 emphasizes larger nodules, unlike other datasets, it contains fewer scans, making it more representative of findings in asymptomatic heavy smokers. Given its design, the dataset is intended exclusively for testing and is not recommended for training CAD algorithms~\cite{ginneken_comparing_2010}.
+
+\subsection{LUNGx}\label{lungx}
+The LUNGx Challenge aimed to compare the performance of participants’ computerized methods for lung nodule characterization with that of six radiologists who participated in an observer study performing the same tasks on the same dataset. The scans were obtained from the clinical archive at The University of Chicago with Institutional Review Board approval, having removed all protected health information before being uploaded to The Cancer Imaging Archive. %TODO: Maybe redo this phrase
+
+The Challenge required participants to use pre-trained algorithms to proceed with classification tasks. Ten scans were given for calibration purposes (5 benign, 5 malignant) and were followed by a test set of 60 scans with 73 nodules (containing 37 benign and 36 malignant) nodules. 
+Nodule sizes were measured through Response Evaluation Criteria in Solid Tumours guidelines, with benign nodules averaging 15.8 mm and malignant nodules 18.6 mm in diameter. This design was made to provide some balance in nodule's size, since it could be a malignancy indicator. In addition, spatial coordinates of each nodule were provided, without its sizes or diagnoses~\cite{kirby_lungx_2016}.
+
+\subsection{Limitations}
+
+It is important to recognize that medical imaging datasets significantly contribute to developing and validating computer-aided detection (CAD) systems for lung cancer diagnosis. Nevertheless, even the most used datasets, such as LIDC-IDRI and LUNA16, have some limitations that can impact model performance and generalizability. These challenges include a lack of annotated data, subjectivity in labeling, inter-observer variability, and potential biases within the datasets. These factors complicate the creation of robust and broadly applicable models. Additionally, we acknowledge that the process of annotating medical images is both time-consuming and costly, often leading to datasets that are limited in size. This limitation is further exacerbated by patient data privacy regulations, which restrict access to larger datasets.~\cite{gu_survey_2021}
+   
+\section{Fusion Techniques}
+Information fusion techniques are particularly relevant in this context of medical image analysis. It's study seeks to integrate data from different sources or natures in order to enhance the quality of classification or detection models, where features extracted using different methods (e.g., hand-crafted and deep learning) can complement existing approaches further improving diagnosis methodologies.
+
+We aim to provide a comprehensive understanding of the advancements in nodule characterization. The focus is placed on the role of fusion techniques in enhancing diagnostic performance, particularly in terms of accuracy, sensitivity, and robustness against imaging artifacts.
+
+
+\subsection{Decision Level Fusion}
+In decision level fusion, the features are first used to train independent classifiers. Each classifier produces a classification decision or probability based on its own set of features.
+The classification decisions or probabilities of each classifier are then combined using methods such as weighted voting, majority voting or probability averaging.
+The final decision is made based on the results of each classifier.
+
+% Decision Level 
+\citet{xie_fusing_2018} gave us an algorithm, Fuse-TSD, that takes texture, shape, and deep features to automatically classify lung nodules in chest CT images. It uses a texture descriptor based on the GLCM, a Fourier shape descriptor, and a DCNN to extract features. Then classifiers, AdaBoosted Back Propagation Neural Network (BPNN), are applied for each feature and the decision is made by the fusion of the respective results. Evaluated on the LIDC-IDRI dataset, Fuse-TSD achieved an AUC of 96.65\% when nodules with a composite malignancy rate of 3 were discarded (D1), 94.45\% when they were considered benign (D2), and 81.24\% when they were considered malignant (D3). If for each D1, D2 and D3 we compare the fusion with the respective best AUC results of the test set that does not use fusion, we obtain increments of 0,41, 1,54\%, and 4,58\% respectively.
+
+% Decision Level
+\citet{muzammil_pulmonary_2021} investigates different fusion approaches based on feature fusion and ensemble learning to classify lung nodules in CT scans. The authors propose two heterogeneous fusion techniques: fusion based on the average prediction score (AVG-Predict) and fusion based on majority voting (MAX-VOTE). The results showed that the MAX-VOTE technique, combining the predictions of twelve individual classifiers, achieved the highest accuracy in binary classification, with 95.59\% ± 0.27\% against the 91.12\% achieved by the AdaBoostM2 classifier, without fusion and trained on deep features from AlexNet. While in multi-classification, the SVM-FFCAT (Feature Fusion by Concatenation) method achieved superior performance, with an accuracy of 96.89\%, an AUC of 99.21\%, and a specificity of 97.70\%. These results emphasize that fusion features with ensemble learning can significantly enhance the performance of lung nodule classification.
+
+% Non fusion but the introduction of texture improve the results
+\citet{ali_efficient_2020} propose a Transferable Texture Convolutional Neural Network (CNN) for lung nodule classification, whose architecture consists of three convolutional layers and an Energy Layer (EL), omitting pooling layers to reduce trainable parameters and computational complexity. The EL preserves texture information and learns during both forward and backward propagation. The model was evaluated on the LIDC-IDRI and LUNGx Challenge datasets. The texture CNN achieved an accuracy of 96.69\% ± 0.72\% and an error rate of 3.30\% ± 0.72\% on LIDC-IDRI. Transfer learning improved accuracy on LUNGx from 86.14\% to 90.91\%.  
+
+% Decision level
+The study by \citet{ali_deep_2021} evaluated the performance of Support Vector Machine and AdaBoostM2 algorithms using deep features from VGG-16, VGG-19, GoogLeNet, Inception-V3, ResNet-18, ResNet-50, ResNet-101 e InceptionResNet-V2 by identifying the optimal layers. Their results showed that SVM was more efficient for deep features as compared to AdaBoostM2. The proposed decision-level fusion technique demonstrates better results in terms of accuracy (90.46 ± 0.25\%), recovery (90.10 ± 0.44\%), and AUC (94.46 ± 0.11\%). Although it was ranked second in terms of specificity (92.56 ± 0.18\%), the deviation is notably lower compared to the Texture CNN approach~\cite{ali_efficient_2020}. Furthermore, the classification accuracy based on the simple average of the prediction scores is also computed at 89.10\%, which highlights the robustness and effectiveness of the decision fusion technique compared to other methods. For reference, the  higher accuracy achieved for the non-fusion classifications tested was 86.28\%, with ResNet-101 through SVM.
+
+% Decision level
+The CAD system proposed by \citet{shaffie_computer-assisted_2022} uses an appearance features descriptor, comprising a Histogram of Oriented Gradients, Multi-view Analytical Local Binary Patterns, and a Markov Gibbs Random Field. In addition, employs a shape feature descriptor that includes Multi-view Peripheral Sum Curvature Scale Space, Spherical Harmonics Expansion, and a set of fundamental morphological features. Then a stacked auto-encoder followed by a soft-max classifier is applied to generate the initial malignancy probability. All of the resultant probabilities are fed to the last network that returns the diagnosis. When comparing with a previous study, they refer that the increase in the accuracy is small (from 93.97\% to 94.73\%), which is predictable, since the features used model the same nodule characteristics. However, the increase in system sensitivity from 90.48\% to 93.97\% represents a notable improvement, demonstrating that the new system, with additional features, is less affected by the segmentation process and image artifacts.
+
+% 11
+% Both, decision performs better
+\citet{li_comparison_2022} evaluated the effectiveness of fusion models in predicting axillary lymph node (ALN) metastases in breast cancer, comparing traditional radiomics models, deep learning radiomics models, and fusion models using dynamic contrast-enhanced MRI (DCE-MRI) images. The imaging data were sourced from TCIA via the Duke-Breast-Cancer-MRI project. Handcrafted radiomic features and deep learning features were extracted from 3062 DCE-MRI images, with feature selection performed using mutual information algorithms and recursive feature elimination. The study found that the decision fusion model, integrating radiomic and deep learning features, outperforms traditional and deep learning models in all metrics, with increments of 2.81\% and 2.58\% in accuracy over them.
+Adding clinical features to the decision fusion model further increased the AUC. The findings demonstrate the efficacy of fusion models in predicting ALN metastases, with the decision fusion model showing significant potential to aid clinical decision-making in early-stage breast cancer treatment.
+
+% Decision Level? I'm in doubt if the 1st stage does not use feature level fusion
+\citet{alksas_novel_2023} employ an approach that modifies the local ternary pattern (LTP) to use three levels instead of two and a new pattern identification algorithm to capture the heterogeneity and morphology of the nodule. Then the features were given as training data to a classification architecture based on hyper-tuned stacked generalization to classify nodules, achieving an overall accuracy of 96.17\%, with 97.14\% sensitivity and 95.33\% specificity. On the other hand, the original LBP and other classification structures resulted in lower performance when compared to the proposed approach.
+We can perceive an improvement of 4.56\%, 4.12\%, and 4.95\% in accuracy, sensitivity, and specificity respectively, over the deep learning-based model used on the same proposed two-stage stacking-based classification. As for radiomics features, we observed an improvement of 5.89\%, 6.66\%, and 5.22\% on the same metrics.
+
+% 7
+% Decision Level
+\citet{liu_classification_2023} present a novel method for classifying benign and malignant lung nodules by combining shallow visual features and deep learning features. The approach utilizes separate pipelines for feature extraction and classification. Shallow features, including texture and morphology, are extracted using statistical 3D data analysis and Haralick's texture model, while morphological features are derived from parameters such as size and shape. Support Vector Machines (SVMs) are employed to classify these extracted features. The deep learning branch uses neural architecture search to design a deep model with three sub-branches and integrates a Convolutional Block Attention Module (CBAM) for enhanced feature learning. The classification results from both shallow and deep models are fused using a weighted voting method, achieving an accuracy\ of 91,21\%, sensitivity of 90,27\%, a specificity of 91,98\% and an F1-score of 91,04\%, evaluated with LIDC-IDRI data. This represents a 1.27\% accuracy improvement over the best stand-alone branch, along with the highest specificity among all approaches. 
+
+
+\subsection{Feature Level Fusion}
+In feature fusion, the features extracted from different sources are combined directly to form a single feature vector that represents all the data.
+This combination can be done through concatenation, where the feature vectors are appended to each other, or through other operations.
+Once the features have been fused, a classifier is trained using the new feature vector.
+This allows the classifier to learn complex relationships between different types of features, which can lead to improvements in classification accuracy.
+
+% Feature Level
+\citet{farag_feature_2017} explored feature fusion by extracting texture descriptors (Gabor filters and Local Binary Patterns - LBP) and shape (signed distance transform fused with LBP). They showed that Gabor filters when implemented on a two-level cascaded framework with Support Vector Machines (SVM) classifiers, obtained the best performance: a mean area under the ROC curve (AUC) of 99\% and an F1-score of 97.5\%. Although this approach does not conclude that feature fusion is optimal, it does encourage the hypothesis that feature fusion, particularly with Gabor filters, can improve classification. We can also take from this study the possibility of carrying out the classification tasks separately, into nodule or non-nodule, and benign or manlignant, with the aim of improving the cascade classifier.
+
+% Feature Level in a NN 
+\citet{shaffie_generalized_2018} proposed a framework to accurately diagnose lung nodules by integrating two types of features: appearance features from a seventh-order Gibbs random field model, that captures spatial heterogeneity in nodules, and geometric features, defining their shape. Then, a deep autoencoder classifier uses these features to distinguish between malignant and benign nodules. Evaluated with data from the LIDC, which included 727 nodules from 467 patients, the system demonstrated potential for lung cancer detection, achieving a classification accuracy of 91.20\%. This reflects a clear improvement over using only geometric or appearance features, which just achieved an accuracy of 85.83\% and 90.51\% respectively.
+
+% Feature Level
+\citet{saba_lung_2019} proposed a method for early-stage lung nodule detection, consisting of three main phases: nodule segmentation using Otsu's thresholding and morphological operations, feature extraction of geometric, texture, and deep learning features to select optimal features, and serial fusion of the optimal features for classifying nodules as malignant or benign. The study experiments with the LIDC-IDRI dataset, using Otsu's algorithm and morphological erosion for segmentation. Handcrafted geometric and texture features are combined with deep learning features extracted using a VGG-19 model. Feature optimization is performed using PCA, and the fused features are classified using multiple classifiers. Experimental results show the proposed method outperforms existing approaches, achieving an accuracy of 99.0\%,  a sensitivity of 99.0\%, and a specificity of 100\% applying fused features. It was able to surpass by 1\% and 2\% the sensitivity and specificity of the work done in \cite{naqi_multistage_2018}, which, despite using segmentation, has not used fusion.
+
+% 4
+%NN
+% Feature Level
+The CAD system presented by \citet{yuan_multi-modal_2023} uses a multi-branch classification network with an effective attention mechanism (3D ECA-ResNet) to extract features from 3D images of nodules, adapting dynamically to improve the extraction of key information. Structured data, such as diameter and other radiological characteristics, are transformed into a feature vector. The experimental results show that the system achieves an accuracy of 94.89\%, a sensitivity of 94.91\%, and an F1-score of 94.65\%, with a false positive rate of 5.55\%. The increase becomes evident if we compare the results obtained with the baseline defined for accuracy in 2D~\cite{xie_fusing_2018} and 3D~\cite{zhao_combining_2020} methods: 	
+89.53\% and 93.92\%. The study concludes that the combination of multimodal data increases the effectiveness of the CAD system, making it more likely to be able to assist doctors in diagnosing pulmonary nodules.
+
+% -
+% Feature level
+The study by \citet{liu_study_2022} emphasizes the need to consider the temporal aspect in analyzing pulmonary nodules. It employs a Faster R-CNN to generate regions of interest and extract temporal and spatial features from lung nodule data. A 3D CNN fuses these features, and a time-modulated long short-term memory (T-LSTM) model analyzes trends and predicts the evolution and malignancy of lung lesions, incrementing the accuracy to 92.8\% when compared with the LSTM (91.1\%), RNN (87.1\%) and SVM (81.2\%) methods.
+
+% -
+% Feature level
+\citet{zhao_pulmonary_2022} proposed a lung nodule detection method that integrates multi-scale feature fusion. Candidate nodules are detected using a Faster R-CNN with multi-scale features, achieving a sensitivity of 98.6\%, a 10\% improvement over single-scale models. For false positive reduction, a 3D CNN based on multi-scale fusion achieved 90.5\% sensitivity at 4 false positives per scan.
+
+% 7
+%Feature Level
+\citet{munoz_3d-morphomics_2022} used a predictive model, such as XGBoost, based on morphological characteristics extracted from CT scans, an approach called “3D-MORPHOMICS”. Its premise is that morphological changes can be quantified and used in the diagnostic process since irregularities in the nodules are indicators of malignancy. The classification model, using only 3D-morphomic features, achieved an AUC (Area Under the ROC Curve) of 96.4\% on the NLST test set, and the combination with radiomic features resulted in even better performance, with an AUC of 97.8\% on the NLST test set and 95.8\% on the LIDC dataset.
+
+% 10
+% Feature Level
+Based on Hybrid Deep Learning models, \citet{li_research_2022} proposed a CAD system that integrates deep learning techniques for feature extraction and feature fusion. The system uses VGG16 and VGG19 networks with a Convolutional Block Attention Module (CBAM) to extract relevant features. These features are reduced using Principal Component Analysis (PCA) and fused via Canonical Correlation Analysis (CCA) to create effective representations. The final analysis is performed using an optimized Multiple Kernel Learning Support Vector Machine - Improved Particle Swarm Optimization (MKL-SVM-IPSO). The proposed system achieved 99.56\% accuracy, 99.3\% sensitivity, and an F1-score of 99.65\% on the LUNA16 dataset, surpassing the respective baseline algorithms of other lung CAD systems by 3.68\% in accuracy and by 7.33\% in sensitivity. These results demonstrate its competitiveness in reducing false positives and negatives in nodule detection.
+
+% 11
+% Feature Level
+\citet{iqbal_fusion_2023}, present with this study an innovative technique for classifying medical image modalities by combining visual and textural features. A pre-trained CNN extracts deep features, while manual methods like Zernike moments, Haralick features, and Global-Local Pyramid Pattern (GLPP) capture relevant textural and statistical attributes. These fused features are used to train ML classifiers such as SVM, KNN, and Decision Trees. The proposed approach outperformed standalone pre-trained CNNs, from 93.32\% to 96.08\% in accuracy and from 93.34\% to 96.31\% in sensitivity.
+
+\subsection{Decision And Feature Fusion}
+
+The model proposed by \citet{ma_novel_2023}, RGD, is an algorithm for nodule characterization that makes use of radiomic features and Graph Convolutional Network (GNN) in multiple CNN architectures in order to achieve a more complete characterization combining predictions for a rubust decision making.
+Its process can be divided in two phases incorporating the two previously described fusion levels.
+\begin{itemize}
+    \item \textbf{Feature Level:} The RGD model extracts radiomic features through LBP, HOG and GLCM and simultaneously uses five distinct CNN architectures (AlexNet, GoogLeNet, VGG, ResNet and AttentionNet) to extract deep features independently.
+    The features extracted by the five CNNs are then aggregated by a graph convolutional network (GCN), which learns over the features in a graph structure. This creates a representation of the features that incorporates not only what the CNNs have learned, but also how these features relate to each other, something that would not be captured by simply concatenating or merging fully connected layers.
+    The radiomic features and characteristics learned by the GCN are then combined with the highest level CNN representation learned at the output layer of each 3D CNNs to generate decision scores. 
+    
+    \item \textbf{Decision Level:} Each CNN model is trained independently to produce a probability of a nodule being malignant or benign.
+    The proposed model, instead of making a decision based on a single model, combines the decisions of the five models through a weighted average, where the weights are determined by the accuracy of each model. This ensemble learning approach allows the model to make use of the information from each of the classifiers.
+\end{itemize}
+
+The integration of radiomics, GCN and CNN results in significant performance improvements compared to the respective original CNN models. Furthermore, the ensemble of the CNNs demonstrates a higher average accuracy than a single CNN model, indicating that the use of multiple and diverse CNN architectures improves the extraction of discriminative features.
+
+The use of information fusion allowed RGD to achieve superior performance in the classification task when compared to models that use only one type of fusion (e.g. \cite{xie_fusing_2018}) or none at all, with mean accuracy of 93.25\% ± 0.021, a sensitivity of 89.22\% ± 0.045, a specificity of 95.82\% ± 0.032, F1-score of 0.9114 ± 0.029, and AUC of 0.9629 ± 0.018, having a 1.3\% accuracy increase over the previous integration of radiomics, GCN and CNN.
+
+Those results with small standard deviations show the effectiveness and robustness of the proposed method on lung nodule classification. By integrating both the features extracted independently by each CNN and their relationships modeled in non-Euclidean space by the GCN, the model is able to capture more complete and effective representations of the nodules. In addition, the fusion of decisions from multiple models results in a more robust classification.
+
+
 \section{Remarks}
-We all recognize that AI has shown potential for enhancing diagnostic, reducing false positives, and optimizing the management of pulmonary nodules. However, generalization, interpretability, and clinical integration remain major obstacles.~\cite{ArtificialIntelligence2022} It is essential that these tools are validated on larger datasets that are representative of the population to be applied and that they are integrated into clinical workflows.~\cite{Wu2024}
 
-Standalone Deep learning approaches still fail to overcome many challenges, for example, if the segmentation of the node is not accurate, the model may not be able to extract the features correctly, leading to inaccurate classification.~\cite{Gu2021, Shaffie2021}, although feature extraction shows better accuracy and lower False Positive rates. Textural features, such as GLCM, are promising for differentiating nodules. The combination of feature extraction methods and neural networks optimizes diagnosis.~\cite{Mathumetha2024}
+We all recognize that AI has shown potential for enhancing diagnostic, reducing false positives, and optimizing the management of pulmonary nodules. However, generalization, interpretability, and clinical integration remain major obstacles~\cite{liu_artificial_2022}. It is essential that these tools are validated on larger datasets that are representative of the population to be applied and that they are integrated into clinical workflows.~\cite{wu_ai-enhanced_2024}
 
-Fusion-based techniques showed potential in the classification of pulmonary nodules, addressing the limitations of autonomous feature extraction methods. By making use of supplementary information from various feature domains, these approaches increase the accuracy and reliability of the diagnosis. The studies reviewed here highlight the promise of information fusion as a critical enabler of advanced CAD systems, leading the way for better clinical decision-making.
+Standalone deep learning approaches still fail to overcome many challenges, for example, if the segmentation of the node is not accurate, the model may not be able to extract the features correctly, leading to inaccurate classification~\cite{gu_survey_2021, shaffie_generalized_2018}. Despite this, feature extraction has shown better accuracy and lower false positive rates. Textural features, such as GLCM, are promising for differentiating nodules. Additionally combining feature extraction methods with neural networks optimizes diagnosis~\cite{mathumetha_feature_2024}.
+
+On this thought, fusion-based techniques showed potential in the classification of lung nodules, addressing the limitations of autonomous feature extraction methods. By making use of supplementary information from various feature domains, these approaches increase the accuracy and reliability of the diagnosis. The studies reviewed here highlight the promise of information fusion as a critical enabler of advanced CAD systems, leading the way for better clinical decision-making.
+
+A clear example of this improvement is the study by \citet{xie_fusing_2018} which showed AUC increases of 0.41\%, 1.54\% and 4.58\% when compared to results without fusion, depending on the treatment of nodules with malignancy rates 3 (D1, D2 and D3, respectively).
+Other studies have emphasized the benefits of combining complementary features. \citet{shaffie_computer-assisted_2022} improved accuracy by integrating appearance and geometric features, while \citet{saba_lung_2019} reached an accuracy of 99.0\% with feature fusion. \citet{yuan_multi-modal_2023} enhanced accuracy to 94.89\% through multimodal fusion, and \citet{liu_artificial_2022} reported a striking 99.56\% accuracy with a CAD system based on fusion. Additionally, \citet{iqbal_fusion_2023} increased accuracy from 93.32\% to 96.08\% by combining visual and textural features.
+
+These collective results, many of which show large increases in accuracy, highlight the robust advantages of feature fusion in improving diagnostic accuracy and overall performance. While consistently indicating the benefits of information fusion, it demonstrates the importance of the approach for more efficient and reliable CAD systems in the diagnosis of pulmonary nodules.

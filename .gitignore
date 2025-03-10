@@ -2,3 +2,4 @@ docs/Deliveries/Versions/
 src/lightning_logs
 *.pyc
 data/
+*.zip

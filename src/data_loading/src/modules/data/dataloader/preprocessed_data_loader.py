@@ -207,21 +207,19 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
             )
         self.image_numpy_arrays_dir_path = image_numpy_arrays_dir_path
         self.image_transformer = torchvision.transforms.Compose([
-            torchvision.transforms.Lambda(self.transpose_if_3d),
+            lambda x: numpy.transpose(x, axes=(1, 2, 0))
+                if x.ndim == 3 else x,
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize(mean=0.5, std=0.5),
         ])
         self.mask_numpy_arrays_dir_path = mask_numpy_arrays_dir_path
         if mask_numpy_arrays_dir_path:
             self.mask_transformer = torchvision.transforms.Compose([
-            torchvision.transforms.Lambda(self.transpose_if_3d),
-            torchvision.transforms.ToTensor(),
-        ])
-            
-    def transpose_if_3d(self, x):
-        return numpy.transpose(x, axes=(1, 2, 0)) if x.ndim == 3 else x
+                lambda x: numpy.transpose(x, axes=(1, 2, 0))
+                    if x.ndim == 3 else x,
+                torchvision.transforms.ToTensor(),
+            ])
 
-    
     def __len__(self):
         return len(self.file_names)
 

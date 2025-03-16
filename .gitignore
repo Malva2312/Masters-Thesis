@@ -1,4 +1,4 @@
 docs/Deliveries/Versions/
 src/lightning_logs
 *.pyc
-src/data_loading
+src/data_loading/data/preprocessed/protocol_1/

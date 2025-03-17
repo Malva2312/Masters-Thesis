@@ -83,3 +83,41 @@ for subset_type in ["train", "validation", "test"]:
         print(f"    Fold index: {fold_index + 1}")
         for batch_index, (data, label) in enumerate(iter(data_loaders_by_subset[subset_type][fold_index]), 1):
             print_loaded_data_info(k_fold_data_loaders=True)
+
+
+print("\n-------------------------------------- Demonstrating the Training ---------------------------------------\n")
+import torch
+import pytorch_lightning as pl
+from dev.LungNoduleClassifier import LungNoduleClassifier
+
+# Trainer configuration
+trainer = pl.Trainer(
+    max_epochs=5,
+    accelerator="gpu" if torch.cuda.is_available() else "cpu",
+    log_every_n_steps=10
+)
+
+# Initialize model
+model = LungNoduleClassifier(lr=1e-4)
+
+# Train the model using the K-fold data loaders
+for fold_index in range(config.data.preprocessed.loader.number_of_k_folds):
+    print(f"Training on fold {fold_index + 1}")
+    train_loader = data_loaders_by_subset["train"][fold_index]
+    val_loader = data_loaders_by_subset["validation"][fold_index]
+    trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=val_loader)
+
+def predict(model, image):
+    model.eval()
+    with torch.no_grad():
+        image = image.unsqueeze(0)  # Add batch dimension
+        logits = model(image)
+        prob = torch.sigmoid(logits).item()
+    return "Malignant" if prob > 0.5 else "Benign"
+
+# Example usage with a batch from the test set
+test_loader = data_loaders_by_subset["test"][0]
+for batch_index, (data, label) in enumerate(test_loader, 1):
+    image = data['input_image']
+    prediction = predict(model, image)
+    print(f"Batch {batch_index} Prediction: {prediction}")

@@ -28,11 +28,18 @@ from data_loading.src.modules.data.metadata import LIDCIDRIPreprocessedMetaData
 from data_loading.src.modules.utils.paths import PYTHON_PROJECT_DIR_PATH
 print(PYTHON_PROJECT_DIR_PATH)
 
-def print_loaded_data_info(k_fold_data_loaders=False, load_mask=False):
+class DataInfo:
+    def __init__(self, batch_index, data, label):
+        self.batch_index = batch_index
+        self.data = data
+        self.label = label
+
+def print_loaded_data_info(data_info, k_fold_data_loaders=False, load_mask=False):
     """
     Prints information about the loaded data for lung nodule CT images and their corresponding labels.
 
     Parameters:
+    data_info (DataInfo): An instance of the DataInfo class containing batch index, data, and label.
     k_fold_data_loaders (bool): If True, adds an extra indentation to the printed information.
     load_mask (bool): Currently not used in the function.
 
@@ -48,15 +55,15 @@ def print_loaded_data_info(k_fold_data_loaders=False, load_mask=False):
         - Min/max values
     """
     space = "    " if k_fold_data_loaders else ""
-    print(f"{space}    Batch index: {batch_index}")
+    print(f"{space}    Batch index: {data_info.batch_index}")
     print(f"{space}        Data (Lung nodule CT image):")
-    print(f"{space}         - Type: {type(data['input_image']).__name__}")
-    print(f"{space}         - Shape: {data['input_image'].shape}")
-    print(f"{space}         - Min/max values: {data['input_image'].min()}/{data['input_image'].max()}")
+    print(f"{space}         - Type: {type(data_info.data['input_image']).__name__}")
+    print(f"{space}         - Shape: {data_info.data['input_image'].shape}")
+    print(f"{space}         - Min/max values: {data_info.data['input_image'].min()}/{data_info.data['input_image'].max()}")
     print(f"{space}        Label (Mean lung nodule malignancy)")
-    print(f"{space}         - Type: {type(label['lnm']['mean']).__name__}")
-    print(f"{space}         - Shape: {label['lnm']['mean'].shape}")
-    print(f"{space}         - Min/max values: {label['lnm']['mean'].min()}/{label['lnm']['mean'].max()}")
+    print(f"{space}         - Type: {type(data_info.label['lnm']['mean']).__name__}")
+    print(f"{space}         - Shape: {data_info.label['lnm']['mean'].shape}")
+    print(f"{space}         - Min/max values: {data_info.label['lnm']['mean'].min()}/{data_info.label['lnm']['mean'].max()}")
     
 hydra.initialize(config_path='./config', version_base=None)
 config = hydra.compose(
@@ -69,61 +76,64 @@ config = hydra.compose(
 
 metadata = LIDCIDRIPreprocessedMetaData(config=config.metadata.preprocessed)
 
-print("\n-------------------------------------- Demonstrating the K-fold data loader ---------------------------------------\n")
-config.data.preprocessed.loader.number_of_k_folds = 5
-config.data.preprocessed.loader.test_fraction_of_entire_dataset = None
-dataloader = LIDCIDRIPreprocessedKFoldDataLoader(
-    config=config.data.preprocessed.loader, 
-    lung_nodule_image_metadataframe=metadata.get_lung_nodule_image_metadataframe()
-)
-data_loaders_by_subset = dataloader.get_data_loaders_by_subset()
-for subset_type in ["train", "validation", "test"]:
-    print(f"Subset type: {subset_type.title()}")
-    for fold_index in range(config.data.preprocessed.loader.number_of_k_folds):
-        print(f"    Fold index: {fold_index + 1}")
-        for batch_index, (data, label) in enumerate(iter(data_loaders_by_subset[subset_type][fold_index]), 1):
-            print_loaded_data_info(k_fold_data_loaders=True)
+def main():
+    print("\n-------------------------------------- Demonstrating the K-fold data loader ---------------------------------------\n")
+    config.data.preprocessed.loader.number_of_k_folds = 5
+    config.data.preprocessed.loader.test_fraction_of_entire_dataset = None
+    dataloader = LIDCIDRIPreprocessedKFoldDataLoader(
+        config=config.data.preprocessed.loader, 
+        lung_nodule_image_metadataframe=metadata.get_lung_nodule_image_metadataframe()
+    )
+    data_loaders_by_subset = dataloader.get_data_loaders_by_subset()
+    for subset_type in ["train", "validation", "test"]:
+        print(f"Subset type: {subset_type.title()}")
+        for fold_index in range(config.data.preprocessed.loader.number_of_k_folds):
+            print(f"    Fold index: {fold_index + 1}")
+            for batch_index, (data, label) in enumerate(iter(data_loaders_by_subset[subset_type][fold_index]), 1):
+                data_info = DataInfo(batch_index=batch_index, data=data, label=label)
+                print_loaded_data_info(data_info, k_fold_data_loaders=True)
 
 
-print("\n-------------------------------------- Demonstrating the Training ---------------------------------------\n")
-import torch
-import lightning as pl
-from modules.LungNoduleClassifier import LungNoduleClassifier
+    print("\n-------------------------------------- Demonstrating the Training ---------------------------------------\n")
+    import torch
+    import lightning as pl
+    from modules.LungNoduleClassifier import LungNoduleClassifier
 
-# Trainer configuration
-# trainer = pl.Trainer(
-#     max_epochs=5,
-#     accelerator="gpu" if torch.cuda.is_available() else "cpu",
-#     log_every_n_steps=10
-# )
-trainer = pl.Trainer(limit_train_batches=100, max_epochs=1)
+    # Trainer configuration
+    # trainer = pl.Trainer(
+    #     max_epochs=5,
+    #     accelerator="gpu" if torch.cuda.is_available() else "cpu",
+    #     log_every_n_steps=10
+    # )
+    trainer = pl.Trainer(limit_train_batches=100, max_epochs=1)
 
-# Initialize model
-# define any number of nn.Modules (or use your current ones)
-encoder = torch.nn.Sequential(
-    torch.nn.Flatten(),
-    torch.nn.Linear(32 * 32, 64), 
-    torch.nn.ReLU(), 
-    torch.nn.Linear(64, 3)
-)
-decoder = torch.nn.Sequential(
-    torch.nn.Linear(3, 64), 
-    torch.nn.ReLU(), 
-    torch.nn.Linear(64, 32 * 32),
-    torch.nn.Unflatten(1, (1, 32, 32))
-)
+    # Initialize model
+    # define any number of nn.Modules (or use your current ones)
+    encoder = torch.nn.Sequential(
+        torch.nn.Flatten(),
+        torch.nn.Linear(32 * 32, 64), 
+        torch.nn.ReLU(), 
+        torch.nn.Linear(64, 3)
+    )
+    decoder = torch.nn.Sequential(
+        torch.nn.Linear(3, 64), 
+        torch.nn.ReLU(), 
+        torch.nn.Linear(64, 32 * 32),
+        torch.nn.Unflatten(1, (1, 32, 32))
+    )
 
-autoencoder = LungNoduleClassifier(encoder, decoder)
+    autoencoder = LungNoduleClassifier(encoder, decoder)
 
-trainer.fit(model=autoencoder, train_dataloaders=dataloader.get_data_loaders_by_subset()["train"][0])
+    trainer.fit(model=autoencoder, train_dataloaders=dataloader.get_data_loaders_by_subset()["train"][0])
 
-######## Test the model (for DEMO porpuses)########
+    ######## Test the model (for DEMO purposes)########
+    # Load checkpoint
+    #checkpoint = "./lightning_logs/version_0/checkpoints/epoch=0-step=7.ckpt" # Path to the checkpoint
+    #autoencoder = LungNoduleClassifier.load_from_checkpoint(checkpoint, encoder=encoder, decoder=decoder)
 
-# Load checkpoint
-checkpoint = "./lightning_logs/version_0/checkpoints/epoch=0-step=7.ckpt" # Path to the checkpoint
-autoencoder = LungNoduleClassifier.load_from_checkpoint(checkpoint, encoder=encoder, decoder=decoder)
+    # Choose your trained nn.Module
+    encoder = autoencoder.encoder
+    encoder.eval()
 
-# Choose your trained nn.Module
-encoder = autoencoder.encoder
-encoder.eval()
-
+if __name__ == "__main__":
+    main()

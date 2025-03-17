@@ -1,4 +1,4 @@
-name: preprocessed_data_loading_jn_venv
+name: lung_nodule_fusion_env
 channels:
   - defaults
   - https://repo.anaconda.com/pkgs/main
@@ -16,3 +16,6 @@ dependencies:
       - omegaconf==2.3.0
       - pandas==2.1.0rc0
       - scikit-learn==1.6.1
+      
+      - pytorch-lightning==1.6.0
+      - efficientnet_pytorch

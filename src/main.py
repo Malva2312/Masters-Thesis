@@ -87,37 +87,43 @@ for subset_type in ["train", "validation", "test"]:
 
 print("\n-------------------------------------- Demonstrating the Training ---------------------------------------\n")
 import torch
-import pytorch_lightning as pl
-from dev.LungNoduleClassifier import LungNoduleClassifier
+import lightning as pl
+from modules.LungNoduleClassifier import LungNoduleClassifier
 
 # Trainer configuration
-trainer = pl.Trainer(
-    max_epochs=5,
-    accelerator="gpu" if torch.cuda.is_available() else "cpu",
-    log_every_n_steps=10
-)
+# trainer = pl.Trainer(
+#     max_epochs=5,
+#     accelerator="gpu" if torch.cuda.is_available() else "cpu",
+#     log_every_n_steps=10
+# )
+trainer = pl.Trainer(limit_train_batches=100, max_epochs=1)
 
 # Initialize model
-model = LungNoduleClassifier(lr=1e-4)
+# define any number of nn.Modules (or use your current ones)
+encoder = torch.nn.Sequential(
+    torch.nn.Flatten(),
+    torch.nn.Linear(32 * 32, 64), 
+    torch.nn.ReLU(), 
+    torch.nn.Linear(64, 3)
+)
+decoder = torch.nn.Sequential(
+    torch.nn.Linear(3, 64), 
+    torch.nn.ReLU(), 
+    torch.nn.Linear(64, 32 * 32),
+    torch.nn.Unflatten(1, (1, 32, 32))
+)
 
-# Train the model using the K-fold data loaders
-for fold_index in range(config.data.preprocessed.loader.number_of_k_folds):
-    print(f"Training on fold {fold_index + 1}")
-    train_loader = data_loaders_by_subset["train"][fold_index]
-    val_loader = data_loaders_by_subset["validation"][fold_index]
-    trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=val_loader)
+autoencoder = LungNoduleClassifier(encoder, decoder)
 
-def predict(model, image):
-    model.eval()
-    with torch.no_grad():
-        image = image.unsqueeze(0)  # Add batch dimension
-        logits = model(image)
-        prob = torch.sigmoid(logits).item()
-    return "Malignant" if prob > 0.5 else "Benign"
+trainer.fit(model=autoencoder, train_dataloaders=dataloader.get_data_loaders_by_subset()["train"][0])
 
-# Example usage with a batch from the test set
-test_loader = data_loaders_by_subset["test"][0]
-for batch_index, (data, label) in enumerate(test_loader, 1):
-    image = data['input_image']
-    prediction = predict(model, image)
-    print(f"Batch {batch_index} Prediction: {prediction}")
+######## Test the model (for DEMO porpuses)########
+
+# Load checkpoint
+checkpoint = "./lightning_logs/version_0/checkpoints/epoch=0-step=7.ckpt" # Path to the checkpoint
+autoencoder = LungNoduleClassifier.load_from_checkpoint(checkpoint, encoder=encoder, decoder=decoder)
+
+# Choose your trained nn.Module
+encoder = autoencoder.encoder
+encoder.eval()
+

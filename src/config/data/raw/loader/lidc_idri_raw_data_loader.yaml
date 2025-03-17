@@ -1,0 +1,7 @@
+transforms:
+  min_max_clip_hu_values: [ -1000, 400 ]
+  min_max_value_range: [ 0, 1 ]
+  slice_thickness: 1
+  pixel_spacing: 1
+  axis_transposition_protocol: [ 2, 0, 1 ]
+  flip_axis: 1

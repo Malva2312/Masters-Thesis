@@ -22,7 +22,7 @@ class LungNoduleClassifier(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         images, labels = batch
-        labels = labels.float().unsqueeze(1)  # Ensure shape compatibility
+        labels = labels['lnm']['mean'].float().unsqueeze(1)  # Ensure shape compatibility
         logits = self(images)
         loss = self.loss_fn(logits, labels)
         preds = torch.sigmoid(logits).round()
@@ -33,7 +33,7 @@ class LungNoduleClassifier(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         images, labels = batch
-        labels = labels.float().unsqueeze(1)
+        labels = labels['lnm']['mean'].float().unsqueeze(1)
         logits = self(images)
         loss = self.loss_fn(logits, labels)
         preds = torch.sigmoid(logits).round()

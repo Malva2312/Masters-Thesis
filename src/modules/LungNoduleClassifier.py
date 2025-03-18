@@ -3,69 +3,57 @@ from torch import optim, nn
 import torch
 
 class LungNoduleClassifier(pl.LightningModule):
-    def __init__(self, encoder, decoder):
+    def __init__(self, model=None, num_classes=1, num_channels=1):
         super().__init__()
         self.save_hyperparameters()
-
         self.encoder = nn.Sequential(
+            nn.Conv2d(num_channels, 32, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
-            nn.Linear(32 * 32, 64), 
-            nn.ReLU(), 
-            nn.Linear(64, 3)
+            nn.Linear(64 * 8 * 8, 128),
+            nn.ReLU(),
+            nn.Linear(128, num_classes)
         )
-        self.decoder = nn.Sequential(
-            nn.Linear(3, 64), 
-            nn.ReLU(), 
-            nn.Linear(64, 32 * 32),
-            nn.Unflatten(1, (1, 32, 32))
-        )
-        
+
+        self.model = self.encoder if model is None else model
+
+
+        self.loss_fn = nn.BCEWithLogitsLoss()
+
     def forward(self, x):
-        x = x['input_image']  # Assuming 'input_image' is the key for the tensor in the dict
-        return self.encoder(x)
+        return self.model(x)
     
-    def training_step(self, batch, batch_idx):
-        """
-        Defines the training step for the model.
-        Args:
-            batch (tuple): A tuple containing the input data and labels. 
-                           The input data is a dictionary with the key 'input_image' 
-                           which maps to a list of tensor images (one image for each channel).
-            batch_idx (int): The index of the batch.
-        Returns:
-            torch.Tensor: The loss value computed for the batch.
-        Notes:
-            - The method extracts the images from the batch and reshapes them.
-            - It then passes the images through the encoder and decoder to compute the reconstructed images.
-            - The mean squared error (MSE) loss is calculated between the original and reconstructed images.
-            - The loss is logged for monitoring purposes.
-        """
-        # training_step defines the train loop.
-        # it is independent of forward
+    def step(self, batch):
         images, labels = batch
-        labels = labels['lnm']['mean'].float().unsqueeze(1)
-
+        images = images['input_image']
+        labels = labels['lnm']['mean']
         logits = self(images)
-
-        images = images['input_image']  # Assuming 'input_image' is the key for the tensor in the dict
-        images = images.view(images.size(0), -1)
-
-        z = self.encoder(images)
-        images_hat = self.decoder(z)
-
-        # Ensure the dimensions match correctly
-        images = images.view(images.size(0), 1, 32, 32)
-        images_hat = images_hat.view(images.size(0), 1, 32, 32)
-
-        loss = nn.functional.mse_loss(images_hat, images)
+        loss = self.loss_fn(logits, labels)
         preds = torch.sigmoid(logits).round()
         acc = (preds == labels).float().mean()
+        return loss, acc
 
-        # Logging to TensorBoard (if installed) by default
+    def training_step(self, batch, batch_idx):
+        loss, acc = self.step(batch)
         self.log("train_loss", loss, prog_bar=True)
         self.log("train_acc", acc, prog_bar=True)
         return loss
+    
+    def validation_step(self, batch, batch_idx):
+        loss, acc = self.step(batch)
+        self.log("val_loss", loss, prog_bar=True)
+        self.log("val_acc", acc, prog_bar=True)
+        return loss
+    
+    def test_step(self, batch, batch_idx):
+        loss, acc = self.step(batch)
+        self.log("test_loss", loss, prog_bar=True)
+        self.log("test_acc", acc, prog_bar=True)
+        return loss
 
     def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters(), lr=1e-3)
-        return optimizer
+        return optim.Adam(self.parameters(), lr=1e-3)

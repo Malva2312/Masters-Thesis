@@ -1,5 +1,4 @@
 import lightning as pl
-from efficientnet_pytorch import EfficientNet
 from torch import optim, nn
 import torch
 
@@ -8,9 +7,18 @@ class LungNoduleClassifier(pl.LightningModule):
         super().__init__()
         self.save_hyperparameters()
 
-        self.encoder = encoder
-        self.decoder = decoder
-        # self.model = FusionModel(protocol = 1)  # Custom model for fusion
+        self.encoder = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(32 * 32, 64), 
+            nn.ReLU(), 
+            nn.Linear(64, 3)
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(3, 64), 
+            nn.ReLU(), 
+            nn.Linear(64, 32 * 32),
+            nn.Unflatten(1, (1, 32, 32))
+        )
         
     def forward(self, x):
         x = x['input_image']  # Assuming 'input_image' is the key for the tensor in the dict

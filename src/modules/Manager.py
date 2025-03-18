@@ -56,11 +56,11 @@ class TrainerManager:
 
     def setup_model(self):
         #self.autoencoder = LungNoduleClassifier()
-        self.autoencoder = ProtocolEfficientNet(num_classes=2, num_channels=1)
+        self.autoencoder = ProtocolEfficientNet(num_classes=1, num_channels=1)
 
     def train_model(self):
         self.trainer.fit(model=self.autoencoder, train_dataloaders=self.dataloader_manager.get_data_loaders_by_subset()["train"][0])
 
     def test_model(self):
-        encoder = self.autoencoder.encoder
-        encoder.eval()
+        #TODO: Implement test_model method
+        pass

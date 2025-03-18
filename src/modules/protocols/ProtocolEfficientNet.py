@@ -4,7 +4,7 @@ import torch
 from torch import optim, nn
 
 class ProtocolEfficientNet(pl.LightningModule):
-    def __init__(self, num_classes, num_channels=3, model_name='efficientnet-b0'):
+    def __init__(self, num_classes=1, num_channels=3, model_name='efficientnet-b0'):
         super().__init__()
         self.save_hyperparameters()
         self.model = EfficientNet.from_pretrained(model_name)
@@ -24,11 +24,11 @@ class ProtocolEfficientNet(pl.LightningModule):
     
     def step(self, batch):
         images, labels = batch
-
+    
         images = images['input_image']
-        # images = images.view(images.size(0), -1)
+        #images = images.view(images.size(0), -1)
 
-        labels = labels['lnm']['mean'].float().unsqueeze(1)
+        labels = labels['lnm']['mean']
         logits = self(images)
         loss = self.loss_fn(logits, labels)
         preds = torch.sigmoid(logits).round()

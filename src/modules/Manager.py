@@ -11,6 +11,7 @@ from data_loading.src.modules.utils.paths import PYTHON_PROJECT_DIR_PATH
 
 from modules.LungNoduleClassifier import LungNoduleClassifier
 from modules.protocols.ProtocolEfficientNet import ProtocolEfficientNet
+from modules.protocols.ProtocolRadiomics import ProtocolRadiomics
 
 class DataInfo:
     def __init__(self, batch_index, data, label):
@@ -56,7 +57,8 @@ class TrainerManager:
 
     def setup_model(self):
         #self.autoencoder = LungNoduleClassifier()
-        self.autoencoder = ProtocolEfficientNet(num_classes=1, num_channels=1)
+        #self.autoencoder = ProtocolEfficientNet(num_classes=1, num_channels=1)
+        self.autoencoder = ProtocolRadiomics(num_classes=1, num_channels=1)
 
     def train_model(self):
         self.trainer.fit(model=self.autoencoder, train_dataloaders=self.dataloader_manager.get_data_loaders_by_subset()["train"][0])

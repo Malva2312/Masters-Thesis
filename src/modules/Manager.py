@@ -2,12 +2,15 @@ from os.path import abspath, dirname, join
 import sys
 from lightning import Trainer
 
-from modules.LungNoduleClassifier import LungNoduleClassifier
+
 
 sys.path.append(abspath(join(dirname(__file__), "../data_loading/")))
 from data_loading.src.modules.data.dataloader.preprocessed_data_loader import LIDCIDRIPreprocessedKFoldDataLoader
 from data_loading.src.modules.data.metadata import LIDCIDRIPreprocessedMetaData
 from data_loading.src.modules.utils.paths import PYTHON_PROJECT_DIR_PATH
+
+from modules.LungNoduleClassifier import LungNoduleClassifier
+from modules.protocols.ProtocolEfficientNet import ProtocolEfficientNet
 
 class DataInfo:
     def __init__(self, batch_index, data, label):
@@ -52,7 +55,8 @@ class TrainerManager:
         self.autoencoder = None
 
     def setup_model(self):
-        self.autoencoder = LungNoduleClassifier()
+        #self.autoencoder = LungNoduleClassifier()
+        self.autoencoder = ProtocolEfficientNet(num_classes=2, num_channels=1)
 
     def train_model(self):
         self.trainer.fit(model=self.autoencoder, train_dataloaders=self.dataloader_manager.get_data_loaders_by_subset()["train"][0])

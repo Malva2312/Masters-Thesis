@@ -1,7 +1,6 @@
 from os.path import abspath, dirname, join
 import sys
-import torch
-import lightning as pl
+from lightning import Trainer
 
 from modules.LungNoduleClassifier import LungNoduleClassifier
 
@@ -49,23 +48,11 @@ class TrainerManager:
     def __init__(self, config, dataloader_manager):
         self.config = config
         self.dataloader_manager = dataloader_manager
-        self.trainer = pl.Trainer(limit_train_batches=100, max_epochs=1)
+        self.trainer = Trainer(limit_train_batches=100, max_epochs=1)
         self.autoencoder = None
 
     def setup_model(self):
-        encoder = torch.nn.Sequential(
-            torch.nn.Flatten(),
-            torch.nn.Linear(32 * 32, 64), 
-            torch.nn.ReLU(), 
-            torch.nn.Linear(64, 3)
-        )
-        decoder = torch.nn.Sequential(
-            torch.nn.Linear(3, 64), 
-            torch.nn.ReLU(), 
-            torch.nn.Linear(64, 32 * 32),
-            torch.nn.Unflatten(1, (1, 32, 32))
-        )
-        self.autoencoder = LungNoduleClassifier(encoder, decoder)
+        self.autoencoder = LungNoduleClassifier()
 
     def train_model(self):
         self.trainer.fit(model=self.autoencoder, train_dataloaders=self.dataloader_manager.get_data_loaders_by_subset()["train"][0])

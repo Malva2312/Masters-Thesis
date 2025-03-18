@@ -3,6 +3,26 @@ from torch import optim, nn
 import torch
 
 class LungNoduleClassifier(pl.LightningModule):
+    """
+    A PyTorch Lightning Module for classifying lung nodules using a convolutional neural network.
+    Attributes:
+        encoder (nn.Sequential): The neural network encoder consisting of convolutional, activation, pooling, and fully connected layers.
+        model (nn.Module): The model to be used for forward pass. Defaults to the encoder if no model is provided.
+        loss_fn (nn.Module): The loss function used for training. Defaults to BCEWithLogitsLoss.
+    Methods:
+        forward(x):
+            Performs a forward pass through the model.
+        step(batch):
+            Performs a single step of the model, including forward pass, loss computation, and accuracy calculation.
+        training_step(batch, batch_idx):
+            Defines the training step. Logs training loss and accuracy.
+        validation_step(batch, batch_idx):
+            Defines the validation step. Logs validation loss and accuracy.
+        test_step(batch, batch_idx):
+            Defines the test step. Logs test loss and accuracy.
+        configure_optimizers():
+            Configures the optimizer for training. Defaults to Adam optimizer with a learning rate of 1e-3.
+    """
     def __init__(self, model=None, num_classes=1, num_channels=1):
         super().__init__()
         self.save_hyperparameters()

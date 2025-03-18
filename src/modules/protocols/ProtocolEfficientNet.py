@@ -24,7 +24,6 @@ class ProtocolEfficientNet(pl.LightningModule):
     
     def step(self, batch):
         images, labels = batch
-    
         images = images['input_image']
         labels = labels['lnm']['mean']
         logits = self(images)

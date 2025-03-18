@@ -1,4 +1,4 @@
-name: lung_nodule_fusion_env
+name: lung_char_fusion_env
 channels:
   - defaults
   - https://repo.anaconda.com/pkgs/main
@@ -20,3 +20,4 @@ dependencies:
       #- pytorch-lightning==1.6.0
       - lightning
       - efficientnet_pytorch
+      - pyradiomics

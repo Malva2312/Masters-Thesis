@@ -26,8 +26,6 @@ class ProtocolEfficientNet(pl.LightningModule):
         images, labels = batch
     
         images = images['input_image']
-        #images = images.view(images.size(0), -1)
-
         labels = labels['lnm']['mean']
         logits = self(images)
         loss = self.loss_fn(logits, labels)

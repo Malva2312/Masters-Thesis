@@ -51,4 +51,4 @@ class ProtocolEfficientNet(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        return optim.Adam(self.parameters(), lr=1e-3)
+        return optim.Adam(self.parameters(), lr=1e-3) # -1, -2, -3, -4, -5

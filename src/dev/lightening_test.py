@@ -21,7 +21,7 @@ class LitAutoEncoder(L.LightningModule):
         # it is independent of forward
         x, _ = batch
         x = x.view(x.size(0), -1)
-        z = self.encoder(x)
+        z = self.encoder(x) # generate embeddings / feature maps
         x_hat = self.decoder(z)
         loss = nn.functional.mse_loss(x_hat, x)
         # Logging to TensorBoard (if installed) by default

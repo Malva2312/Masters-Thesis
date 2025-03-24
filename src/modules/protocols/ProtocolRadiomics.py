@@ -36,7 +36,8 @@ class ProtocolRadiomics(pl.LightningModule):
         images, labels = batch
         images = images['input_image']
         labels = labels['lnm']['mean']
-        logits = torch.tensor(self.forward(images), dtype=torch.float32)
+        # TODO: logits = self(images) #it call the foward method
+        # logits = torch.tensor(self.forward(images), dtype=torch.float32) 
         loss = self.loss_fn(logits, labels)
         preds = torch.sigmoid(logits).round()
         acc = (preds == labels).float().mean()

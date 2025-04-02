@@ -27,7 +27,4 @@ if exist .\data (
 REM Copy data from .\src\data_loading\data to .\
 xcopy .\src\data_loading\data .\data\ /s /e /i
 
-REM Call conda.bat to set up the environment
-call .\conda.bat
-
-echo Setup completed.
+echo Data copied successfully..

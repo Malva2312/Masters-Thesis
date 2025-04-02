@@ -1,0 +1,9 @@
+# filepath: /C:/Users/janto/OneDrive/Ambiente de Trabalho/Dissertação/Masters-Thesis/src/config/experiments/exp1.yml
+# Only params that are needed to the protocol must be called here
+# Params that are not needed to the protocol will throw an error if called here
+
+protocol: "ProtocolEfficientNet"
+protocol_params:
+  num_classes: 1
+  num_channels: 1
+  model_name: "efficientnet-b0"

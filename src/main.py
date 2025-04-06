@@ -9,9 +9,11 @@ class MainApplication:
         if args.demo_mode:
             dataloader_override = "data/preprocessed/loader=lidc_idri_preprocessed_data_loader_jn_demo"
             metadata_override = "metadata/preprocessed=lidc_idri_preprocessed_metadata_jn_demo"
+            print("Using demo dataloader")
         else:
             dataloader_override = "data/preprocessed/loader=lidc_idri_preprocessed_data_loader"
             metadata_override = "metadata/preprocessed=lidc_idri_preprocessed_metadata"
+            print("Using non-demo dataloader")
 
         self.config = hydra.compose(
             config_name="config", 
@@ -48,7 +50,7 @@ class MainApplication:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main application for training lung nodule classifiers.")
     parser.add_argument("--config_file", type=str, required=True, help="Path to the YAML configuration file.")
-    parser.add_argument("--demo_mode", action="store_false", help="Use non-demo dataloader if set, otherwise use demo dataloader.")
+    parser.add_argument("--demo_mode", action="store_true", help="Use non-demo dataloader if set, otherwise use demo dataloader.")
     args = parser.parse_args()
 
     with open(args.config_file, 'r') as file:

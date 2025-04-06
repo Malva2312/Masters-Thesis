@@ -73,7 +73,9 @@ class TrainerManager:
             raise ValueError(f"Unknown protocol: {self.protocol}")
 
     def train_model(self):
-        self.trainer.fit(model=self.autoencoder, train_dataloaders=self.dataloader_manager.get_data_loaders_by_subset()["train"][0])
+        self.trainer.fit(model=self.autoencoder,
+                         train_dataloaders=self.dataloader_manager.get_data_loaders_by_subset()["train"][0],
+                         val_dataloaders=self.dataloader_manager.get_data_loaders_by_subset()["validation"][0])
 
     def test_model(self):
         test_dataloader = self.dataloader_manager.get_data_loaders_by_subset()["test"][0]

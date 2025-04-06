@@ -33,6 +33,17 @@ conda env remove --name lung_char_fusion_env
 cd ./src
 ```
 
+4. **Launch TensorBoard**:
+    - If TensorBoard is not installed, you can install it using pip. Run the following command in the terminal:
+        ```commandline
+        pip install tensorboard
+        ```
+    - To visualize and analyze the training logs, use TensorBoard. Run the following command in the terminal:
+    ```commandline
+    tensorboard --logdir=lightning_logs/
+    ```
+    - Open a web browser and navigate to the URL provided by TensorBoard (usually `http://localhost:6006`) to view the logs.
+
 5. **Run Experiments**:
     - Execute the main experiment script to start the desired experiments.
     - Use the following command as an example:

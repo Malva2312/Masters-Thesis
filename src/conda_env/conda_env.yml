@@ -21,3 +21,5 @@ dependencies:
       - lightning
       - efficientnet_pytorch
       - pyradiomics
+      #- tensorboard
+      ##- wandb # wandb is not needed for the current version

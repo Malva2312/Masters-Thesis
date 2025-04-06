@@ -57,6 +57,9 @@ class TrainerManager:
         self.protocol_params = protocol_params
         
         logger = TensorBoardLogger(save_dir="lightning_logs/")
+
+        #TODO: set values in config file
+        #TODO: choose the best values for the trainer (e.g. max_epochs, limit_train_batches, etc.)
         self.trainer = Trainer(logger=logger, limit_train_batches=100, max_epochs=1)
         self.autoencoder = None
 

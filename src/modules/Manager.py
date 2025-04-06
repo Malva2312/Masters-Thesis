@@ -1,6 +1,7 @@
 from os.path import abspath, dirname, join
 import sys
 from lightning import Trainer
+from lightning.pytorch.loggers import TensorBoardLogger
 
 
 
@@ -54,7 +55,9 @@ class TrainerManager:
         self.dataloader_manager = dataloader_manager
         self.protocol = protocol
         self.protocol_params = protocol_params
-        self.trainer = Trainer(limit_train_batches=100, max_epochs=1)
+        
+        logger = TensorBoardLogger(save_dir="lightning_logs/")
+        self.trainer = Trainer(logger=logger, limit_train_batches=100, max_epochs=1)
         self.autoencoder = None
 
         print(f"Protocol: {self.protocol}")
@@ -73,5 +76,6 @@ class TrainerManager:
         self.trainer.fit(model=self.autoencoder, train_dataloaders=self.dataloader_manager.get_data_loaders_by_subset()["train"][0])
 
     def test_model(self):
-        #TODO: Implement test_model method
-        pass
+        test_dataloader = self.dataloader_manager.get_data_loaders_by_subset()["test"][0]
+        test_results = self.trainer.test(model=self.autoencoder, dataloaders=test_dataloader)
+        print("Test Results:", test_results)

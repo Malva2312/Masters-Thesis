@@ -27,7 +27,8 @@ class MainApplication:
             self.config, 
             self.dataloader_manager, 
             protocol=args.protocol, 
-            protocol_params=args.protocol_params
+            protocol_params=args.protocol_params,
+            demo_mode=args.demo_mode
         )
 
     def run(self):

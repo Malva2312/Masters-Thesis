@@ -12,7 +12,6 @@ from data_loading.src.modules.utils.paths import PYTHON_PROJECT_DIR_PATH
 
 # from modules.LungNoduleClassifier import LungNoduleClassifier # Example protoco 
 from modules.protocols.ProtocolEfficientNet import ProtocolEfficientNet
-from modules.protocols.ProtocolRadiomics import ProtocolRadiomics
 
 class DataInfo:
     def __init__(self, batch_index, data, label):
@@ -70,17 +69,23 @@ class TrainerManager:
     def setup_model(self):
         if self.protocol == "ProtocolEfficientNet":
             self.autoencoder = ProtocolEfficientNet(**self.protocol_params)
-        elif self.protocol == "ProtocolRadiomics":
-            self.autoencoder = ProtocolRadiomics(**self.protocol_params)
         else:
             raise ValueError(f"Unknown protocol: {self.protocol}")
 
     def train_model(self):
-        self.trainer.fit(model=self.autoencoder,
-                         train_dataloaders=self.dataloader_manager.get_data_loaders_by_subset()["train"][0],
-                         val_dataloaders=self.dataloader_manager.get_data_loaders_by_subset()["validation"][0])
+        for fold_index, (train_dataloader, val_dataloader) in enumerate(
+            zip(self.dataloader_manager.get_data_loaders_by_subset()["train"],
+                self.dataloader_manager.get_data_loaders_by_subset()["validation"])
+        ):
+            print(f"Training on fold {fold_index + 1}/{self.config.data.preprocessed.loader.number_of_k_folds}")
+            self.trainer.fit(model=self.autoencoder,
+                             train_dataloaders=train_dataloader,
+                             val_dataloaders=val_dataloader)
 
     def test_model(self):
-        test_dataloader = self.dataloader_manager.get_data_loaders_by_subset()["test"][0]
-        test_results = self.trainer.test(model=self.autoencoder, dataloaders=test_dataloader)
-        print("Test Results:", test_results)
+        for fold_index, test_dataloader in enumerate(
+            self.dataloader_manager.get_data_loaders_by_subset()["test"]
+        ):
+            print(f"Testing on fold {fold_index + 1}/{self.config.data.preprocessed.loader.number_of_k_folds}")
+            test_results = self.trainer.test(model=self.autoencoder, dataloaders=test_dataloader)
+            print(f"Test Results for fold {fold_index + 1}:", test_results)

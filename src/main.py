@@ -43,10 +43,8 @@ class MainApplication:
                     data_info = DataInfo(batch_index=batch_index, data=data, label=label)
                     self.dataloader_manager.print_loaded_data_info(data_info, k_fold_data_loaders=True)
 
-        print("\n-------------------------------------- Demonstrating the Training ---------------------------------------\n")
         self.trainer_manager.setup_model()
-        self.trainer_manager.train_model()
-        self.trainer_manager.test_model()
+        self.trainer_manager.run_experiment()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main application for training lung nodule classifiers.")

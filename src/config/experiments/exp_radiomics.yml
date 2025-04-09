@@ -1,6 +1,0 @@
-# Configuration file for the ProtocolRadiomics experiment
-
-protocol: "ProtocolRadiomics"
-protocol_params:
-  num_classes: 1
-  num_channels: 1

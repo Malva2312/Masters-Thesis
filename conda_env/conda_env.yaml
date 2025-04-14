@@ -1,4 +1,4 @@
-name: luna25_pl_dl_pipeline_template_venv
+name: lung_fusion_env
 channels:
   - defaults
   - https://repo.anaconda.com/pkgs/main
@@ -18,5 +18,5 @@ dependencies:
       - torch==2.0.1
       - torchvision==0.15.2
 
-      - pyradiomics
       - kaleido
+      - pyradiomics

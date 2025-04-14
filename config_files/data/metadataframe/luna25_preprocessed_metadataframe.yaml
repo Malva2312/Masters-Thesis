@@ -1,0 +1,3 @@
+dataset_name: ${..dataset_name}
+data_preprocessing_protocol_number: ${..data_preprocessing_protocol_number}
+data_type: lung_nodule_bb

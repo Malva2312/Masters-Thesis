@@ -1,0 +1,15 @@
+model_id: ${..model_id}
+model_name: ${..model_name}
+hyperparameters:
+  device: cuda
+  number_of_classes: 2
+  optimiser:
+    type: Adam
+    kwargs:
+      lr: 0.00001
+  criterion:
+    apply_weights: True
+    device: ${..device}
+    metadataframe: ${.....data.metadataframe}
+  model:
+    number_of_classes: 2

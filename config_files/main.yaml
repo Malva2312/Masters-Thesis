@@ -1,0 +1,21 @@
+defaults:
+  - data: data
+  - data/dataloader: lidc_idri_preprocessed_dataloader
+  - data/metadataframe: lidc_idri_preprocessed_metadataframe
+  - experiment_execution/ids: ids
+  - experiment_execution/info: info
+  - experiment_execution/paths: paths
+  - hyperparameter_grid_based_execution: luna25_hyperparameter_grid_based_execution
+  - model: model
+  - model/model_pipeline: luna25_model_pipeline
+  - model/pytorch_lightning_model: luna25_pytorch_lightning_efficient_net
+  - results_analysis/model_test_performance_metrics_dataframe: luna25_model_test_performance_metrics_dataframe
+  - results_analysis/model_training_performance_metrics_figure: luna25_model_training_performance_metrics_figure
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
+  - _self_
+hydra:
+  output_subdir: null
+  run:
+    dir: .
+seed_value: 900

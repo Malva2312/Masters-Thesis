@@ -1,0 +1,23 @@
+dataset_name: ${..dataset_name}
+data_preprocessing_protocol_number: ${..data_preprocessing_protocol_number}
+lnva:
+  names:
+   - subtlety
+   - internal_structure
+   - calcification
+   - sphericity
+   - margin
+   - lobulation
+   - spiculation
+   - texture
+  score_counts:
+    subtlety: 5
+    internal_structure: 4
+    calcification: 6
+    sphericity: 5
+    margin: 5
+    lobulation: 5
+    spiculation: 5
+    texture: 5
+  quantity: 8
+use_mode_for_internal_structure_and_calcification: False

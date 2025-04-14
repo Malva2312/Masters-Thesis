@@ -1,0 +1,18 @@
+apply: True
+hyperparameter_combination:
+  index: None
+  used: None
+hyperparameter_grid:
+  model.pytorch_lightning_model.hyperparameters.optimiser.kwargs.lr:
+#    - 0.001
+#    - 0.0001
+    - 0.00001
+  data.dataloader.torch_dataloader_kwargs.batch_size:
+#    - 16
+    - 32
+#    - 64
+#    - 128
+  seed_value:
+    - 1
+#    - 30
+#    - 900

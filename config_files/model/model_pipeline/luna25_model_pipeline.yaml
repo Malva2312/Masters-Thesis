@@ -1,0 +1,32 @@
+model_id: ${..model_id}
+model_name: ${..model_name}
+callbacks:
+  model_checkpoints:
+    - monitor: val_auroc
+      filename: mod=${....model_id}-exp=X-ver=Y-dtf=Z-{epoch}-var={${.monitor}:.3f}
+      mode: max
+      save_top_k: 1
+    - monitor: val_loss
+      filename: mod=${....model_id}-exp=X-ver=Y-dtf=Z-{epoch}-var={${.monitor}:.3f}
+      mode: min
+      save_top_k: 1
+    - filename: mod=${....model_id}-exp=X-ver=Y-dtf=Z-{epoch}-var=last_epoch
+  model_early_stoppings:
+    - monitor: val_auroc
+      patience: 5
+      mode: max
+      verbose: False
+enable_logging: True
+enable_model_early_stopping: False
+finalization:
+  delete_model_checkpoints: True
+  save_used_data_file_names: True
+pytorch_lightning_model: ${..pytorch_lightning_model}
+pytorch_lightning_trainer_kwargs:
+  accelerator: gpu
+  enable_checkpointing: True
+  enable_model_summary: False
+  enable_progress_bar: False
+  log_every_n_steps: 1
+  min_epochs: 0
+  max_epochs: 5

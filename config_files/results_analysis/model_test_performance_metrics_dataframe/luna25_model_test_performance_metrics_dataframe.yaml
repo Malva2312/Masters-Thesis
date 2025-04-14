@@ -1,0 +1,1 @@
+monitored_variables: [val_auroc, val_loss, last_epoch]

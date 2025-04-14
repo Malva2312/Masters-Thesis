@@ -2,3 +2,4 @@ docs/Deliveries/Versions/
 *.pyc
 data/*
 !data/*.zip
+.vscode/sftp.json

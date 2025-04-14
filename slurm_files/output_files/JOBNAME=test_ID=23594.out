@@ -1,0 +1,39 @@
+
+**************************************************  Experiment 2 | Version 1 **************************************************
+
+Running model pipeline for data fold 1...
+...model pipeline for data fold 1 has run!
+
+Running model pipeline for data fold 2...
+...model pipeline for data fold 2 has run!
+
+Running model pipeline for data fold 3...
+...model pipeline for data fold 3 has run!
+
+Running model pipeline for data fold 4...
+...model pipeline for data fold 4 has run!
+
+Running model pipeline for data fold 5...
+Error executing job with overrides: []
+Traceback (most recent call last):
+  File "/nas-ctm01/homes/emrodrigues/python_projects/pytorch_lightning_dl_pipeline_template/slurm_files/shell_script_files/../../src/scripts/run_experiment_pipeline.py", line 66, in run_hyperparameter_grid_based_execution_pipeline
+    experiment_info.save_dataframe_as_csv()
+  File "/nas-ctm01/homes/emrodrigues/python_projects/pytorch_lightning_dl_pipeline_template/src/modules/experiment_execution/info.py", line 71, in save_dataframe_as_csv
+    self.dataframe.to_csv(
+  File "/nas-ctm01/homes/emrodrigues/.conda/envs/conda_venv/lib/python3.11/site-packages/pandas/core/generic.py", line 3902, in to_csv
+    return DataFrameRenderer(formatter).to_csv(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nas-ctm01/homes/emrodrigues/.conda/envs/conda_venv/lib/python3.11/site-packages/pandas/io/formats/format.py", line 1152, in to_csv
+    csv_formatter.save()
+  File "/nas-ctm01/homes/emrodrigues/.conda/envs/conda_venv/lib/python3.11/site-packages/pandas/io/formats/csvs.py", line 247, in save
+    with get_handle(
+         ^^^^^^^^^^^
+  File "/nas-ctm01/homes/emrodrigues/.conda/envs/conda_venv/lib/python3.11/site-packages/pandas/io/common.py", line 739, in get_handle
+    check_parent_directory(str(handle))
+  File "/nas-ctm01/homes/emrodrigues/.conda/envs/conda_venv/lib/python3.11/site-packages/pandas/io/common.py", line 604, in check_parent_directory
+    raise OSError(rf"Cannot save file into a non-existent directory: '{parent}'")
+OSError: Cannot save file into a non-existent directory: '/nas-ctm01/homes/emrodrigues/python_projects/pytorch_lightning_dl_pipeline_template/experiments'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+...model pipeline for data fold 5 has run!
+srun: error: 02.ctm-deep-04: task 0: Exited with exit code 1

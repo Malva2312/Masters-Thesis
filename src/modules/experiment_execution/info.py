@@ -15,7 +15,7 @@ class ExperimentExecutionInfo:
 
         self.csv_file_path = (
             f"{experiment_execution_paths.python_project_dir_path}"
-            f"/experiments/experiments_info.csv"
+            f"/experiment_results/experiments_info.csv"
         )
         self.experiment_id = experiment_execution_ids.experiment_id
         self.md_file_path = (

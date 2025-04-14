@@ -1,9 +1,0 @@
-# filepath: C:/Users/janto/OneDrive/Ambiente de Trabalho/Dissertação/Masters-Thesis/src/config/experiments/exp2.yml
-
-protocol: ProtocolLBP
-parameters:
-  radius: 2
-  n_points: 16
-  method: 'uniform'
-  kernel: 'rbf'
-  C: 1.0

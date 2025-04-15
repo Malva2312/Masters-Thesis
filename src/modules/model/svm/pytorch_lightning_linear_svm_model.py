@@ -16,7 +16,7 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         )
 
         self.labels = None
-        self.model = LinearSVMModel(input_dim=self.config.model.input_dim)
+        self.model = LinearSVMModel(input_dim=self.config.input_dim)
         self.predicted_labels = None
         self.weighted_losses = None
 
@@ -36,7 +36,7 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
     def training_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
 
-        model_output = self.model(data.to(self.device))
+        model_output = self.model(data['image'].view(data['image'].size(0), -1).to(self.device))
 
         loss = self.criterion(
             logits=model_output,
@@ -46,7 +46,7 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         self.log(
             "train_loss",
             loss,
-            batch_size=data.shape[0],
+            batch_size=data['image'].shape[0],
             on_epoch=True,
             on_step=False,
             prog_bar=False
@@ -62,7 +62,7 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
     def validation_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
 
-        model_output = self.model(data.to(self.device))
+        model_output = self.model(data['image'].view(data['image'].size(0), -1).to(self.device))
         predicted_labels = torch.sign(model_output)
         loss = self.criterion(
             logits=model_output,
@@ -71,7 +71,7 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
 
         self.labels.append(labels)
         self.predicted_labels.append(predicted_labels)
-        self.weighted_losses.append(loss * data.shape[0])
+        self.weighted_losses.append(loss * data['image'].shape[0])
 
     def on_validation_epoch_end(self):
         labels = torch.cat(self.labels, dim=0)
@@ -115,7 +115,7 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
     def test_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
 
-        model_output = self.model(data.to(self.device))
+        model_output = self.model(data['image'].view(data['image'].size(0), -1).to(self.device))
         predicted_labels = torch.sign(model_output)
 
         self.labels.append(labels)

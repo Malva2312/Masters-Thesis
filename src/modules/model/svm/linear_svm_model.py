@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class LinearSVMModel(nn.Module):
-    def _init_(self, input_dim):
+    def __init__(self, input_dim):
         super(LinearSVMModel, self)._init_()
         self.fc = nn.Linear(input_dim, 1)  # binary classification: one output
 

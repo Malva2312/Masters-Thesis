@@ -5,10 +5,10 @@ hyperparameter_combination:
 hyperparameter_grid:
   model.pytorch_lightning_model.hyperparameters.input_dim:
     - 1
-#  model.pytorch_lightning_model.hyperparameters.optimiser.kwargs.lr:
-##    - 0.001
-##    - 0.0001
-#    - 0.00001
+  model.pytorch_lightning_model.hyperparameters.optimiser.kwargs.lr:
+#    - 0.001
+#    - 0.0001
+    - 0.00001
   data.dataloader.torch_dataloader_kwargs.batch_size:
 #    - 16
     - 32

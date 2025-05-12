@@ -1,0 +1,13 @@
+model_id: ${..model_id}
+model_name: ${..model_name}
+hyperparameters:
+  input_dim: 1
+  device: cuda
+  optimiser:
+    type: Adam
+    kwargs:
+      lr: 0.00001
+  criterion:
+    apply_weights: True
+    device: ${..device}
+    metadataframe: ${.....data.metadataframe}

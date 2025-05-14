@@ -2,8 +2,8 @@
 
 # Slurm job execution flags. REQUIRED TO SET: --job-name, --partition and --qos.
 #SBATCH --job-name=test_net
-#SBATCH --partition=gpu_min8gb
-#SBATCH --qos=gpu_min8gb_ext
+#SBATCH --partition=gpu_min11gb
+#SBATCH --qos=gpu_min11gb_ext
 #SBATCH --output=../output_files/JOBNAME=%x_ID=%j.out
 #SBATCH --error=../output_files/JOBNAME=%x_ID=%j.out
 

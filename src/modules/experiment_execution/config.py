@@ -77,6 +77,7 @@ class ExperimentExecutionConfig:
             if dirname(abspath("")).startswith('/nas-ctm01'):
                 dataset_dir_path = \
                     "/nas-ctm01/datasets/private/LUCAS/LIDC_IDRI"
+                    #TODO: set local path
             else:
                 dataset_dir_path = (
                     f"{dirname(abspath('')).split('/nas-ctm01')[0]}"

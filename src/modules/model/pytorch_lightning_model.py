@@ -1,7 +1,7 @@
 from src.modules.model.efficient_net.pytorch_lightning_efficient_net_model \
     import PyTorchLightningEfficientNetModel
 
-from src.modules.model.svm.pytorch_lightning_linear_svm_model \
+from src.modules.model.linear_svm.pytorch_lightning_linear_svm_model \
     import PyTorchLightningLinearSVMModel
 
 class PyTorchLightningModel:

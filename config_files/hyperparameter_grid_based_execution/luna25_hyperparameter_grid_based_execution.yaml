@@ -3,8 +3,6 @@ hyperparameter_combination:
   index: None
   used: None
 hyperparameter_grid:
-  model.pytorch_lightning_model.hyperparameters.input_dim:
-    - 1
   model.pytorch_lightning_model.hyperparameters.optimiser.kwargs.lr:
 #    - 0.001
 #    - 0.0001

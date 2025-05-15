@@ -1,7 +1,7 @@
 model_id: ${..model_id}
 model_name: ${..model_name}
 hyperparameters:
-  input_dim: 1024
+  input_dim: 1024 #number of LBP features per image
   device: cuda
   optimiser:
     type: Adam

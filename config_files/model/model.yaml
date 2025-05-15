@@ -1,2 +1,5 @@
-model_id: SVM
-model_name: LinearSVM
+#model_id: SVM 
+#model_name: LinearSVM
+
+model_id: EfNet
+model_name: EfficientNet

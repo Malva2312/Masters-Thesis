@@ -76,8 +76,7 @@ class ExperimentExecutionConfig:
         if config.data.dataset_name == "LIDC-IDRI":
             if dirname(abspath("")).startswith('/nas-ctm01'):
                 dataset_dir_path = \
-                    "/nas-ctm01/datasets/private/LUCAS/LIDC_IDRI"
-                    #TODO: set local path
+                    "/nas-ctm01/datasets/private/LUCAS/LIDC_IDRI"      
             else:
                 dataset_dir_path = (
                     f"{dirname(abspath('')).split('/nas-ctm01')[0]}"
@@ -99,6 +98,11 @@ class ExperimentExecutionConfig:
             raise ValueError(
                 "Invalid dataset name: {}. Expected: 'LIDC-IDRI' or 'LUNA25'"
             )
+        
+        # TODO: Remove this hardcoded path
+        # when the code is run on the server
+        # and the dataset is used from there
+        dataset_dir_path = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data"
 
         experiment_id = config.experiment_execution.ids.experiment_id
         experiment_version_id = \

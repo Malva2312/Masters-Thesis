@@ -11,7 +11,7 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         self.config = config
 
         self.criterion = HingeLossFunction(
-            config=self.config.criterion,
+            criterion=self.config.criterion,
             experiment_execution_paths=experiment_execution_paths
         )
 

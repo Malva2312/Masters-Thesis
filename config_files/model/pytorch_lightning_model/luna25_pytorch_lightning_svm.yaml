@@ -8,6 +8,6 @@ hyperparameters:
     kwargs:
       lr: 0.00001
   criterion:
-    apply_weights: True
+  #  apply_weights: True
     device: ${..device}
-    metadataframe: ${.....data.metadataframe}
+  #  metadataframe: ${.....data.metadataframe}

@@ -3,7 +3,7 @@ import torch
 class LinearSVMModel(torch.nn.Module):
     def __init__(self, input_dim):
         super(LinearSVMModel, self).__init__()
-        self.fc = torch.nn.Linear(1024, 1)  # binary classification: one output
+        self.fc = torch.nn.Linear(input_dim, 1)  # binary classification: one output
 
     def forward(self, x):
         if x.shape[-1] != self.fc.in_features:

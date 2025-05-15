@@ -20,3 +20,4 @@ dependencies:
 
       - kaleido
       - pyradiomics
+      - scikit-image

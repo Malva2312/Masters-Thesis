@@ -7,8 +7,15 @@ class HingeLossFunction(torch.nn.Module):
     def __init__(self, criterion, experiment_execution_paths):
         super(HingeLossFunction, self).__init__()
         self.criterion = criterion
+        self.experiment_execution_paths = experiment_execution_paths
 
     def forward(self, logits: torch.Tensor, targets: torch.Tensor):
+        if self.criterion == 'hinge':
+            loss = self.hinge_loss(logits, targets)
+            return loss
+        else:
+            raise ValueError(f"Unknown criterion: {self.criterion}")
+
         loss = self.hinge_loss(logits, targets)
         return loss
 

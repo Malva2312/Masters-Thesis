@@ -8,3 +8,7 @@ hyperparameters:
     kwargs:
       lr: 0.00001
   criterion: hinge
+  #TODO: GRID of the following hyperparameters for LBP extraction
+  # self.P = P
+  # self.R = R
+  # self.method = method

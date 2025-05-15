@@ -4,7 +4,7 @@ import torch
 from src.modules.data.metadataframe.metadataframe import MetadataFrame
 
 class HingeLossFunction(torch.nn.Module):
-    def __init__(self, criterion=None, experiment_execution_paths):
+    def __init__(self, criterion, experiment_execution_paths):
         super(HingeLossFunction, self).__init__()
         self.criterion = criterion
 

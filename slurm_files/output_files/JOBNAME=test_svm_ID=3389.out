@@ -1,0 +1,54 @@
+
+**************************************************  Experiment 14 | Version 20 **************************************************
+
+Running model pipeline for data fold 1...
+/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/skimage/feature/texture.py:385: UserWarning: Applying `local_binary_pattern` to floating-point images may give unexpected results when small numerical differences between adjacent pixels are present. It is recommended to use this function with images of integer dtype.
+  warnings.warn(
+Error executing job with overrides: []
+Traceback (most recent call last):
+  File "/nas-ctm01/homes/jmalva/Masters-Thesis/slurm_files/shell_script_files/../../src/scripts/run_experiment_pipeline.py", line 52, in run_hyperparameter_grid_based_execution_pipeline
+    run_experiment_pipeline(config)
+  File "/nas-ctm01/homes/jmalva/Masters-Thesis/slurm_files/shell_script_files/../../src/scripts/run_experiment_pipeline.py", line 127, in run_experiment_pipeline
+    model_pipeline.train_model()
+  File "/nas-ctm01/homes/jmalva/Masters-Thesis/src/modules/model/model_pipeline.py", line 67, in train_model
+    self.pytorch_lightning_trainer.fit(
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/pytorch_lightning/trainer/trainer.py", line 532, in fit
+    call._call_and_handle_interrupt(
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/pytorch_lightning/trainer/call.py", line 43, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/pytorch_lightning/trainer/trainer.py", line 571, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/pytorch_lightning/trainer/trainer.py", line 980, in _run
+    results = self._run_stage()
+              ^^^^^^^^^^^^^^^^^
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/pytorch_lightning/trainer/trainer.py", line 1021, in _run_stage
+    self._run_sanity_check()
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/pytorch_lightning/trainer/trainer.py", line 1050, in _run_sanity_check
+    val_loop.run()
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/pytorch_lightning/loops/utilities.py", line 181, in _decorator
+    return loop_run(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/pytorch_lightning/loops/evaluation_loop.py", line 115, in run
+    self._evaluation_step(batch, batch_idx, dataloader_idx)
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/pytorch_lightning/loops/evaluation_loop.py", line 376, in _evaluation_step
+    output = call._call_strategy_hook(trainer, hook_name, *step_kwargs.values())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/pytorch_lightning/trainer/call.py", line 294, in _call_strategy_hook
+    output = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/pytorch_lightning/strategies/strategy.py", line 393, in validation_step
+    return self.model.validation_step(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nas-ctm01/homes/jmalva/Masters-Thesis/src/modules/model/linear_svm/pytorch_lightning_linear_svm_model.py", line 81, in validation_step
+    model_output = self.model(model_input)
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nas-ctm01/homes/jmalva/.conda/envs/lung_fusion_env/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nas-ctm01/homes/jmalva/Masters-Thesis/src/modules/model/linear_svm/linear_svm_model.py", line 10, in forward
+    raise ValueError(f"Input feature dimension mismatch. Expected {self.fc.in_features}, got {x.shape[-1]}")
+ValueError: Input feature dimension mismatch. Expected 1, got 1024
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: 01.deep01: task 0: Exited with exit code 1

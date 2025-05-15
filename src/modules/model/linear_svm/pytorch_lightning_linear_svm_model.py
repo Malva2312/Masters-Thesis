@@ -2,8 +2,9 @@ from torchmetrics.functional import accuracy, auroc, precision, recall
 import pytorch_lightning
 import torch
 
-from src.modules.model.svm.linear_svm_model import LinearSVMModel
+from src.modules.model.linear_svm.linear_svm_model import LinearSVMModel
 from src.modules.loss_functions.hinge_loss_functions import HingeLossFunction
+from src.modules.model.features.lbp_extractor import LocalBinaryPattern
 
 class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
     def __init__(self, config, experiment_execution_paths):
@@ -19,6 +20,13 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         self.model = LinearSVMModel(input_dim=self.config.input_dim)
         self.predicted_labels = None
         self.weighted_losses = None
+
+        # Instantiate LBP extractor
+        self.lbp_extractor = LocalBinaryPattern(
+            P=getattr(self.config, "lbp_P", 8),
+            R=getattr(self.config, "lbp_R", 1),
+            method=getattr(self.config, "lbp_method", "uniform")
+        )
 
         self.to(torch.device(self.config.device))
 
@@ -36,7 +44,11 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
     def training_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
 
-        model_output = self.model(data['image'].view(data['image'].size(0), -1).to(self.device))
+        # Apply LBP extractor
+        lbp_images = self.lbp_extractor(data['image'])
+        model_input = lbp_images.view(lbp_images.size(0), -1).to(self.device)
+
+        model_output = self.model(model_input)
 
         loss = self.criterion(
             logits=model_output,
@@ -62,7 +74,11 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
     def validation_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
 
-        model_output = self.model(data['image'].view(data['image'].size(0), -1).to(self.device))
+        # Apply LBP extractor
+        lbp_images = self.lbp_extractor(data['image'])
+        model_input = lbp_images.view(lbp_images.size(0), -1).to(self.device)
+
+        model_output = self.model(model_input)
         predicted_labels = torch.sign(model_output)
         loss = self.criterion(
             logits=model_output,
@@ -115,7 +131,11 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
     def test_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
 
-        model_output = self.model(data['image'].view(data['image'].size(0), -1).to(self.device))
+        # Apply LBP extractor
+        lbp_images = self.lbp_extractor(data['image'])
+        model_input = lbp_images.view(lbp_images.size(0), -1).to(self.device)
+
+        model_output = self.model(model_input)
         predicted_labels = torch.sign(model_output)
 
         self.labels.append(labels)

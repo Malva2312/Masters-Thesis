@@ -4,8 +4,8 @@ hyperparameter_combination:
   used: None
 hyperparameter_grid:
   model.pytorch_lightning_model.hyperparameters.optimiser.kwargs.lr:
-#    - 0.001
-#    - 0.0001
+  #  - 0.001
+  #  - 0.0001
     - 0.00001
   data.dataloader.torch_dataloader_kwargs.batch_size:
 #    - 16 # <-- this generate a error: the last batch only has 1 sample

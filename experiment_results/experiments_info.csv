@@ -2,3 +2,4 @@ Experiment ID,Who ran it?,When was it run?,What was run?
 1,Joao Malva,2025-05-16 16:53,EfficientNet Testing - No Grid Execution
 2,Joao Malva,2025-05-16 17:00,SVM W/ LBP Testing - Testing LBP Extractor
 3,Joao Malva,2025-05-16 18:21,EfficientNet - Grid Hyperparameter Combination
+6,Joao Malva,2025-05-17 19:58,EfficientNet + LBP - Test

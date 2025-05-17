@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Slurm job execution flags. REQUIRED TO SET: --job-name, --partition and --qos.
-#SBATCH --job-name=test_svm
+#SBATCH --job-name=exp_models
 #SBATCH --partition=gpu_min11gb
 #SBATCH --qos=gpu_min11gb_ext
 #SBATCH --output=../output_files/JOBNAME=%x_ID=%j.out

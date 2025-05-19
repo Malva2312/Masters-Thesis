@@ -14,11 +14,11 @@ class PyTorchLightningEfficientNetModel(pytorch_lightning.LightningModule):
         self.config = config
 
         self.criterion = EfficientNetLossFunction(
-            config=self.config.criterion,
+            config=self.config.effnet_config.criterion,
             experiment_execution_paths=experiment_execution_paths
         )
         self.labels = None
-        self.model = EfficientNetModel(config=self.config.model)
+        self.model = EfficientNetModel(config=self.config)
         self.predicted_labels = None
         self.weighted_losses = None
 

@@ -11,7 +11,7 @@ class PyTorchLightningEfficientNetLBPModel(pytorch_lightning.LightningModule):
         super().__init__()
         self.config = config
         self.criterion = EfficientNetLossFunction(
-            config=self.config.criterion,
+            config=self.config.effnet_config.criterion,
             experiment_execution_paths=experiment_execution_paths
         )
         self.model = EffNet_LBP(config=self.config)

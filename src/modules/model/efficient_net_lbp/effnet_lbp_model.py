@@ -5,14 +5,14 @@ from src.modules.features.lbp_extractor import LocalBinaryPattern
 class EffNet_LBP(torch.nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.efficient_net = EfficientNetModel(config=config.model)
+        self.efficient_net = EfficientNetModel(config=config)
         self.lbp_extractor = LocalBinaryPattern()
         # Assume LBP histogram length is 59 for 'uniform' with P=8, R=1
         lbp_feature_dim = 59
         
         effnet_out_dim = self.efficient_net.model.classifier[1].in_features
         self.fc_lbp = torch.nn.Linear(lbp_feature_dim, 128)
-        self.classifier = torch.nn.Linear(effnet_out_dim + 128, config.model.number_of_classes)
+        self.classifier = torch.nn.Linear(effnet_out_dim + 128, config.number_of_classes)
 
     def forward(self, image):
         # EfficientNet features

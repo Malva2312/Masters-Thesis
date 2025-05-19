@@ -7,7 +7,7 @@ from src.modules.model.linear_svm.pytorch_lightning_linear_svm_model \
 from src.modules.model.efficient_net_lbp.pytorch_lightning_effnet_lbp_model \
     import PyTorchLightningEfficientNetLBPModel
 
-from src.modules.model.efficient_net_svm.pytorch_lightning_effnet_svm_model \
+from src.modules.model.efficient_net_svm.pytorch_lightning_effnet_svm_fusion_model \
     import PyTorchLightningEffNetSVMFusionModel
 
 

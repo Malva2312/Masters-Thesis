@@ -9,9 +9,10 @@ hyperparameters:
     kwargs:
       lr: 0.00001
 
+  number_of_classes: 2
+  
   # EfficientNet parameters
   effnet_config:
-    number_of_classes: 2
     criterion:
       apply_weights: True
       device: ${...device}

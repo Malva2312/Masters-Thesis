@@ -17,8 +17,6 @@ hyperparameters:
       apply_weights: True
       device: ${...device}
       metadataframe: ${......data.metadataframe}
-    model:
-      number_of_classes: 2
     optimiser: ${..optimiser}
 
   # SVM parameters

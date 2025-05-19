@@ -9,7 +9,7 @@ from src.modules.features.lbp_extractor import LocalBinaryPattern
 class EffNetSVMFusionModule(torch.nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.effnet = EfficientNetModel(config=config.effnet_config)
+        self.effnet = EfficientNetModel(config=config)
         self.svm = LinearSVMModel(input_dim=config.svm_config.input_dim)
         self.lbp_extractor = LocalBinaryPattern(
             P=getattr(config, "lbp_P", 8),

@@ -1,0 +1,31 @@
+# filepath: /nas-ctm01/homes/jmalva/Masters-Thesis/config_files/model/pytorch_lightning_model/luna25_pytorch_lightning_effnet_svm.yaml
+model_id: ${..model_id}
+model_name: ${..model_name}
+hyperparameters:
+  device: cuda
+
+  optimiser:
+    type: Adam
+    kwargs:
+      lr: 0.00001
+
+  # EfficientNet parameters
+  effnet_config:
+    number_of_classes: 2
+    criterion:
+      apply_weights: True
+      device: ${...device}
+      metadataframe: ${......data.metadataframe}
+    model:
+      number_of_classes: 2
+    optimiser: ${..optimiser}
+
+  # SVM parameters
+  svm_config:
+    input_dim: 1024 # number of LBP features per image
+    criterion: hinge
+    optimiser: ${..optimiser}
+    #TODO: GRID of the following hyperparameters for LBP extraction (maybe not needed)
+    # P: <value>
+    # R: <value>
+    # method: <value>

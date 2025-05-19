@@ -4,5 +4,8 @@
 #model_id: EfNet
 #model_name: EfficientNet
 
-model_id: EfNet_LBP
-model_name: EfficientNet_LBP
+#model_id: EfNet_LBP
+#model_name: EfficientNet_LBP
+
+model_id: EffNet_SVM
+model_name: EfficientNet_SVM

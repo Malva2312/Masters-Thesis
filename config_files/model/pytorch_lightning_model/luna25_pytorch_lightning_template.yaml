@@ -5,9 +5,10 @@ hyperparameters:
   device: cuda
 
   optimiser:
-    type: Adam
+    type: Adam #Maybe also try AdamW
     kwargs:
       lr: 0.00001
+      #weight_decay: 0.0001 #does this help?
 
   number_of_classes: 2
   

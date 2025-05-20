@@ -4,3 +4,4 @@ Experiment ID,Who ran it?,When was it run?,What was run?
 3,Joao Malva,2025-05-16 18:21,EfficientNet - Grid Hyperparameter Combination
 4,Joao Malva,2025-05-17 19:58,EfficientNet + LBP - Test
 5,Joao Malva,2025-05-20 00:43,EffNet + SVM(LBP) - Decision Fusion - Grid Hyperparameter Search
+6,Joao Malva,2025-05-20 09:21,EffNet + FC(LBP) - Feature Fusion - Grid Hyperparameter Search

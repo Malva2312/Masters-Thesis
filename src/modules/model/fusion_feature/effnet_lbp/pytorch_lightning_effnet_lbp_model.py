@@ -2,26 +2,22 @@ from torchmetrics.functional import accuracy, auroc, precision, recall
 import pytorch_lightning
 import torch
 
-from src.modules.model.efficient_net.efficient_net_model \
-    import EfficientNetModel
-from src.modules.loss_functions.efficient_net_loss_functions \
-    import EfficientNetLossFunction
+from src.modules.model.fusion_feature.effnet_lbp.effnet_lbp_model import EffNet_LBP
+from src.modules.loss_functions.efficient_net_loss_functions import EfficientNetLossFunction
 
 
-class PyTorchLightningEfficientNetModel(pytorch_lightning.LightningModule):
+class PyTorchLightningEfficientNetLBPModel(pytorch_lightning.LightningModule):
     def __init__(self, config, experiment_execution_paths):
         super().__init__()
         self.config = config
-
         self.criterion = EfficientNetLossFunction(
             config=self.config.effnet_config.criterion,
             experiment_execution_paths=experiment_execution_paths
         )
+        self.model = EffNet_LBP(config=self.config)
         self.labels = None
-        self.model = EfficientNetModel(config=self.config)
         self.predicted_labels = None
         self.weighted_losses = None
-
         self.to(torch.device(self.config.device))
 
     def configure_optimizers(self):
@@ -32,14 +28,11 @@ class PyTorchLightningEfficientNetModel(pytorch_lightning.LightningModule):
 
     def training_step(self, batch):
         data, labels = batch[0], batch[1]
-
         model_output = self.model(data['image'].to(self.device))
-
         loss = self.criterion(
             logits=model_output,
             targets=labels.to(self.device)
         )
-
         self.log(
             batch_size=data['image'].shape[0],
             name="train_loss",
@@ -48,7 +41,6 @@ class PyTorchLightningEfficientNetModel(pytorch_lightning.LightningModule):
             prog_bar=False,
             value=loss
         )
-
         return loss
 
     def on_validation_epoch_start(self):
@@ -58,14 +50,12 @@ class PyTorchLightningEfficientNetModel(pytorch_lightning.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
-
         model_output = self.model(data['image'].to(self.device))
         predicted_labels = torch.argmax(model_output, dim=1, keepdim=True)
         loss = self.criterion(
             logits=model_output,
             targets=labels.to(self.device)
         )
-
         self.labels.append(labels)
         self.predicted_labels.append(predicted_labels)
         self.weighted_losses.append(loss * data['image'].shape[0])
@@ -73,7 +63,6 @@ class PyTorchLightningEfficientNetModel(pytorch_lightning.LightningModule):
     def on_validation_epoch_end(self):
         labels = torch.cat(self.labels, dim=0)
         predicted_labels = torch.cat(self.predicted_labels, dim=0)
-
         metrics_for_logging = {
             'val_loss': (sum(self.weighted_losses) / labels.shape[0]).item(),
             'val_accuracy': accuracy(
@@ -111,17 +100,14 @@ class PyTorchLightningEfficientNetModel(pytorch_lightning.LightningModule):
 
     def test_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
-
         model_output = self.model(data['image'].to(self.device))
         predicted_labels = torch.argmax(model_output, dim=1, keepdim=True)
-
         self.labels.append(labels)
         self.predicted_labels.append(predicted_labels)
 
     def on_test_epoch_end(self):
         labels = torch.cat(self.labels, dim=0)
         predicted_labels = torch.cat(self.predicted_labels, dim=0)
-
         metrics_for_logging = {
             'test_accuracy': accuracy(
                 preds=predicted_labels,

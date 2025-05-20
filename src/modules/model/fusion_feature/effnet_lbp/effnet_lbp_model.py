@@ -1,5 +1,5 @@
 import torch
-from src.modules.model.efficient_net.efficient_net_model import EfficientNetModel
+from src.modules.model.standalone.effnet.efficient_net_model import EfficientNetModel
 from src.modules.features.lbp_extractor import LocalBinaryPattern
 
 class EffNet_LBP(torch.nn.Module):

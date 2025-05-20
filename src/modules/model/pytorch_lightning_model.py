@@ -1,13 +1,13 @@
-from src.modules.model.efficient_net.pytorch_lightning_efficient_net_model \
+from src.modules.model.standalone.effnet.pytorch_lightning_efficient_net_model \
     import PyTorchLightningEfficientNetModel
 
-from src.modules.model.linear_svm.pytorch_lightning_linear_svm_model \
+from src.modules.model.standalone.linear_svm.pytorch_lightning_linear_svm_model \
     import PyTorchLightningLinearSVMModel
 
-from src.modules.model.efficient_net_lbp.pytorch_lightning_effnet_lbp_model \
+from src.modules.model.fusion_feature.effnet_lbp.pytorch_lightning_effnet_lbp_model \
     import PyTorchLightningEfficientNetLBPModel
 
-from src.modules.model.efficient_net_svm.pytorch_lightning_effnet_svm_fusion_model \
+from src.modules.model.fusion_decision.effnet_svm.pytorch_lightning_effnet_svm_fusion_model \
     import PyTorchLightningEffNetSVMFusionModel
 
 

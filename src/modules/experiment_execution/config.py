@@ -25,17 +25,19 @@ class ExperimentExecutionConfig:
 
     @staticmethod
     def set_experiment_id(config):
-        experiments_dir_path = \
-            Path(__file__).resolve().parents[3] / "experiment_results"
-        if not any(Path(experiments_dir_path).iterdir()):
+        experiments_dir_path = Path(__file__).resolve().parents[3] / "experiment_results"
+        experiment_folders = [
+            folder for folder in Path(experiments_dir_path).iterdir() if folder.is_dir() and folder.name.startswith("experiment_")
+        ]
+        if not experiment_folders:
             experiment_id = 1
         else:
             experiment_ids = [
                 int(folder.name.split("_")[1])
-                for folder in Path(experiments_dir_path).iterdir()
-                if folder.is_dir()
+                for folder in experiment_folders
+                if folder.name.split("_")[1].isdigit()
             ]
-            experiment_id = experiment_ids[-1] + 1
+            experiment_id = max(experiment_ids) + 1 if experiment_ids else 1
         config.experiment_execution.ids.experiment_id = experiment_id
 
     @staticmethod

@@ -13,6 +13,7 @@ hyperparameters:
   
   # EfficientNet parameters
   effnet_config:
+    architecture: b2
     criterion:
       apply_weights: True
       device: ${...device}
@@ -28,3 +29,12 @@ hyperparameters:
     # P: <value>
     # R: <value>
     # method: <value>
+
+    # ResNet parameters
+  resnet_config:
+    architecture: 50         # Options: 18, 34, 50, 101, 152, etc.
+    criterion:
+      apply_weights: True
+      device: ${...device}
+      metadataframe: ${......data.metadataframe}
+    optimiser: ${..optimiser}

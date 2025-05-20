@@ -10,6 +10,9 @@ from src.modules.model.fusion_feature.effnet_lbp.pytorch_lightning_effnet_lbp_mo
 from src.modules.model.fusion_decision.effnet_svm.pytorch_lightning_effnet_svm_fusion_model \
     import PyTorchLightningEffNetSVMFusionModel
 
+from src.modules.model.standalone.resnet.pytorch_lightning_resnet_model \
+    import PyTorchLightningResNetModel
+
 
 class PyTorchLightningModel:
     def __new__(cls, config, experiment_execution_paths):
@@ -33,8 +36,13 @@ class PyTorchLightningModel:
                 config=config.hyperparameters,
                 experiment_execution_paths=experiment_execution_paths
             )
+        elif config.model_name == "ResNet":  # <-- Add this block
+            return PyTorchLightningResNetModel(
+                config=config.hyperparameters,
+                experiment_execution_paths=experiment_execution_paths
+            )
         else:
             raise ValueError(
                 f"Invalid model name: {config.model_name}. "
-                f"Supported datasets are 'EfficientNet'."
+                f"Supported datasets are 'EfficientNet', 'LinearSVM', 'EfficientNet_LBP', 'EfficientNet_SVM', 'ResNet'."
             )

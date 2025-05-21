@@ -13,6 +13,8 @@ from src.modules.model.fusion_decision.effnet_svm.pytorch_lightning_effnet_svm_f
 from src.modules.model.standalone.resnet.pytorch_lightning_resnet_model \
     import PyTorchLightningResNetModel
 
+from src.modules.model.standalone.vgg.pytorch_lightning_vgg_model \
+    import PyTorchLightningVGGModel
 
 class PyTorchLightningModel:
     def __new__(cls, config, experiment_execution_paths):
@@ -38,6 +40,11 @@ class PyTorchLightningModel:
             )
         elif config.model_name == "ResNet":  # <-- Add this block
             return PyTorchLightningResNetModel(
+                config=config.hyperparameters,
+                experiment_execution_paths=experiment_execution_paths
+            )
+        elif config.model_name == "VGG":
+            return PyTorchLightningVGGModel(
                 config=config.hyperparameters,
                 experiment_execution_paths=experiment_execution_paths
             )

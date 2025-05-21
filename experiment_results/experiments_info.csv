@@ -7,3 +7,4 @@ Experiment ID,Who ran it?,When was it run?,What was run?
 6,Joao Malva,2025-05-20 09:21,EffNet + FC(LBP) - Feature Fusion - Grid Hyperparameter Search
 7,Joao Malva,2025-05-20 12:28,Standalone EffNet b1 architecture - Grid Hyperparameter Combination
 8,Joao Malva,2025-05-20 12:10,Standalone EffNet b2 architecture - Grid Hyperparameter Combination
+9,Joao Malva,2025-05-21 10:37,Standalone ResNet 18, 50, 101 architecture - Grid Hyperparameter Combination

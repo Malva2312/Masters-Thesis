@@ -9,4 +9,7 @@ class AlexNetLossFunction(torch.nn.Module):
         self.loss_fn = torch.nn.CrossEntropyLoss(weight=self.class_weights)
 
     def forward(self, logits, targets):
+        # Ensure targets are 1D class indices, not one-hot encoded
+        if targets.dim() > 1:
+            targets = torch.argmax(targets, dim=1)
         return self.loss_fn(logits, targets)

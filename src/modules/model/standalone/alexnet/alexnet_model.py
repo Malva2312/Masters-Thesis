@@ -13,4 +13,7 @@ class AlexNetModel(torch.nn.Module):
     def forward(self, model_input):
         if model_input.shape[1] == 1:
             model_input = model_input.repeat(1, 3, 1, 1)
+        # Resize input if spatial dimensions are too small
+        if model_input.shape[2] < 224 or model_input.shape[3] < 224:
+            model_input = torch.nn.functional.interpolate(model_input, size=(224, 224), mode='bilinear', align_corners=False)
         return self.model(model_input)

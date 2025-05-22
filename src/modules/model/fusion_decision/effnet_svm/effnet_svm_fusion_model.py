@@ -3,7 +3,7 @@ import torch
 from src.modules.model.standalone.effnet.efficient_net_model import EfficientNetModel
 from src.modules.model.standalone.linear_svm.linear_svm_model import LinearSVMModel
 
-from src.modules.features.lbp_extractor import LocalBinaryPattern
+from src.modules.features.texture.lbp_extractor import LocalBinaryPattern
 
 
 class EffNetSVMFusionModule(torch.nn.Module):

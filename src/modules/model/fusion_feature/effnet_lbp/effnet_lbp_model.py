@@ -1,6 +1,6 @@
 import torch
 from src.modules.model.standalone.effnet.efficient_net_model import EfficientNetModel
-from src.modules.features.lbp_extractor import LocalBinaryPattern
+from src.modules.features.texture.lbp_extractor import LocalBinaryPattern
 
 class EffNet_LBP(torch.nn.Module):
     def __init__(self, config):
@@ -11,7 +11,7 @@ class EffNet_LBP(torch.nn.Module):
         lbp_feature_dim = 59
         
         effnet_out_dim = self.efficient_net.model.classifier[1].in_features
-        self.fc_lbp = torch.nn.Linear(lbp_feature_dim, 128)
+        self.fc_lbp = torch.nn.Linear(lbp_feature_dim, 128) #TODO: reshape this to match effnet dim (1D/2D/3D)
         self.classifier = torch.nn.Linear(effnet_out_dim + 128, config.number_of_classes)
 
     def forward(self, image):

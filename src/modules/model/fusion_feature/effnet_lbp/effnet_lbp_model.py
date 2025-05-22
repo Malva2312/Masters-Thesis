@@ -1,6 +1,6 @@
 import torch
 from src.modules.model.standalone.effnet.efficient_net_model import EfficientNetModel
-from src.modules.features.texture.lbp_extractor import LocalBinaryPattern
+from src.modules.features.texture.lbp import LocalBinaryPattern
 
 class EffNet_LBP(torch.nn.Module):
     def __init__(self, config):

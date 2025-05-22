@@ -23,7 +23,8 @@ hyperparameters:
 
   # SVM parameters
   svm_config:
-    input_dim: 1024 # number of LBP features per image
+    input_dim: 2399 # number of features being tested
+    #input_dim: 1024 # number of LBP features per image
     criterion: hinge
     optimiser: ${..optimiser}
     #TODO: GRID of the following hyperparameters for LBP extraction (maybe not needed)
@@ -34,6 +35,31 @@ hyperparameters:
     # ResNet parameters
   resnet_config:
     architecture: 50         # Options: 18, 34, 50, 101, 152, etc.
+    criterion:
+      apply_weights: True
+      device: ${...device}
+      metadataframe: ${......data.metadataframe}
+    optimiser: ${..optimiser}
+
+      # AlexNet parameters
+  alexnet_config:
+    criterion:
+      apply_weights: True
+      device: ${...device}
+      metadataframe: ${......data.metadataframe}
+    optimiser: ${..optimiser}
+
+  # VGG parameters
+  vgg_config:
+    architecture: 16         # Options: 11, 13, 16, 19, etc.
+    criterion:
+      apply_weights: True
+      device: ${...device}
+      metadataframe: ${......data.metadataframe}
+    optimiser: ${..optimiser}
+
+  # GoogLeNet parameters
+  googlenet_config:
     criterion:
       apply_weights: True
       device: ${...device}

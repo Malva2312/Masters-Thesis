@@ -3,16 +3,23 @@ hyperparameter_combination:
   index: None
   used: None
 hyperparameter_grid:
+  #model.pytorch_lightning_model.hyperparameters.resnet_config.architecture:
+  #  - 18
+  #  - 50
+  #  - 101
+  #model.pytorch_lightning_model.hyperparameters.vgg_config.architecture:
+  #  - 11
+  #  - 13
   model.pytorch_lightning_model.hyperparameters.optimiser.kwargs.lr:
-    - 0.001
-    - 0.0001
+    #- 0.001
+    #- 0.0001
     - 0.00001
   data.dataloader.torch_dataloader_kwargs.batch_size:
 #    - 16 # <-- this generate a error: the last batch only has 1 sample
     - 32
-    - 64
-    - 128
+    #- 64
+    #- 128
   seed_value:
     - 1
-    - 30
-    - 900
+    #- 30
+    #- 900

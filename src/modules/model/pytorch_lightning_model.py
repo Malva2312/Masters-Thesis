@@ -16,6 +16,9 @@ from src.modules.model.standalone.resnet.pytorch_lightning_resnet_model \
 from src.modules.model.standalone.vgg.pytorch_lightning_vgg_model \
     import PyTorchLightningVGGModel
 
+from src.modules.model.standalone.alexnet.pytorch_lightning_alexnet_model \
+    import PyTorchLightningAlexNetModel
+
 class PyTorchLightningModel:
     def __new__(cls, config, experiment_execution_paths):
         if config.model_name == "EfficientNet":
@@ -45,6 +48,11 @@ class PyTorchLightningModel:
             )
         elif config.model_name == "VGG":
             return PyTorchLightningVGGModel(
+                config=config.hyperparameters,
+                experiment_execution_paths=experiment_execution_paths
+            )
+        elif config.model_name == "AlexNet":
+            return PyTorchLightningAlexNetModel(
                 config=config.hyperparameters,
                 experiment_execution_paths=experiment_execution_paths
             )

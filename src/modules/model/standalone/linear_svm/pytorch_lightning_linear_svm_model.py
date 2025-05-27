@@ -25,6 +25,8 @@ from src.modules.features.intensity.percentiles import Percentiles
 from src.modules.features.shape.area_perimeter import AreaPerimeter
 from src.modules.features.shape.eccentricity_solidity import EccentricitySolidity
 
+from src.modules.features.feature_extractors import FeatureExtractorManager
+
 
 class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
     def __init__(self, config, experiment_execution_paths):
@@ -41,22 +43,8 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         self.predicted_labels = None
         self.weighted_losses = None
 
-        # Instantiate all feature extractors
-        self.lbp_extractor = LocalBinaryPattern(
-            P=getattr(self.config, "lbp_P", 8),
-            R=getattr(self.config, "lbp_R", 1),
-            method=getattr(self.config, "lbp_method", "uniform")
-        )
-        self.glcm_extractor = GrayLevelCooccurrenceMatrix()
-        self.fft_extractor = FastFourierTransform()
-        self.gabor_extractor = GaborFeature()
-        self.hog_extractor = HistogramOfOrientedGradients()
-        self.entropy_extractor = Entropy()
-        self.mean_std_extractor = MeanStd()
-        self.percentiles_extractor = Percentiles()
-        self.area_perimeter_extractor = AreaPerimeter()
-        self.eccentricity_solidity_extractor = EccentricitySolidity()
-
+        self.feature_extractor_manager = FeatureExtractorManager(config=self.config.svm_config)
+        
         self.to(torch.device(self.config.device))
 
     def configure_optimizers(self):
@@ -70,29 +58,13 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         self.predicted_labels = []
         self.weighted_losses = []
 
-    def extract_features(self, images):
-        features = []
-        # Each extractor should handle a batch of images (shape: [batch_size, ...])
-        features.append(self.lbp_extractor(images).view(images.size(0), -1))
-        features.append(self.glcm_extractor(images).view(images.size(0), -1))
-        fft_features = self.fft_extractor(images)
-        if isinstance(fft_features, dict):
-            # Replace 'feature' with the actual key if different
-            fft_features = fft_features['magnitude']  
-        features.append(fft_features.view(images.size(0), -1))
-        features.append(self.gabor_extractor(images).view(images.size(0), -1))
-        features.append(self.hog_extractor(images).view(images.size(0), -1))
-        features.append(self.entropy_extractor(images).view(images.size(0), -1))
-        mean_std_features = self.mean_std_extractor(images)
-        features.append(mean_std_features['mean'].view(images.size(0), -1))
-        features.append(mean_std_features['std'].view(images.size(0), -1))
-        features.append(self.percentiles_extractor(images).view(images.size(0), -1))
-        area_perimeter_features = self.area_perimeter_extractor(images)
-        features.append(area_perimeter_features['area'].view(images.size(0), -1))
-        features.append(area_perimeter_features['perimeter'].view(images.size(0), -1))
-        #features.append(self.eccentricity_solidity_extractor(images).view(images.size(0), -1))
-        # Concatenate all features along the last dimension
-        return torch.cat(features, dim=1).to(self.device)
+    def extract_features(self, images, masks=None):
+        #features = self.feature_extractor_manager(images, masks)
+
+        #return torch.cat(features, dim=1).to(self.device)
+        features = self.feature_extractor_manager(images, masks)
+
+        return features.to(self.device)
 
     def training_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]

@@ -4,6 +4,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import CSVLogger
 import json
 import os
+import shutil
 
 from src.modules.model.pytorch_lightning_model import PyTorchLightningModel
 
@@ -44,9 +45,14 @@ class ModelPipeline:
         for trainer_callback in self.pytorch_lightning_trainer.callbacks:
             if isinstance(trainer_callback, ModelCheckpoint):
                 os.remove(path=trainer_callback.best_model_path)
-        os.rmdir(
+        #os.rmdir(
+        #    f"{self.experiment_version_dir_path}"
+        #    f"/datafold_{self.datafold_id}/models"
+        #)
+        shutil.rmtree(
             f"{self.experiment_version_dir_path}"
-            f"/datafold_{self.datafold_id}/models"
+            f"/datafold_{self.datafold_id}/models",
+            ignore_errors=True
         )
 
     def finalize(self):

@@ -21,9 +21,25 @@ hyperparameters:
       metadataframe: ${......data.metadataframe}
     optimiser: ${..optimiser}
 
+    extractors:
+      - name: LBP
+        params:
+          P: 8
+          R: 1
+          method: uniform
+      - name: HOG
+        params:
+          orientations: 9
+          pixels_per_cell: [8, 8]
+          cells_per_block: [2, 2]
+      - name: Gabor
+        params:
+          frequencies: [0.1, 0.2, 0.3]
+          thetas: [0, 45, 90, 135]
+
   # SVM parameters
   svm_config:
-    input_dim: 2399 # number of features being tested
+    input_dim: 2418 # number of features being tested
     #input_dim: 1024 # number of LBP features per image
     criterion: hinge
     optimiser: ${..optimiser}
@@ -31,10 +47,39 @@ hyperparameters:
     # P: <value>
     # R: <value>
     # method: <value>
+    extractors:
+      - name: entropy
+        params: {}
+      - name: mean_std
+        params: {}
+      - name: percentiles
+        params:
+          percentiles: [10, 25, 50, 75, 90]
+      - name: areaperimeter
+        params: {}
+      #- name: eccentricity_solidity
+      #  params: {}
+      - name: glcm
+        params:
+          distances: [1, 2, 3]
+          angles: [0, 45, 90, 135]
+      - name: lbp
+        params:
+          P: 8
+          R: 1
+          method: uniform
+      - name: fft
+        params: {}
+      - name: gabor
+        params:
+          frequencies: [0.1, 0.2, 0.3]
+          thetas: [0, 45, 90, 135]
+      - name: hog
+        params: {}
 
     # ResNet parameters
   resnet_config:
-    architecture: 50         # Options: 18, 34, 50, 101, 152, etc.
+    architecture: 18         # Options: 18, 34, 50, 101, 152, etc.
     criterion:
       apply_weights: True
       device: ${...device}

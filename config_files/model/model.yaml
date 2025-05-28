@@ -14,7 +14,10 @@ model_name: LinearSVM
 #model_name: ResNet
 
 #model_id: VGG
-#model_name: VGG~
+#model_name: VGG
 
 #model_id: AlexNet
 #model_name: AlexNet
+
+#model_id: ResNetFusionModel
+#model_name: ResNetFusionModel

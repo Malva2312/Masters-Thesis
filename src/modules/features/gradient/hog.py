@@ -34,7 +34,10 @@ class HistogramOfOrientedGradients:
             img = img.squeeze(0)
         assert img.dim() == 2, "Input must be a grayscale image tensor of shape (H, W)"
 
-        if mask is not None:
+        # If mask is None, create a dummy mask covering the whole image
+        if mask is None:
+            mask = torch.ones_like(img, dtype=torch.bool)
+        else:
             assert mask.shape == img.shape, "Mask must have the same shape as the image"
             mask = mask.bool()
 
@@ -66,13 +69,9 @@ class HistogramOfOrientedGradients:
                 x0, x1 = j * self.cell_size, (j + 1) * self.cell_size
                 cell_mag = magnitude[y0:y1, x0:x1]
                 cell_bin = bins[y0:y1, x0:x1]
-                if mask is not None:
-                    cell_mask = mask[y0:y1, x0:x1]
+                cell_mask = mask[y0:y1, x0:x1]
                 for b in range(self.nbins):
-                    if mask is not None:
-                        hog[i, j, b] = (cell_mag[(cell_bin == b) & cell_mask]).sum()
-                    else:
-                        hog[i, j, b] = (cell_mag[cell_bin == b]).sum()
+                    hog[i, j, b] = (cell_mag[(cell_bin == b) & cell_mask]).sum()
 
         # Block normalization
         eps = 1e-6

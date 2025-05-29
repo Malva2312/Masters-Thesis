@@ -14,8 +14,10 @@ class PyTorchLightningResNetModel(pytorch_lightning.LightningModule):
             config=self.config.resnet_config.criterion,
             experiment_execution_paths=experiment_execution_paths
         )
-        self.labels = None
+
         self.model = ResNetModel(config=self.config)
+        
+        self.labels = None
         self.predicted_labels = None
         self.weighted_losses = None
 

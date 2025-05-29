@@ -2,11 +2,11 @@ from torchmetrics.functional import accuracy, auroc, precision, recall
 import pytorch_lightning
 import torch
 
-from src.modules.model.fusion_feature.resnet_fc_layer.resnet_fc_layer_model import ResNet_FC_Layer_Model
+from src.modules.model.fusion_feature.resnet_fused.resnet_fused_model import ResNet_Fused_Model
 from src.modules.loss_functions.resnet_loss_functions import ResNetLossFunction
 from src.modules.features.feature_extractors import FeatureExtractorManager
 
-class PyTorchLightningResNetFCLayerModel(pytorch_lightning.LightningModule):
+class PyTorchLightningResNetFusedModel(pytorch_lightning.LightningModule):
     def __init__(self, config, experiment_execution_paths):
         super().__init__()
         self.config = config
@@ -16,11 +16,8 @@ class PyTorchLightningResNetFCLayerModel(pytorch_lightning.LightningModule):
             experiment_execution_paths=experiment_execution_paths
         )
 
-        self.model = ResNet_FC_Layer_Model(config=self.config)
+        self.model = ResNet_Fused_Model(config=self.config)
         self.feature_extractor_manager = FeatureExtractorManager(config=config.resnet_config)
-
-        self.model.fusion_feature_dim = self.feature_extractor_manager.get_total_feature_dim()
-        self.model.update_fusion_dim(self.model.fusion_feature_dim)
 
         self.labels = None
         self.predicted_labels = None

@@ -19,8 +19,9 @@ from src.modules.model.standalone.vgg.pytorch_lightning_vgg_model \
 from src.modules.model.standalone.alexnet.pytorch_lightning_alexnet_model \
     import PyTorchLightningAlexNetModel
 
-from src.modules.model.fusion_feature.resnet_fc_layer.pytorch_lightning_resnet_fc_layer_model \
-    import PyTorchLightningResNetFCLayerModel
+from src.modules.model.fusion_feature.resnet_fused.pytorch_lightning_resnet_fused_model \
+    import PyTorchLightningResNetFusedModel
+    
 class PyTorchLightningModel:
     def __new__(cls, config, experiment_execution_paths):
         if config.model_name == "EfficientNet":
@@ -59,7 +60,7 @@ class PyTorchLightningModel:
                 experiment_execution_paths=experiment_execution_paths
             )
         elif config.model_name == "ResNetFusionModel":
-            return PyTorchLightningResNetFCLayerModel(
+            return PyTorchLightningResNetFusedModel(
                 config=config.hyperparameters,
                 experiment_execution_paths=experiment_execution_paths
             )

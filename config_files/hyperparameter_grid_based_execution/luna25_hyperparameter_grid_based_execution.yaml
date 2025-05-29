@@ -3,23 +3,59 @@ hyperparameter_combination:
   index: None
   used: None
 hyperparameter_grid:
-  #model.pytorch_lightning_model.hyperparameters.resnet_config.architecture:
-  #  - 18
-  #  - 50
-  #  - 101
-  #model.pytorch_lightning_model.hyperparameters.vgg_config.architecture:
-  #  - 11
-  #  - 13
+  model.pytorch_lightning_model.hyperparameters.resnet_config.default_layer:
+    - layer1
+    - layer2
+    - layer3
+    - layer4
+  model.pytorch_lightning_model.hyperparameters.resnet_config.extractors:
+    #-
+    #  - name: entropy
+    #    params: {}
+    -
+      - name: mean_std
+        params: {}
+    #-
+    #  - name: percentiles
+    #    params:
+    #      percentiles: [10, 25, 50, 75, 90]
+    -
+      - name: areaperimeter
+        params: {}
+    #-  #- name: eccentricity_solidity
+      #  params: {}
+    #-
+    #  - name: glcm
+    #    params:
+    #      distances: [1, 2, 3]
+    #      angles: [0, 45, 90, 135]
+    #-
+    #  - name: lbp
+    #    params:
+    #      P: 8
+    #      R: 1
+    #      method: uniform
+    #-
+    #  - name: fft
+    #    params: {}
+    #-
+    #  - name: gabor
+    #    params:
+    #      frequencies: [0.1, 0.2, 0.3]
+    #      thetas: [0, 45, 90, 135]
+    #-
+    #  - name: hog
+    #    params: {}
   model.pytorch_lightning_model.hyperparameters.optimiser.kwargs.lr:
-    #- 0.001
-    #- 0.0001
-    - 0.00001
+    - 0.001
+  #  - 0.0001
+  #  - 0.00001
   data.dataloader.torch_dataloader_kwargs.batch_size:
 #    - 16 # <-- this generate a error: the last batch only has 1 sample
     - 32
-    #- 64
-    #- 128
+  #  - 64
+  #  - 128
   seed_value:
     - 1
-    #- 30
-    #- 900
+  #  - 30
+  #  - 900

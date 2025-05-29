@@ -53,6 +53,8 @@ class ResNet_Fused_Model(nn.Module):
         if aux_input is None or layer_name not in self.layer_map:
             return x
 
+        proj_list = [x]  # Start with the main branch
+
         for name in self.layer_map[layer_name]:
             if name not in aux_input:
                 continue
@@ -70,18 +72,32 @@ class ResNet_Fused_Model(nn.Module):
             proj = self.projectors[name](aux)  # (B, 256)
             proj = proj.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, x.shape[2], x.shape[3])  # (B, 256, H, W)
 
+            # If needed, project to match x's channels
             if proj.shape[1] != x.shape[1]:
                 fusion_key = f"{layer_name}_{name}"
                 if fusion_key not in self.fusion_convs:
                     self.fusion_convs[fusion_key] = nn.Conv2d(
-                        in_channels=proj.shape[1] + x.shape[1],
+                        in_channels=proj.shape[1],
                         out_channels=x.shape[1],
                         kernel_size=1
                     ).to(x.device)
+                proj = self.fusion_convs[fusion_key](proj)
 
-                x = self.fusion_convs[fusion_key](torch.cat([x, proj], dim=1))
-            else:
-                x = x + proj
+            proj_list.append(proj)
+
+        # Multi-branch fusion: concatenate all and fuse with 1x1 conv
+        if len(proj_list) > 1:
+            fusion_key = f"{layer_name}_multi"
+            total_channels = sum([p.shape[1] for p in proj_list])
+            if fusion_key not in self.fusion_convs:
+                self.fusion_convs[fusion_key] = nn.Conv2d(
+                    in_channels=total_channels,
+                    out_channels=x.shape[1],
+                    kernel_size=1
+                ).to(x.device)
+            x = self.fusion_convs[fusion_key](torch.cat(proj_list, dim=1))
+        else:
+            x = proj_list[0]
 
         return x
 

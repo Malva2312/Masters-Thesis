@@ -11,3 +11,4 @@ Experiment ID,Who ran it?,When was it run?,What was run?
 10,Joao Malva,2025-05-27 19:41,Linear SVM - Feature Extrator Manager - Grid Hyperparameter Combination
 12,Joao Malva,2025-05-29 14:04,Testing Fusion w/ ResNet
 14,Joao Malva,2025-05-29 14:55,Mean&Std and Are&Perimeter w/ all 4 layers
+11,Joao Malva,2025-05-30 03:58,ResNet 18 - Layer Feature Fusion w/ 3 Fixed Extractors concatenaded and feed it in the same layer 

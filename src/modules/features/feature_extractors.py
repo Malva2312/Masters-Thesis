@@ -24,12 +24,16 @@ FEATURE_EXTRACTOR_CLASSES = {
 
     # Intensity features
     "entropy": Entropy,
-    "mean_std": MeanStd,
+    "mean" : MeanStd,
+    "std" : MeanStd,  # Alias for consistency
     "percentiles": Percentiles,
 
     # Shape features
-    "areaperimeter": AreaPerimeter,
-    "eccentricity_solidity": EccentricitySolidity,
+    "area": AreaPerimeter,
+    "perimeter": AreaPerimeter,  # Alias for consistency
+    "area_perimeter": AreaPerimeter,  # Alias for consistency
+    "eccentricity": EccentricitySolidity,
+    "solidity": EccentricitySolidity, # Alias for consistency
 
     # Texture features
     "glcm": GrayLevelCooccurrenceMatrix,
@@ -57,26 +61,42 @@ class FeatureExtractorManager:
         """
         Extract features from a batch of images (and optional masks).
         Returns a dict: {feature_name: torch.Tensor}
+        Avoids redundant calls for extractors with multiple aliases.
         """
         batch_size = images.shape[0]
         features_dict = {}
 
+        # Map extractor class to all names/aliases used
+        class_to_names = {}
         for name, extractor in zip(self.extractor_names, self.extractors):
+            cls = type(extractor)
+            if cls not in class_to_names:
+                class_to_names[cls] = []
+            class_to_names[cls].append(name)
+
+        # Only call each extractor once, then assign results to all aliases
+        called_extractors = {}
+        for extractor, names in zip(self.extractors, self.extractor_names):
+            cls = type(extractor)
+            if cls in called_extractors:
+                continue  # Already called this extractor
             try:
                 feat = extractor(images, masks)
             except TypeError:
                 feat = extractor(images)
-            if isinstance(feat, torch.Tensor):
-                feat = feat.view(batch_size, -1)
-                features_dict[name] = feat
-            elif isinstance(feat, dict):
-                for key, value in feat.items():
-                    if isinstance(value, torch.Tensor):
-                        value = value.view(batch_size, -1)
-                        features_dict[f"{name}_{key}"] = value
-                    else:
-                        raise ValueError(f"Unexpected type in dict: {type(value)}")
-            else:
-                raise ValueError(f"Unexpected feature type: {type(feat)}")
+            called_extractors[cls] = feat
+
+            # Assign features to all aliases for this extractor
+            for name in class_to_names[cls]:
+                if isinstance(feat, torch.Tensor):
+                    features_dict[name] = feat.view(batch_size, -1)
+                elif isinstance(feat, dict):
+                    for key, value in feat.items():
+                        if isinstance(value, torch.Tensor):
+                            features_dict[f"{name}_{key}"] = value.view(batch_size, -1)
+                        else:
+                            raise ValueError(f"Unexpected type in dict: {type(value)}")
+                else:
+                    raise ValueError(f"Unexpected feature type: {type(feat)}")
 
         return features_dict

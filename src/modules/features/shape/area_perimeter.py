@@ -2,15 +2,14 @@ import torch
 
 import numpy as np
 from scipy.ndimage import binary_erosion
-
 class AreaPerimeter:
     def __call__(self, masks: torch.Tensor) -> dict:
         """
-        Compute area and perimeter from a batch of binary masks.
+        Compute area, perimeter, and area/perimeter ratio from a batch of binary masks.
         Args:
             masks (torch.Tensor): Binary masks of shape (N, ...), where ... can be (H, W), (D, H, W), or (C, H, W).
         Returns:
-            dict: {'area': torch.Tensor, 'perimeter': torch.Tensor}, each of shape (N,)
+            dict: {'area': torch.Tensor, 'perimeter': torch.Tensor, 'area_per_perimeter': torch.Tensor}, each of shape (N,)
         """
         assert masks.dim() >= 3, "Masks must be at least 3D (N, ...)"
         device = masks.device
@@ -25,4 +24,10 @@ class AreaPerimeter:
             perimeter = np.logical_xor(mask_np, eroded).sum()
             perimeters.append(perimeter)
         perimeters = torch.tensor(perimeters, dtype=areas.dtype).to(device)
-        return {"area": areas, "perimeter": perimeters}
+        # Avoid division by zero
+        area_per_perimeter = areas.float() / (perimeters.float() + 1e-8)
+        return {
+            "area": areas,
+            "perimeter": perimeters,
+            "area_per_perimeter": area_per_perimeter
+        }

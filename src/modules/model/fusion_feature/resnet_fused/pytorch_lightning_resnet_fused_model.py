@@ -59,7 +59,8 @@ class PyTorchLightningResNetFusedModel(pytorch_lightning.LightningModule):
     def validation_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
         extracted_features = self.feature_extractor_manager(
-            images=data['image'].to(self.device)
+            images=data['image'].to(self.device),
+            masks=data.get('mask', None)
         )
         model_output = self.model(
             model_input=data['image'].to(self.device),
@@ -77,7 +78,8 @@ class PyTorchLightningResNetFusedModel(pytorch_lightning.LightningModule):
     def test_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
         extracted_features = self.feature_extractor_manager(
-            images=data['image'].to(self.device)
+            images=data['image'].to(self.device),
+            masks=data.get('mask', None)
         )
         model_output = self.model(
             model_input=data['image'].to(self.device),
@@ -89,7 +91,8 @@ class PyTorchLightningResNetFusedModel(pytorch_lightning.LightningModule):
         data, labels = batch[0], batch[1]
 
         extracted_features = self.feature_extractor_manager(
-            images=data['image'].to(self.device)
+            images=data['image'].to(self.device),
+            masks=data.get('mask', None)
         )
         model_output = self.model(
             model_input=data['image'].to(self.device),

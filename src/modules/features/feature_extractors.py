@@ -56,6 +56,8 @@ class FeatureExtractorManager:
                 raise ValueError(f"Unknown extractor name: {name}")
             self.extractors.append(extractor_class(**params))
             self.extractor_names.append(name)
+        
+        self.feature_dict = {}
 
     def __call__(self, images: torch.Tensor, masks: torch.Tensor = None) -> dict:
         """
@@ -99,4 +101,16 @@ class FeatureExtractorManager:
                 else:
                     raise ValueError(f"Unexpected feature type: {type(feat)}")
 
+        self.feature_dict = features_dict
         return features_dict
+
+    def to_vector(self) -> torch.Tensor:
+        """
+        Convert the extracted features to a single vector.
+        """
+        if not self.feature_dict:
+            raise ValueError("No features extracted. Call the extractor first.")
+        
+        # Concatenate all feature tensors into a single vector
+        feature_vectors = [feat.view(feat.size(0), -1) for key, feat in self.feature_dict.items() if key in self.extractor_names]
+        return torch.cat(feature_vectors, dim=1)

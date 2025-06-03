@@ -5,26 +5,6 @@ import torch
 from src.modules.model.standalone.linear_svm.linear_svm_model import LinearSVMModel
 from src.modules.loss_functions.hinge_loss_functions import HingeLossFunction
 
-# Texture features
-from src.modules.features.texture.lbp import LocalBinaryPattern
-from src.modules.features.texture.glcm import GrayLevelCooccurrenceMatrix
-
-# Frequency features
-from src.modules.features.frequency.fft import FastFourierTransform
-from src.modules.features.frequency.gabor import GaborFeature
-
-# Gradient features
-from src.modules.features.gradient.hog import HistogramOfOrientedGradients
-
-# Intensity features
-from src.modules.features.intensity.entropy import Entropy
-from src.modules.features.intensity.mean_std import MeanStd
-from src.modules.features.intensity.percentiles import Percentiles
-
-# Shape features
-from src.modules.features.shape.area_perimeter import AreaPerimeter
-from src.modules.features.shape.eccentricity_solidity import EccentricitySolidity
-
 from src.modules.features.feature_extractors import FeatureExtractorManager
 
 
@@ -37,14 +17,24 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
             criterion=self.config.svm_config.criterion,
             experiment_execution_paths=experiment_execution_paths
         )
+        
+        self.feature_extractor_manager = FeatureExtractorManager(config=self.config.svm_config)
+
+        # Use a dummy 32x32 image to determine the feature extractor output size
+        with torch.no_grad():
+            dummy_image = torch.zeros(1, 1, 32, 32)  # Assuming grayscale, shape: (batch, channel, height, width)
+            dummy_mask = torch.zeros(1, 1, 32, 32)
+            _ = self.feature_extractor_manager(dummy_image, dummy_mask)
+            dummy_features = self.feature_extractor_manager.to_vector()
+            self.config.svm_config.input_dim = dummy_features.shape[1]
+
 
         self.labels = None
         self.model = LinearSVMModel(input_dim=self.config.svm_config.input_dim)
         self.predicted_labels = None
         self.weighted_losses = None
-
-        self.feature_extractor_manager = FeatureExtractorManager(config=self.config.svm_config)
         
+
         self.to(torch.device(self.config.device))
 
     def configure_optimizers(self):
@@ -59,18 +49,14 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         self.weighted_losses = []
 
     def extract_features(self, images, masks=None):
-        #features = self.feature_extractor_manager(images, masks)
-
-        #return torch.cat(features, dim=1).to(self.device)
-        features = self.feature_extractor_manager(images, masks)
-
-        return features.to(self.device)
+        _ = self.feature_extractor_manager(images, masks)
+        return self.feature_extractor_manager.to_vector().to(self.device)
 
     def training_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
 
         # Extract features from all extractors
-        model_input = self.extract_features(data['image'])
+        model_input = self.extract_features(data['image'], masks=data.get('mask', None))
 
         model_output = self.model(model_input)
 
@@ -99,7 +85,7 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         data, labels = batch[0], batch[1]
 
         # Extract features from all extractors
-        model_input = self.extract_features(data['image'])
+        model_input = self.extract_features(data['image'], masks=data.get('mask', None))
 
         model_output = self.model(model_input)
         predicted_labels = torch.sign(model_output)
@@ -155,7 +141,7 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         data, labels = batch[0], batch[1]
 
         # Extract features from all extractors
-        model_input = self.extract_features(data['image'])
+        model_input = self.extract_features(data['image'], masks=data.get('mask', None))
 
         model_output = self.model(model_input)
         predicted_labels = torch.sign(model_output)

@@ -28,13 +28,6 @@ class ResNet_Fused_Model(nn.Module):
 
     def forward(self, data):
         model_input = data['image']  # (B, C, H, W)
-        aux_input = dict()  # Auxiliary inputs for feature fusion
-        for extractor in self.extractors:
-            #print(f"Processing extractor: {extractor['name']}")
-            name = extractor['name']
-            if name in data:
-                aux_input[name] = data[name]
-                #print(f"Added aux input for {name} with shape {data[name].shape}")
         # If input is grayscale, repeat channels to get 3 channels
         if model_input.shape[1] == 1:
             model_input = model_input.repeat(1, 3, 1, 1)
@@ -46,10 +39,10 @@ class ResNet_Fused_Model(nn.Module):
         x = self.resnet_model.model.relu(x)
         x = self.resnet_model.model.maxpool(x)
 
-        x = self._fuse_layer('layer1', self.resnet_model.model.layer1(x), aux_input)
-        x = self._fuse_layer('layer2', self.resnet_model.model.layer2(x), aux_input)
-        x = self._fuse_layer('layer3', self.resnet_model.model.layer3(x), aux_input)
-        x = self._fuse_layer('layer4', self.resnet_model.model.layer4(x), aux_input)
+        x = self._fuse_layer('layer1', self.resnet_model.model.layer1(x), data)
+        x = self._fuse_layer('layer2', self.resnet_model.model.layer2(x), data)
+        x = self._fuse_layer('layer3', self.resnet_model.model.layer3(x), data)
+        x = self._fuse_layer('layer4', self.resnet_model.model.layer4(x), data)
        
         x = self.resnet_model.model.avgpool(x)
         x = torch.flatten(x, 1)
@@ -67,7 +60,11 @@ class ResNet_Fused_Model(nn.Module):
             if name not in aux_input:
                 continue
 
-            aux = aux_input[name]  # (B, D)
+            aux = aux_input[name]  # (B, 1, H, W)
+            # Flatten spatial dimensions for projection
+            #print(f"Processing aux input: {name}, shape: {aux.shape}")
+            
+            aux = aux.view(aux.shape[0], -1)  # (B, H*W)
             if name not in self.projectors:
                 # Dynamically create projector for aux
                 input_dim = aux.shape[1]
@@ -78,7 +75,7 @@ class ResNet_Fused_Model(nn.Module):
 
             aux = aux.to(x.device)
             proj = self.projectors[name](aux)  # (B, 256)
-            print(f"Projector {name} output shape: {proj.shape}")
+            #print(f"Projector {name} output shape: {proj.shape}")
             proj = proj.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, x.shape[2], x.shape[3])  # (B, 256, H, W)
 
             # If needed, project to match x's channels

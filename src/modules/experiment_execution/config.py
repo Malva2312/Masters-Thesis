@@ -81,8 +81,7 @@ class ExperimentExecutionConfig:
                     "/nas-ctm01/datasets/private/LUCAS/LIDC_IDRI"
             else:
                 dataset_dir_path = (
-                    f"{dirname(abspath('')).split('/nas-ctm01')[0]}"
-                    f"/nas-ctm01/datasets/private/LUCAS/LIDC_IDRI"
+                    "C:\Users\janto\OneDrive\Ambiente de Trabalho\Dissertação\Masters-Thesis\data"
                 )
         elif config.data.dataset_name == "LUNA25":
             if dirname(abspath("")).startswith('/nas-ctm01'):

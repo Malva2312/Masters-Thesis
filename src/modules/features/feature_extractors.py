@@ -1,116 +1,118 @@
 import torch
-
-from src.modules.features.frequency.fft import FastFourierTransform
-from src.modules.features.frequency.gabor import GaborFeature
-from src.modules.features.gradient.hog import HistogramOfOrientedGradients
-from src.modules.features.intensity.entropy import Entropy
-from src.modules.features.intensity.mean_std import MeanStd
-from src.modules.features.intensity.percentiles import Percentiles
-from src.modules.features.shape.area_perimeter import AreaPerimeter
-from src.modules.features.shape.eccentricity_solidity import EccentricitySolidity
-from src.modules.features.texture.glcm import GrayLevelCooccurrenceMatrix
-#from src.modules.features.texture.glrlm import GLRLMFeature
-from src.modules.features.texture.lbp import LocalBinaryPattern
-import torch
-#from modules.features.keypoints.brief import BRIEFFeature
-
-FEATURE_EXTRACTOR_CLASSES = {
-    # Frequency features
-    "fft": FastFourierTransform,
-    "gabor": GaborFeature,
-    
-    # Gradient features
-    "hog": HistogramOfOrientedGradients,
-
-    # Intensity features
-    "entropy": Entropy,
-    "mean" : MeanStd,
-    "std" : MeanStd,  # Alias for consistency
-    "percentiles": Percentiles,
-
-    # Shape features
-    "area": AreaPerimeter,
-    "perimeter": AreaPerimeter,  # Alias for consistency
-    "area_perimeter": AreaPerimeter,  # Alias for consistency
-    "eccentricity": EccentricitySolidity,
-    "solidity": EccentricitySolidity, # Alias for consistency
-
-    # Texture features
-    "glcm": GrayLevelCooccurrenceMatrix,
-    "lbp": LocalBinaryPattern,
-
-    # Keypoints features
-    # "brief": BRIEFFeature,
-}
+from src.modules.features._2D.frequency.fft import FFTFeatureExtractor
+from src.modules.features._2D.frequency.gabor import Gabor
+from src.modules.features._2D.gradient.hog import HOGFeatureExtractor
+from src.modules.features._2D.intensity.entropy import Entropy
+from src.modules.features._2D.intensity.mean import Mean
+from src.modules.features._2D.intensity.std import StandardDeviation
+from src.modules.features._2D.shape.shape import ShapeFeatures2D
+from src.modules.features._2D.texture.glcm import GLCM
+from src.modules.features._2D.texture.lbp import LBP
 
 class FeatureExtractorManager:
-    def __init__(self, config):
-        self.extractors = []
-        self.extractor_names = []
-        
-        for extractor_cfg in config.get("extractors", []):
-            name = extractor_cfg["name"]
-            params = extractor_cfg.get("params", {})
-            extractor_class = FEATURE_EXTRACTOR_CLASSES.get(name)
-            if extractor_class is None:
-                raise ValueError(f"Unknown extractor name: {name}")
-            self.extractors.append(extractor_class(**params))
-            self.extractor_names.append(name)
-        
-        self.feature_dict = {}
+    """
+    Manages and applies all feature extractors to a batch of images and masks.
+    Returns a dictionary with feature names as keys and torch tensors as values.
+    """
 
-    def __call__(self, images: torch.Tensor, masks: torch.Tensor = None) -> dict:
+    def __init__(self):
+        self.fft_extractor = FFTFeatureExtractor()
+        #self.gabor_extractor = Gabor()
+        self.hog_extractor = HOGFeatureExtractor()
+        self.entropy_extractor = Entropy()
+        self.mean_extractor = Mean()
+        self.std_extractor = StandardDeviation()
+        self.shape_extractor = ShapeFeatures2D()
+        self.glcm_extractor = GLCM()
+        self.lbp_extractor = LBP()
+
+        # Shape feature keys to extract
+        self.shape_keys = [
+            'MeshSurface',
+            'Perimeter',
+            'PerimeterSurfaceRatio',
+            'Sphericity',
+            'SphericalDisproportion',
+            'Maximum2DDiameter'
+        ]
+
+    def __call__(self, images: torch.Tensor, masks: torch.Tensor):
         """
-        Extract features from a batch of images (and optional masks).
-        Returns a dict: {feature_name: torch.Tensor}
-        Avoids redundant calls for extractors with multiple aliases.
+        Args:
+            images: (B, H, W) torch.Tensor
+            masks: (B, H, W) torch.Tensor
+
+        Returns:
+            dict: {feature_name: torch.Tensor}
         """
+        features = {}
+
+        # FFT
+        fft_feats = self.fft_extractor(images, masks)
+        features['fft_magnitude'] = fft_feats['fft_magnitude']
+        features['fft_phase'] = fft_feats['fft_phase']
+
+        # Gabor
+        #gabor_feats = self.gabor_extractor.extract(images, masks)
+        #features['gabor'] = gabor_feats['gabor']
+
+        # HOG
+        hog_feats = self.hog_extractor(images, masks)
+        hog_tensor = torch.tensor(hog_feats['hog'], dtype=torch.float32)
+        features['hog'] = hog_tensor
+
+        # Entropy
+        entropy_feats = self.entropy_extractor(images, masks)
+        entropy_tensor = entropy_feats['entropy']
+        if not isinstance(entropy_tensor, torch.Tensor):
+            entropy_tensor = torch.tensor([entropy_tensor], dtype=torch.float32)
+        features['entropy'] = entropy_tensor if entropy_tensor.dim() > 0 else entropy_tensor.unsqueeze(0)
+
+        # Mean
+        mean_feats = self.mean_extractor(images, masks)
+        mean_tensor = mean_feats['mean']
+        if isinstance(mean_tensor, list):
+            mean_tensor = torch.tensor(mean_tensor, dtype=torch.float32)
+        else:
+            mean_tensor = torch.tensor([mean_tensor], dtype=torch.float32)
+        features['mean'] = mean_tensor
+
+        # Std
+        std_feats = self.std_extractor(images, masks)
+        std_tensor = std_feats['std']
+        if isinstance(std_tensor, torch.Tensor):
+            if std_tensor.dim() == 0:
+                std_tensor = std_tensor.unsqueeze(0)
+        else:
+            std_tensor = torch.tensor([std_tensor], dtype=torch.float32)
+        features['std'] = std_tensor
+
+        # Shape features
+        shape_feats = self.shape_extractor.extract(images, masks)
+        # shape_feats may be a dict with keys like 'MeshSurface_0', ... for batch
+        # We'll collect them into a tensor of shape (B, len(shape_keys))
         batch_size = images.shape[0]
-        features_dict = {}
-
-        # Map extractor class to all names/aliases used
-        class_to_names = {}
-        for name, extractor in zip(self.extractor_names, self.extractors):
-            cls = type(extractor)
-            if cls not in class_to_names:
-                class_to_names[cls] = []
-            class_to_names[cls].append(name)
-
-        # Only call each extractor once, then assign results to all aliases
-        called_extractors = {}
-        for extractor, names in zip(self.extractors, self.extractor_names):
-            cls = type(extractor)
-            if cls in called_extractors:
-                continue  # Already called this extractor
-            try:
-                feat = extractor(images, masks)
-            except TypeError:
-                feat = extractor(images)
-            called_extractors[cls] = feat
-
-            # Assign features to all aliases for this extractor
-            for name in class_to_names[cls]:
-                if isinstance(feat, torch.Tensor):
-                    features_dict[name] = feat.view(batch_size, -1)
-                elif isinstance(feat, dict):
-                    for key, value in feat.items():
-                        if isinstance(value, torch.Tensor):
-                            features_dict[f"{name}_{key}"] = value.view(batch_size, -1)
-                        else:
-                            raise ValueError(f"Unexpected type in dict: {type(value)}")
+        shape_tensor = torch.zeros((batch_size, len(self.shape_keys)), dtype=torch.float32)
+        for i in range(batch_size):
+            for j, key in enumerate(self.shape_keys):
+                # Try batch key, fallback to single key
+                batch_key = f"{key}_{i}"
+                if batch_key in shape_feats:
+                    val = shape_feats[batch_key]
+                elif key in shape_feats:
+                    val = shape_feats[key]
                 else:
-                    raise ValueError(f"Unexpected feature type: {type(feat)}")
+                    val = 0.0
+                shape_tensor[i, j] = float(val) if val is not None else 0.0
+        for idx, key in enumerate(self.shape_keys):
+            features[key] = shape_tensor[:, idx]
 
-        self.feature_dict = features_dict
-        return features_dict
+        # GLCM
+        glcm_feats = self.glcm_extractor(images, masks)
+        features['glcm'] = glcm_feats['glcm']
 
-    def to_vector(self) -> torch.Tensor:
-        """
-        Convert the extracted features to a single vector.
-        """
-        if not self.feature_dict:
-            raise ValueError("No features extracted. Call the extractor first.")
-        
-        # Concatenate all feature tensors into a single vector
-        feature_vectors = [feat.view(feat.size(0), -1) for key, feat in self.feature_dict.items() if key in self.extractor_names]
-        return torch.cat(feature_vectors, dim=1)
+        # LBP
+        lbp_feats = self.lbp_extractor(images, masks)
+        features['lbp'] = lbp_feats['lbp']
+
+        return features

@@ -17,7 +17,7 @@ class FeatureExtractorManager:
 
     def __init__(self):
         self.fft_extractor = FFTFeatureExtractor()
-        #self.gabor_extractor = Gabor()
+        self.gabor_extractor = Gabor()
         self.hog_extractor = HOGFeatureExtractor()
         self.entropy_extractor = Entropy()
         self.mean_extractor = Mean()
@@ -39,6 +39,7 @@ class FeatureExtractorManager:
         self.feature_dims = {
             'fft_magnitude': None,
             'fft_phase': None,
+            'gabor': None,
             'hog': None,
             'entropy': None,
             'mean': None,
@@ -58,6 +59,14 @@ class FeatureExtractorManager:
         features['fft_phase'] = fft_feats['fft_phase']
         self.feature_dims['fft_magnitude'] = features['fft_magnitude'].shape
         self.feature_dims['fft_phase'] = features['fft_phase'].shape
+
+        # Gabor
+        gabor_feats = self.gabor_extractor(images, masks)
+        gabor_tensor = gabor_feats['gabor']
+        if not isinstance(gabor_tensor, torch.Tensor):
+            gabor_tensor = torch.tensor(gabor_tensor, dtype=torch.float32)
+        features['gabor'] = gabor_tensor
+        self.feature_dims['gabor'] = gabor_tensor.shape
 
         # HOG
         hog_feats = self.hog_extractor(images, masks)

@@ -34,7 +34,7 @@ class Gabor:
         gb = np.exp(-0.5 * (x_theta**2 / sigma_x**2 + y_theta**2 / sigma_y**2)) * np.cos(2 * np.pi * frequency * x_theta)
         return torch.tensor(gb, dtype=torch.float32)
 
-    def extract(self, images: torch.Tensor, mask: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def __call__(self, images: torch.Tensor, mask: torch.Tensor) -> Dict[str, torch.Tensor]:
         """
         images: (B, 1, H, W) or (1, H, W) or (H, W)
         mask: (B, 1, H, W) or (1, H, W) or (H, W)
@@ -55,6 +55,7 @@ class Gabor:
             filtered = F.conv2d(images, kernel, padding=self.kernel_size//2)
             masked = filtered * mask
             mean_val = masked.sum(dim=[2,3]) / (mask.sum(dim=[2,3]) + 1e-8)
-            feature_list.append(mean_val.squeeze(-1).squeeze(-1))  # (B,)
-        features_tensor = torch.stack(feature_list, dim=1)  # (B, num_kernels)
+            mean_val = mean_val.view(mean_val.size(0), 1)  # Ensure shape (B, 1)
+            feature_list.append(mean_val)  # (B, 1)
+        features_tensor = torch.cat(feature_list, dim=1)  # (B, num_kernels)
         return {'gabor': features_tensor}

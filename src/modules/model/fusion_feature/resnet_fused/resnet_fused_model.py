@@ -73,8 +73,10 @@ class ResNet_Fused_Model(nn.Module):
                 if name not in self.projectors:
                     self.projectors[name] = nn.Sequential(
                         nn.Conv2d(1, 32, kernel_size=3, padding=1),
+                        nn.BatchNorm2d(32),
                         nn.ReLU(),
                         nn.Conv2d(32, 64, kernel_size=3, padding=1),
+                        nn.BatchNorm2d(64),
                         nn.ReLU()
                     ).to(x.device)
                 proj = self.projectors[name](aux)  # (B, 64, H, W)
@@ -84,8 +86,9 @@ class ResNet_Fused_Model(nn.Module):
                 aux = aux.view(B, -1)  # (B, H*W) = (B, 1)
                 if name not in self.projectors:
                     self.projectors[name] = nn.Sequential(
-                        nn.Linear(aux.shape[1], 256),
-                        nn.ReLU()
+                            nn.Linear(aux.shape[1], 256),
+                            nn.BatchNorm1d(256),
+                            nn.ReLU()
                     ).to(x.device)
                 proj = self.projectors[name](aux)  # (B, 256)
                 proj = proj.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, x.shape[2], x.shape[3])  # (B, 256, H, W)

@@ -4,7 +4,7 @@ import torch
 class ResNetModel(torch.nn.Module):
     def __init__(self, config):
         super(ResNetModel, self).__init__()
-        resnet_name = f"resnet{getattr(config.resnet_config, 'architecture', '50')}"
+        resnet_name = f"resnet{getattr(config.resnet_config, 'architecture', '18')}"
         resnet_fn = getattr(models, resnet_name)
         self.model = resnet_fn()
         self.model.fc = torch.nn.Linear(

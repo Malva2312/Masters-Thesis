@@ -2,7 +2,7 @@
 model_id: ${..model_id}
 model_name: ${..model_name}
 hyperparameters:
-  device: cuda
+  device: cpu
 
   optimiser:
     type: Adam #Maybe also try AdamW

@@ -23,7 +23,7 @@ finalization:
   save_used_data_file_names: True
 pytorch_lightning_model: ${..pytorch_lightning_model}
 pytorch_lightning_trainer_kwargs:
-  accelerator: gpu
+  accelerator: cpu
   enable_checkpointing: True
   enable_model_summary: False
   enable_progress_bar: False

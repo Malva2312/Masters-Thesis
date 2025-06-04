@@ -292,7 +292,7 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
         for key, value in features.items():
             if isinstance(value, torch.Tensor) and value.shape[0] == 1:
                 data[key] = value.squeeze(0)
-                if value.is_cuda != image.is_cuda:
+                if value.device != image.device:
                     data[key] = value.to(image.device)
             else:
                 data[key] = value

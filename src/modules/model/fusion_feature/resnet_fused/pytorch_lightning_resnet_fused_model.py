@@ -17,7 +17,6 @@ class PyTorchLightningResNetFusedModel(pytorch_lightning.LightningModule):
         )
 
         self.model = ResNet_Fused_Model(config=self.config)
-        self.feature_extractor_manager = FeatureExtractorManager(config=config.resnet_config)
 
         self.labels = None
         self.predicted_labels = None
@@ -31,73 +30,9 @@ class PyTorchLightningResNetFusedModel(pytorch_lightning.LightningModule):
         )
         return optimizer
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch):
         data, labels = batch[0], batch[1]
-
-        extracted_features = self.feature_extractor_manager(
-            images=data['image'].to(self.device)
-        )
-
-        model_output = self.model(
-            model_input=data['image'].to(self.device),
-            aux_input=extracted_features
-        )
-        loss = self.criterion(
-            logits=model_output,
-            targets=labels.to(self.device)
-        )
-        self.log(
-            "train_loss",
-            loss,
-            batch_size=data['image'].shape[0],
-            on_epoch=True,
-            on_step=False,
-            prog_bar=False
-        )
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        data, labels = batch[0], batch[1]
-        extracted_features = self.feature_extractor_manager(
-            images=data['image'].to(self.device),
-            masks=data.get('mask', None)
-        )
-        model_output = self.model(
-            model_input=data['image'].to(self.device),
-            aux_input=extracted_features
-        )
-        predicted_labels = torch.argmax(model_output, dim=1, keepdim=True)
-        loss = self.criterion(
-            logits=model_output,
-            targets=labels.to(self.device)
-        )
-        self.labels.append(labels)
-        self.predicted_labels.append(predicted_labels)
-        self.weighted_losses.append(loss * data['image'].shape[0])
-
-    def test_step(self, batch, batch_idx):
-        data, labels = batch[0], batch[1]
-        extracted_features = self.feature_extractor_manager(
-            images=data['image'].to(self.device),
-            masks=data.get('mask', None)
-        )
-        model_output = self.model(
-            model_input=data['image'].to(self.device),
-            aux_input=extracted_features
-        )
-        predicted_labels = torch.argmax(model_output, dim=1, keepdim=True)
-        self.labels.append(labels)
-        self.predicted_labels.append(predicted_labels)
-        data, labels = batch[0], batch[1]
-
-        extracted_features = self.feature_extractor_manager(
-            images=data['image'].to(self.device),
-            masks=data.get('mask', None)
-        )
-        model_output = self.model(
-            model_input=data['image'].to(self.device),
-            aux_input=extracted_features
-        )
+        model_output, labels = self.step(batch)
         loss = self.criterion(
             logits=model_output,
             targets=labels.to(self.device)
@@ -119,21 +54,11 @@ class PyTorchLightningResNetFusedModel(pytorch_lightning.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
-
-        extracted_features = self.feature_extractor_manager(
-            images=data['image'].to(self.device)
-        )
-        model_output = self.model(
-            model_input=data['image'].to(self.device),
-            aux_input=extracted_features
-        )
-        predicted_labels = torch.argmax(model_output, dim=1, keepdim=True)
+        model_output, labels = self.step(batch)
         loss = self.criterion(
             logits=model_output,
-            targets=labels.to(self.device)
+            targets=labels
         )
-        self.labels.append(labels)
-        self.predicted_labels.append(predicted_labels)
         self.weighted_losses.append(loss * data['image'].shape[0])
 
     def on_validation_epoch_end(self):
@@ -175,17 +100,7 @@ class PyTorchLightningResNetFusedModel(pytorch_lightning.LightningModule):
         self.predicted_labels = []
 
     def test_step(self, batch, batch_idx):
-        data, labels = batch[0], batch[1]
-        extracted_features = self.feature_extractor_manager(
-            images=data['image'].to(self.device)
-        )
-        model_output = self.model(
-            model_input=data['image'].to(self.device),
-            aux_input=extracted_features
-        )
-        predicted_labels = torch.argmax(model_output, dim=1, keepdim=True)
-        self.labels.append(labels)
-        self.predicted_labels.append(predicted_labels)
+        self.step(batch)
 
     def on_test_epoch_end(self):
         labels = torch.cat(self.labels, dim=0)
@@ -219,3 +134,13 @@ class PyTorchLightningResNetFusedModel(pytorch_lightning.LightningModule):
             on_step=False,
             prog_bar=False
         )
+
+    def step(self, batch):
+        data, labels = batch[0], batch[1]
+        data = {k : v.to(self.device)  for k, v in data.items() if isinstance(v, torch.Tensor) }
+        model_output = self.model(data)
+        predicted_labels = torch.argmax(model_output, dim=1, keepdim=True)
+        self.labels.append(labels)
+        self.predicted_labels.append(predicted_labels)
+
+        return model_output, labels

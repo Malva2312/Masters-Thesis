@@ -26,7 +26,15 @@ class ResNet_Fused_Model(nn.Module):
         self.fusion_convs = nn.ModuleDict()  # Optional: handle channel mismatches
 
 
-    def forward(self, model_input, aux_input=None):
+    def forward(self, data):
+        model_input = data['image']  # (B, C, H, W)
+        aux_input = dict()  # Auxiliary inputs for feature fusion
+        for extractor in self.extractors:
+            #print(f"Processing extractor: {extractor['name']}")
+            name = extractor['name']
+            if name in data:
+                aux_input[name] = data[name]
+                #print(f"Added aux input for {name} with shape {data[name].shape}")
         # If input is grayscale, repeat channels to get 3 channels
         if model_input.shape[1] == 1:
             model_input = model_input.repeat(1, 3, 1, 1)
@@ -70,6 +78,7 @@ class ResNet_Fused_Model(nn.Module):
 
             aux = aux.to(x.device)
             proj = self.projectors[name](aux)  # (B, 256)
+            print(f"Projector {name} output shape: {proj.shape}")
             proj = proj.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, x.shape[2], x.shape[3])  # (B, 256, H, W)
 
             # If needed, project to match x's channels

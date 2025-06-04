@@ -12,28 +12,36 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
     def __init__(self, config, experiment_execution_paths):
         super().__init__()
         self.config = config
+        self.extractors = self.config.svm_config.extractors
 
         self.criterion = HingeLossFunction(
             criterion=self.config.svm_config.criterion,
             experiment_execution_paths=experiment_execution_paths
         )
-        
-        self.feature_extractor_manager = FeatureExtractorManager(config=self.config.svm_config)
 
-        # Use a dummy 32x32 image to determine the feature extractor output size
-        with torch.no_grad():
-            dummy_image = torch.zeros(1, 1, 32, 32)  # Assuming grayscale, shape: (batch, channel, height, width)
-            dummy_mask = torch.zeros(1, 1, 32, 32)
-            _ = self.feature_extractor_manager(dummy_image, dummy_mask)
-            dummy_features = self.feature_extractor_manager.to_vector()
-            self.config.svm_config.input_dim = dummy_features.shape[1]
 
+        self.features_extractor = FeatureExtractorManager()
+        # Example: Call with dummy image to initialize feature extractors (if needed)
+        dummy_data =  torch.zeros(1, 32, 32)
+        dummy_mask = torch.zeros(1, 32, 32)  # Dummy mask if needed
+        self.features_extractor(dummy_data, dummy_mask)
+
+        self.input_dim = 0
+        for key, value in self.features_extractor.feature_dims.items():
+            if key in self.extractors:
+                # Ensure value is a tuple or list before converting to tensor
+                if isinstance(value, (list, tuple)):
+                    dim = int(torch.prod(torch.tensor(value)))
+                else:
+                    dim = int(value)
+                self.input_dim += dim
+        self.model = LinearSVMModel(input_dim=self.input_dim)
 
         self.labels = None
-        self.model = LinearSVMModel(input_dim=self.config.svm_config.input_dim)
         self.predicted_labels = None
         self.weighted_losses = None
-        
+
+        self.features_names = self.config.svm_config.extractors
 
         self.to(torch.device(self.config.device))
 
@@ -48,15 +56,10 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         self.predicted_labels = []
         self.weighted_losses = []
 
-    def extract_features(self, images, masks=None):
-        _ = self.feature_extractor_manager(images, masks)
-        return self.feature_extractor_manager.to_vector().to(self.device)
-
     def training_step(self, batch, batch_idx):
         data, labels = batch[0], batch[1]
 
-        # Extract features from all extractors
-        model_input = self.extract_features(data['image'], masks=data.get('mask', None))
+        model_input = self._prepare_model_input(data)
 
         model_output = self.model(model_input)
 
@@ -85,7 +88,7 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         data, labels = batch[0], batch[1]
 
         # Extract features from all extractors
-        model_input = self.extract_features(data['image'], masks=data.get('mask', None))
+        model_input = self._prepare_model_input(data)
 
         model_output = self.model(model_input)
         predicted_labels = torch.sign(model_output)
@@ -141,7 +144,7 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         data, labels = batch[0], batch[1]
 
         # Extract features from all extractors
-        model_input = self.extract_features(data['image'], masks=data.get('mask', None))
+        model_input = self._prepare_model_input(data)
 
         model_output = self.model(model_input)
         predicted_labels = torch.sign(model_output)
@@ -183,4 +186,19 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
             prog_bar=False
         )
 
-    
+    def _prepare_model_input(self, data):
+        # Move all relevant features to the correct device and concatenate them
+        features = []
+
+        for key in self.features_names:
+            feature = data[key]
+            if isinstance(feature, torch.Tensor):
+                features.append(feature.flatten(start_dim=1) if feature.dim() > 1 else feature.unsqueeze(1))
+            elif isinstance(feature, list):
+                tensor_feature = torch.tensor(feature).float().to(self.device)
+                features.append(tensor_feature.flatten().unsqueeze(0) if tensor_feature.dim() == 1 else tensor_feature.flatten(start_dim=1))
+            else:
+                features.append(torch.tensor([feature], device=self.device).float().unsqueeze(0))
+            
+        model_input = torch.cat(features, dim=1)
+        return model_input

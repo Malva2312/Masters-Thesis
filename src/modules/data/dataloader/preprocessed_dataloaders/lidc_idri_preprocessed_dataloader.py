@@ -9,6 +9,33 @@ import torchvision
 
 from src.modules.data.data_augmentation.ct_image_augmenter \
     import CTImageAugmenter
+from src.modules.features.feature_extractors import FeatureExtractorManager
+
+def custom_collate_fn(batch):
+    # batch = [(data, label), (data, label), ...]
+    file_names, data_dicts, labels = [], [], []
+    for item in batch:
+        if len(item) == 3:
+            file_name, data, label = item
+            file_names.append(file_name)
+        else:
+            data, label = item
+        data_dicts.append(data)
+        labels.append(label)
+
+    keys = data_dicts[0].keys()
+    batched_data = {}
+    for key in keys:
+        values = [d[key] for d in data_dicts]
+        try:
+            batched_data[key] = torch.stack(values)
+        except RuntimeError:
+            # Mantém como lista se não empilhável
+            batched_data[key] = values
+
+    if file_names:
+        return file_names, batched_data, torch.stack(labels)
+    return batched_data, torch.stack(labels)
 
 
 class LIDCIDRIPreprocessedKFoldDataLoader:
@@ -66,6 +93,9 @@ class LIDCIDRIPreprocessedKFoldDataLoader:
             generator=self.torch_generator,
             shuffle=True if subset_type == "train" else False,
             worker_init_fn=self._get_torch_dataloader_worker_init_fn,
+
+            collate_fn=custom_collate_fn,  # Use custom collate function
+
             **torch_dataloader_kwargs
         )
         return torch_dataloader
@@ -253,6 +283,17 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
             image=image,
             mask=mask
         )
+        
+        # Extract features and add them to data
+        feature_extractor = FeatureExtractorManager()
+        # Add batch dimension for feature extractor (expects (B, H, W))
+        features = feature_extractor(image, mask)
+        # Remove batch dimension from each feature and add to data dict
+        for key, value in features.items():
+            if isinstance(value, torch.Tensor) and value.shape[0] == 1:
+                data[key] = value.squeeze(0)
+            else:
+                data[key] = value
         return data
 
     def _get_labels(self, data_index):

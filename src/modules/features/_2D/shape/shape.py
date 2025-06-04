@@ -11,10 +11,10 @@ class ShapeFeatures2D:
         self.selected_features = [
             'MeshSurface',
             'Perimeter',
-            'PerimeterSurfaceRatio',
+            #'PerimeterSurfaceRatio',
             'Sphericity',
-            'SphericalDisproportion',
-            'Maximum2DDiameter'
+            #'SphericalDisproportion',
+            #'Maximum2DDiameter'
         ]
 
     def extract(self, images: torch.Tensor, masks: torch.Tensor) -> Dict[str, Any]:
@@ -34,11 +34,18 @@ class ShapeFeatures2D:
         img_np = image.cpu().numpy().astype(np.float32)
         mask_np = mask.cpu().numpy().astype(np.uint8)
 
+        # Check if mask is empty to avoid invalid calculations
+        if np.count_nonzero(mask_np) == 0:
+            # Return NaN or 0 for each selected feature if mask is empty
+            return {k: float('nan') for k in self.selected_features}
+
         img_sitk = sitk.GetImageFromArray(img_np)
         mask_sitk = sitk.GetImageFromArray(mask_np)
 
         shape_extractor = RadiomicsShape2D(img_sitk, mask_sitk)
-        shape_extractor.enableAllFeatures()
+        shape_extractor.disableAllFeatures()
+        for feature in self.selected_features:
+            shape_extractor.enableFeatureByName(feature)
         results = shape_extractor.execute()
         # Filter only the selected features
         features = {k: v for k, v in results.items() if k in self.selected_features}

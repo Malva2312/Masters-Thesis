@@ -21,22 +21,6 @@ hyperparameters:
       metadataframe: ${......data.metadataframe}
     optimiser: ${..optimiser}
 
-    extractors:
-      - name: LBP
-        params:
-          P: 8
-          R: 1
-          method: uniform
-      - name: HOG
-        params:
-          orientations: 9
-          pixels_per_cell: [8, 8]
-          cells_per_block: [2, 2]
-      - name: Gabor
-        params:
-          frequencies: [0.1, 0.2, 0.3]
-          thetas: [0, 45, 90, 135]
-
   # SVM parameters
   svm_config:
     input_dim: 2418 # number of features being tested
@@ -46,67 +30,52 @@ hyperparameters:
     #TODO: GRID of the following hyperparameters for LBP extraction (maybe not needed)
     # P: <value>
     # R: <value>
-    # method: <value>
+     # method: <value>
     extractors:
-      - name: entropy
-        params: {}
-      - name: mean_std
-        params: {}
-      - name: percentiles
-        params:
-          percentiles: [10, 25, 50, 75, 90]
-      - name: areaperimeter
-        params: {}
-      #- name: eccentricity_solidity
-      #  params: {}
-      - name: glcm
-        params:
-          distances: [1, 2, 3]
-          angles: [0, 45, 90, 135]
-      - name: lbp
-        params:
-          P: 8
-          R: 1
-          method: uniform
-      - name: fft
-        params: {}
-      - name: gabor
-        params:
-          frequencies: [0.1, 0.2, 0.3]
-          thetas: [0, 45, 90, 135]
-      - name: hog
-        params: {}
+      - fft_magnitude
+      - fft_phase
+      - gabor
+      - hog
+      - entropy
+      - mean
+      - std
+      - MeshSurface
+      - Perimeter
+      - Sphericity
+      - glcm
+      - lbp
 
-    # ResNet parameters
+  # ResNet parameters
   resnet_config:
     architecture: 18         # Options: 18, 34, 50, 101, 152, etc.
+    default_layer: layer3  # Options: layer1, layer2, layer3, layer4
     criterion:
       apply_weights: True
       device: ${...device}
       metadataframe: ${......data.metadataframe}
     optimiser: ${..optimiser}
-
-      # AlexNet parameters
-  alexnet_config:
-    criterion:
-      apply_weights: True
-      device: ${...device}
-      metadataframe: ${......data.metadataframe}
-    optimiser: ${..optimiser}
-
-  # VGG parameters
-  vgg_config:
-    architecture: 16         # Options: 11, 13, 16, 19, etc.
-    criterion:
-      apply_weights: True
-      device: ${...device}
-      metadataframe: ${......data.metadataframe}
-    optimiser: ${..optimiser}
-
-  # GoogLeNet parameters
-  googlenet_config:
-    criterion:
-      apply_weights: True
-      device: ${...device}
-      metadataframe: ${......data.metadataframe}
-    optimiser: ${..optimiser}
+    extractors:
+      - name: fft_magnitude
+        layer: layer1 # if none specified, it will use the default_layer
+      - name: fft_phase
+        layer: layer2 # if none specified, it will use the default_layer
+      - name: gabor
+        layer: layer3 # if none specified, it will use the default_layer
+      - name: hog
+        layer: layer4 # if none specified, it will use the default_layer
+      - name: entropy
+        layer: layer1
+      - name: mean
+        layer: layer2
+      - name: std
+        layer: layer3
+      - name: MeshSurface
+        layer: layer4
+      - name: Perimeter
+        layer: layer1
+      - name: Sphericity
+        layer: layer2
+      - name: glcm
+        layer: layer3
+      - name: lbp
+        layer: layer4

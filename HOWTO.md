@@ -24,6 +24,9 @@ Information Fusion-Based Model for Lung Nodule Characterization
     conda env remove --name lung_fusion_env
     ```
 
+    ```commandline
+    conda env update --name lung_fusion_env --file ./conda_env/conda_env.yaml --prune```
+
 2. **Replace the CSV Logger File**:
     - Navigate to the Conda environment's site-packages directory:
       `<template_venv_name>/lib/python3.11/site-packages/pytorch_lightning/loggers/`.

@@ -35,6 +35,14 @@ class FeatureExtractorManager:
             #'SphericalDisproportion',
             #'Maximum2DDiameter'
         ]
+        self.glcm_keys = [
+            'glcm_contrast',
+            'glcm_dissimilarity',
+            'glcm_homogeneity',
+            'glcm_energy',
+            'glcm_correlation',
+            'glcm_ASM'
+        ]
 
         self.feature_dims = {
             'fft_magnitude': None,
@@ -45,9 +53,11 @@ class FeatureExtractorManager:
             'mean': None,
             'std': None,
             'glcm': None,
-            'lbp': None,
+            'lbp': None
         }
         for key in self.shape_keys:
+            self.feature_dims[key] = None
+        for key in self.glcm_keys:
             self.feature_dims[key] = None
 
     def __call__(self, images: torch.Tensor, masks: torch.Tensor):
@@ -150,8 +160,9 @@ class FeatureExtractorManager:
             features[key] = feature
             self.feature_dims[key] = feature.shape
 
-        # GLCM
+        # GLCM and its properties
         glcm_feats = self.glcm_extractor(images, masks)
+        # Main GLCM tensor
         glcm_tensor = glcm_feats['glcm']
         if glcm_tensor.dim() == 2:
             glcm_tensor = glcm_tensor.unsqueeze(0)
@@ -159,6 +170,21 @@ class FeatureExtractorManager:
             glcm_tensor = glcm_tensor.unsqueeze(0).unsqueeze(-1)
         features['glcm'] = glcm_tensor
         self.feature_dims['glcm'] = glcm_tensor.shape
+
+        # Extract and format other GLCM properties
+
+        for prop in self.glcm_keys:
+            if prop in glcm_feats:
+                prop_tensor = glcm_feats[prop]
+            if not isinstance(prop_tensor, torch.Tensor):
+                prop_tensor = torch.tensor(prop_tensor, dtype=torch.float32)
+            # Ensure C, H, W format
+            if prop_tensor.dim() == 2:
+                prop_tensor = prop_tensor.unsqueeze(0)
+            elif prop_tensor.dim() == 1:
+                prop_tensor = prop_tensor.unsqueeze(0).unsqueeze(-1)
+            features[prop] = prop_tensor
+            self.feature_dims[prop] = prop_tensor.shape
 
         # LBP
         lbp_feats = self.lbp_extractor(images, masks)

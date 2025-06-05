@@ -31,10 +31,11 @@ class GLCM:
             assert masks.shape == images.shape
 
         glcm_features = []
+        glcm_matrices = []
+
         for i in range(images.shape[0]):
             img = images[i].cpu().numpy()
             img_u8 = img_as_ubyte((img - img.min()) / (img.ptp() + 1e-8))
-
             if masks is not None:
                 mask = masks[i].cpu().numpy().astype(bool)
                 img_u8 = img_u8 * mask
@@ -47,12 +48,23 @@ class GLCM:
                 symmetric=True,
                 normed=True
             )
-            feature_vec = []
-            for prop in self.props:
-                # Take the mean over all distances and angles
-                vals = graycoprops(glcm, prop)
-                feature_vec.append(np.mean(vals))
+
+            # Features
+            feature_vec = [np.mean(graycoprops(glcm, prop)) for prop in self.props]
             glcm_features.append(torch.tensor(feature_vec, dtype=torch.float32))
+
+            # Average GLCM matrix over distances and angles
+            glcm_avg = np.mean(glcm, axis=(2, 3))
+            glcm_matrices.append(torch.tensor(glcm_avg, dtype=torch.float32))
+
         result = torch.stack(glcm_features, dim=0)
-        return {"glcm": result}
-        
+        glcm_matrices = torch.stack(glcm_matrices, dim=0)  # (B, levels, levels)
+        return {
+            "glcm": glcm_matrices,
+            "glcm_contrast": result[:, 0],
+            "glcm_dissimilarity": result[:, 1],
+            "glcm_homogeneity": result[:, 2],
+            "glcm_energy": result[:, 3],
+            "glcm_correlation": result[:, 4],
+            "glcm_ASM": result[:, 5]
+        }

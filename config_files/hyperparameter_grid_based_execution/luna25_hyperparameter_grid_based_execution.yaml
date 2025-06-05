@@ -2,17 +2,59 @@ apply: True
 hyperparameter_combination:
   index: None
   used: None
-hyperparameter_grid:    
+hyperparameter_grid:
+  model.pytorch_lightning_model.hyperparameters.svm_config.extractors:
+    - 
+      - name: fft_magnitude
+    - 
+      - name: fft_phase
+    - 
+      - name: gabor
+    - 
+      - name: hog
+    - 
+      - name: entropy
+    - 
+      - name: mean
+    - 
+      - name: std
+    - 
+      - name: MeshSurface
+    - 
+      - name: Perimeter
+    - 
+      - name: Sphericity
+    - 
+      - name: glcm
+    - 
+      - name: lbp
+    - 
+      - name: glcm_contrast
+    - 
+      - name: glcm_dissimilarity
+    - 
+      - name: glcm_homogeneity
+    - 
+      - name: glcm_energy
+    - 
+      - name: glcm_correlation
+    - 
+      - name: glcm_ASM
+  model.pytorch_lightning_model.hyperparameters.resnet_config.default_layer:
+    - layer1
+    - layer2
+    - layer3
+    - layer4
   model.pytorch_lightning_model.hyperparameters.optimiser.kwargs.lr:
     - 0.001
-  #  - 0.0001
-  #  - 0.00001
+    - 0.0001
+    - 0.00001
   data.dataloader.torch_dataloader_kwargs.batch_size:
 #    - 16 # <-- this generate a error: the last batch only has 1 sample
     - 32
-  #  - 64
-  #  - 128
+    - 64
+    - 128
   seed_value:
     - 1
-  #  - 30
-  #  - 900
+    - 30
+    - 900

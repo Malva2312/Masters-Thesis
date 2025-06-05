@@ -14,7 +14,7 @@ hyperparameters:
   
   # EfficientNet parameters
   effnet_config:
-    architecture: b2
+    architecture: b0
     criterion:
       apply_weights: True
       device: ${...device}
@@ -23,7 +23,6 @@ hyperparameters:
 
   # SVM parameters
   svm_config:
-    input_dim: 2418 # number of features being tested
     #input_dim: 1024 # number of LBP features per image
     criterion: hinge
     optimiser: ${..optimiser}
@@ -33,17 +32,6 @@ hyperparameters:
      # method: <value>
     extractors:
       - fft_magnitude
-      - fft_phase
-      - gabor
-      - hog
-      - entropy
-      - mean
-      - std
-      - MeshSurface
-      - Perimeter
-      - Sphericity
-      - glcm
-      - lbp
 
   # ResNet parameters
   resnet_config:
@@ -56,26 +44,3 @@ hyperparameters:
     optimiser: ${..optimiser}
     extractors:
       - name: fft_magnitude
-        layer: layer1 # if none specified, it will use the default_layer
-      - name: fft_phase
-        layer: layer2 # if none specified, it will use the default_layer
-      - name: gabor
-        layer: layer3 # if none specified, it will use the default_layer
-      - name: hog
-        layer: layer4 # if none specified, it will use the default_layer
-      - name: entropy
-        layer: layer1
-      - name: mean
-        layer: layer2
-      - name: std
-        layer: layer3
-      - name: MeshSurface
-        layer: layer4
-      - name: Perimeter
-        layer: layer1
-      - name: Sphericity
-        layer: layer2
-      - name: glcm
-        layer: layer3
-      - name: lbp
-        layer: layer4

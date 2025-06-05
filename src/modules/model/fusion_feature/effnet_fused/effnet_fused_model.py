@@ -1,20 +1,20 @@
 import torch
-import torch.nn as nn
-from src.modules.model.standalone.resnet.resnet_model import ResNetModel
+from src.modules.model.standalone.efficientnet.efficientnet_model import EfficientNetModel
 
-class ResNet_Fused_Model(nn.Module):
-    
+import torch.nn as nn
+
+class EffNet_Fused_Model(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        self.resnet_model = ResNetModel(config)
+        self.effnet_model = EfficientNetModel(config)
 
         # Parse extractors from config
-        self.extractors = config.resnet_config.get('extractors', [])
-        self.default_layer = config.resnet_config.get('default_layer', 'layer3')
+        self.extractors = config.effnet_config.get('extractors', [])
+        self.default_layer = config.effnet_config.get('default_layer', 'blocks.5')
 
         # Track which extractor injects at which layer
-        self.layer_map = {}  # e.g., {"layer3": ["lbp", "rad"]}
+        self.layer_map = {}  # e.g., {"blocks.5": ["lbp", "rad"]}
 
         for extractor in self.extractors:
             name = extractor['name']
@@ -23,53 +23,42 @@ class ResNet_Fused_Model(nn.Module):
 
         # Projectors initialized on first forward call
         self.projectors = nn.ModuleDict()
-        self.fusion_convs = nn.ModuleDict()  # Optional: handle channel mismatches
-
+        self.fusion_convs = nn.ModuleDict()
 
     def forward(self, data):
-        model_input = data['image']  # (B, C, H, W)
-        # If input is grayscale, repeat channels to get 3 channels
+        model_input = data['image']
         if model_input.shape[1] == 1:
             model_input = model_input.repeat(1, 3, 1, 1)
 
-        # Forward through standard ResNet layers
-        # Model All Layers: odict_keys(['conv1', 'bn1', 'relu', 'maxpool', 'layer1', 'layer2', 'layer3', 'layer4', 'avgpool', 'fc'])
-        x = self.resnet_model.model.conv1(model_input)
-        x = self.resnet_model.model.bn1(x)
-        x = self.resnet_model.model.relu(x)
-        x = self.resnet_model.model.maxpool(x)
+        x = self.effnet_model.model.features[0](model_input)
+        for i, block in enumerate(self.effnet_model.model.features[1:]):
+            layer_name = f'blocks.{i}'
+            x = block(x)
+            x = self._fuse_layer(layer_name, x, data)
 
-        x = self._fuse_layer('layer1', self.resnet_model.model.layer1(x), data)
-        x = self._fuse_layer('layer2', self.resnet_model.model.layer2(x), data)
-        x = self._fuse_layer('layer3', self.resnet_model.model.layer3(x), data)
-        x = self._fuse_layer('layer4', self.resnet_model.model.layer4(x), data)
-       
-        x = self.resnet_model.model.avgpool(x)
+        x = self.effnet_model.model.avgpool(x)
         x = torch.flatten(x, 1)
-        x = self.resnet_model.model.fc(x)
-
+        x = self.effnet_model.model.classifier(x)
         return x
 
     def _fuse_layer(self, layer_name, x, aux_input):
         if aux_input is None or layer_name not in self.layer_map:
             return x
 
-        proj_list = [x]  # Start with the main ResNet feature map
-
+        proj_list = [x]
         for name in self.layer_map[layer_name]:
             if name not in aux_input:
                 continue
 
-            aux = aux_input[name]  # Expected shape: (B, H, W)
+            aux = aux_input[name]
             if aux.ndim != 3:
                 raise ValueError(f"Expected aux input '{name}' to have shape (B, H, W), got {aux.shape}")
 
             aux = aux.to(x.device)
             B, H, W = aux.shape
 
-            # Spatial features: apply Conv2d
             if H > 1 and W > 1:
-                aux = aux.unsqueeze(1)  # (B, 1, H, W)
+                aux = aux.unsqueeze(1)
                 if name not in self.projectors:
                     self.projectors[name] = nn.Sequential(
                         nn.Conv2d(1, 32, kernel_size=3, padding=1),
@@ -79,21 +68,18 @@ class ResNet_Fused_Model(nn.Module):
                         nn.BatchNorm2d(64),
                         nn.ReLU()
                     ).to(x.device)
-                proj = self.projectors[name](aux)  # (B, 64, H, W)
-
-            # Flat/global features: use Linear
+                proj = self.projectors[name](aux)
             else:
-                aux = aux.view(B, -1)  # (B, H*W) = (B, 1)
+                aux = aux.view(B, -1)
                 if name not in self.projectors:
                     self.projectors[name] = nn.Sequential(
-                            nn.Linear(aux.shape[1], 256),
-                            nn.BatchNorm1d(256),
-                            nn.ReLU()
+                        nn.Linear(aux.shape[1], 256),
+                        nn.BatchNorm1d(256),
+                        nn.ReLU()
                     ).to(x.device)
-                proj = self.projectors[name](aux)  # (B, 256)
-                proj = proj.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, x.shape[2], x.shape[3])  # (B, 256, H, W)
+                proj = self.projectors[name](aux)
+                proj = proj.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, x.shape[2], x.shape[3])
 
-            # Match ResNet branch channels if needed
             if proj.shape[1] != x.shape[1]:
                 fusion_key = f"{layer_name}_{name}"
                 if fusion_key not in self.fusion_convs:
@@ -106,14 +92,12 @@ class ResNet_Fused_Model(nn.Module):
 
             proj_list.append(proj)
 
-        # Multi-branch fusion (ResNet + all aux branches)
         if len(proj_list) > 1:
-            # Ensure all tensors have the same spatial size as x
             target_h, target_w = x.shape[2], x.shape[3]
             proj_list_resized = []
             for p in proj_list:
                 if p.shape[2] != target_h or p.shape[3] != target_w:
-                    p = torch.nn.functional.interpolate(p, size=(target_h, target_w), mode='bilinear', align_corners=False)
+                    p = torch.nn.functional.interpolate(p, size=(target_h, target_w), mode='nearest')
                 proj_list_resized.append(p)
             fusion_key = f"{layer_name}_multi"
             total_channels = sum(p.shape[1] for p in proj_list_resized)

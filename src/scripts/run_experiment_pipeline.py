@@ -7,6 +7,7 @@ import sys
 sys.path.append(abspath(join(dirname('.'), "../../")))
 from src.modules.experiment_execution import setup
 setup.disable_warning_messages()
+setup.enforce_deterministic_behavior()
 setup.set_precision(level="high")
 
 from src.modules.data.dataloader.preprocessed_dataloader \

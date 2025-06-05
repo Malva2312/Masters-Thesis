@@ -35,6 +35,14 @@ class FeatureExtractorManager:
             #'SphericalDisproportion',
             #'Maximum2DDiameter'
         ]
+        self.glcm_keys = [
+            'glcm_contrast',
+            'glcm_dissimilarity',
+            'glcm_homogeneity',
+            'glcm_energy',
+            'glcm_correlation',
+            'glcm_ASM'
+        ]
 
         self.feature_dims = {
             'fft_magnitude': None,
@@ -45,9 +53,11 @@ class FeatureExtractorManager:
             'mean': None,
             'std': None,
             'glcm': None,
-            'lbp': None,
+            'lbp': None
         }
         for key in self.shape_keys:
+            self.feature_dims[key] = None
+        for key in self.glcm_keys:
             self.feature_dims[key] = None
 
     def __call__(self, images: torch.Tensor, masks: torch.Tensor):
@@ -65,12 +75,22 @@ class FeatureExtractorManager:
         gabor_tensor = gabor_feats['gabor']
         if not isinstance(gabor_tensor, torch.Tensor):
             gabor_tensor = torch.tensor(gabor_tensor, dtype=torch.float32)
+        # Ensure C, H, W format
+        if gabor_tensor.dim() == 2:
+            gabor_tensor = gabor_tensor.unsqueeze(0)
+        elif gabor_tensor.dim() == 1:
+            gabor_tensor = gabor_tensor.unsqueeze(0).unsqueeze(-1)
         features['gabor'] = gabor_tensor
         self.feature_dims['gabor'] = gabor_tensor.shape
 
         # HOG
         hog_feats = self.hog_extractor(images, masks)
         hog_tensor = torch.tensor(hog_feats['hog'], dtype=torch.float32)
+        # Ensure C, H, W format
+        if hog_tensor.dim() == 2:
+            hog_tensor = hog_tensor.unsqueeze(0)
+        elif hog_tensor.dim() == 1:
+            hog_tensor = hog_tensor.unsqueeze(0).unsqueeze(-1)
         features['hog'] = hog_tensor
         self.feature_dims['hog'] = hog_tensor.shape
 
@@ -79,8 +99,15 @@ class FeatureExtractorManager:
         entropy_tensor = entropy_feats['entropy']
         if not isinstance(entropy_tensor, torch.Tensor):
             entropy_tensor = torch.tensor([entropy_tensor], dtype=torch.float32)
-        features['entropy'] = entropy_tensor if entropy_tensor.dim() > 0 else entropy_tensor.unsqueeze(0)
-        self.feature_dims['entropy'] = features['entropy'].shape
+        if entropy_tensor.dim() == 0:
+            entropy_tensor = entropy_tensor.unsqueeze(0)
+        # Ensure C, H, W format
+        if entropy_tensor.dim() == 1:
+            entropy_tensor = entropy_tensor.unsqueeze(-1)
+        if entropy_tensor.dim() == 2:
+            entropy_tensor = entropy_tensor.unsqueeze(0)
+        features['entropy'] = entropy_tensor
+        self.feature_dims['entropy'] = entropy_tensor.shape
 
         # Mean
         mean_feats = self.mean_extractor(images, masks)
@@ -89,6 +116,11 @@ class FeatureExtractorManager:
             mean_tensor = torch.tensor(mean_tensor, dtype=torch.float32)
         else:
             mean_tensor = torch.tensor([mean_tensor], dtype=torch.float32)
+        # Ensure C, H, W format
+        if mean_tensor.dim() == 1:
+            mean_tensor = mean_tensor.unsqueeze(-1)
+        if mean_tensor.dim() == 2:
+            mean_tensor = mean_tensor.unsqueeze(0)
         features['mean'] = mean_tensor
         self.feature_dims['mean'] = mean_tensor.shape
 
@@ -100,6 +132,11 @@ class FeatureExtractorManager:
                 std_tensor = std_tensor.unsqueeze(0)
         else:
             std_tensor = torch.tensor([std_tensor], dtype=torch.float32)
+        # Ensure C, H, W format
+        if std_tensor.dim() == 1:
+            std_tensor = std_tensor.unsqueeze(-1)
+        if std_tensor.dim() == 2:
+            std_tensor = std_tensor.unsqueeze(0)
         features['std'] = std_tensor
         self.feature_dims['std'] = std_tensor.shape
 
@@ -117,24 +154,52 @@ class FeatureExtractorManager:
                 else:
                     val = 0.0
                 shape_tensor[i, j] = float(val) if val is not None else 0.0
+        # Each shape feature as (C=1, H=batch_size, W=1)
         for idx, key in enumerate(self.shape_keys):
-            features[key] = shape_tensor[:, idx]
-            self.feature_dims[key] = features[key].shape
+            feature = shape_tensor[:, idx].unsqueeze(0).unsqueeze(-1)
+            features[key] = feature
+            self.feature_dims[key] = feature.shape
 
-        # GLCM
+        # GLCM and its properties
         glcm_feats = self.glcm_extractor(images, masks)
-        features['glcm'] = glcm_feats['glcm']
-        self.feature_dims['glcm'] = features['glcm'].shape
+        # Main GLCM tensor
+        glcm_tensor = glcm_feats['glcm']
+        if glcm_tensor.dim() == 2:
+            glcm_tensor = glcm_tensor.unsqueeze(0)
+        elif glcm_tensor.dim() == 1:
+            glcm_tensor = glcm_tensor.unsqueeze(0).unsqueeze(-1)
+        features['glcm'] = glcm_tensor
+        self.feature_dims['glcm'] = glcm_tensor.shape
+
+        # Extract and format other GLCM properties
+
+        for prop in self.glcm_keys:
+            if prop in glcm_feats:
+                prop_tensor = glcm_feats[prop]
+            if not isinstance(prop_tensor, torch.Tensor):
+                prop_tensor = torch.tensor(prop_tensor, dtype=torch.float32)
+            # Ensure C, H, W format
+            if prop_tensor.dim() == 2:
+                prop_tensor = prop_tensor.unsqueeze(0)
+            elif prop_tensor.dim() == 1:
+                prop_tensor = prop_tensor.unsqueeze(0).unsqueeze(-1)
+            features[prop] = prop_tensor
+            self.feature_dims[prop] = prop_tensor.shape
 
         # LBP
         lbp_feats = self.lbp_extractor(images, masks)
-        features['lbp'] = lbp_feats['lbp']
-        self.feature_dims['lbp'] = features['lbp'].shape
+        lbp_tensor = lbp_feats['lbp']
+        if lbp_tensor.dim() == 2:
+            lbp_tensor = lbp_tensor.unsqueeze(0)
+        elif lbp_tensor.dim() == 1:
+            lbp_tensor = lbp_tensor.unsqueeze(0).unsqueeze(-1)
+        features['lbp'] = lbp_tensor
+        self.feature_dims['lbp'] = lbp_tensor.shape
+
         # Replace NaN values with 0 and print a warning if any NaNs are found
         nan_found = False
         for key, tensor in features.items():
             if isinstance(tensor, torch.Tensor) and torch.isnan(tensor).any():
                 features[key] = torch.nan_to_num(tensor, nan=0.0)
                 nan_found = True
-                #print(f"Warning: NaN values found in feature '{key}'. Replaced with 0.")
         return features

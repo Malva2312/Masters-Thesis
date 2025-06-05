@@ -26,7 +26,7 @@ def enforce_deterministic_behavior():
     os.environ['CUBLAS_WORKSPACE_CONFIG'] = ":4096:8"
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-    torch.use_deterministic_algorithms(True)
+    torch.use_deterministic_algorithms(True, warn_only=True)
 
 def disable_warning_messages():
     os.environ['NO_ALBUMENTATIONS_UPDATE'] = "1"

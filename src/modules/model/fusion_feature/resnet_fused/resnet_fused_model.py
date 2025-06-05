@@ -113,7 +113,7 @@ class ResNet_Fused_Model(nn.Module):
             proj_list_resized = []
             for p in proj_list:
                 if p.shape[2] != target_h or p.shape[3] != target_w:
-                    p = torch.nn.functional.interpolate(p, size=(target_h, target_w), mode='bilinear', align_corners=False)
+                    p = torch.nn.functional.interpolate(p, size=(target_h, target_w), mode='nearest')
                 proj_list_resized.append(p)
             fusion_key = f"{layer_name}_multi"
             total_channels = sum(p.shape[1] for p in proj_list_resized)

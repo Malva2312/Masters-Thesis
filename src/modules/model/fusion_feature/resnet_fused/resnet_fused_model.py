@@ -56,44 +56,27 @@ class ResNet_Fused_Model(nn.Module):
 
         proj_list = [x]  # Start with the main ResNet feature map
 
-        for name in self.layer_map[layer_name]:
+        for name in self.layer_map[layer_name]: # for each extractor vector (B, 1, N) -> B(B, 1, H * W) -> (B, 1, H, W) -> (B, C, H, W)
             if name not in aux_input:
                 continue
 
-            aux = aux_input[name]  # Expected shape: (B, H, W)
-            if aux.ndim != 3:
-                raise ValueError(f"Expected aux input '{name}' to have shape (B, H, W), got {aux.shape}")
+            aux = aux_input[name]  # Expected shape: (B, 1, N) # N is the extractor feature dimension
+            if aux.ndim != 3 or aux.shape[1] != 1:
+                raise ValueError(f"Expected aux input '{name}' to have shape (B, 1, N), got {aux.shape}")
 
             aux = aux.to(x.device)
-            B, H, W = aux.shape
+            B, _, N = aux.shape
 
-            # Spatial features: apply Conv2d
-            if H > 1 and W > 1:
-                aux = aux.unsqueeze(1)  # (B, 1, H, W)
-                if name not in self.projectors:
-                    self.projectors[name] = nn.Sequential(
-                        nn.Conv2d(1, 32, kernel_size=3, padding=1),
-                        nn.BatchNorm2d(32),
-                        nn.ReLU(),
-                        nn.Conv2d(32, 64, kernel_size=3, padding=1),
-                        nn.BatchNorm2d(64),
+            if name not in self.projectors:
+                self.projectors[name] = nn.Sequential(
+                        nn.Linear(aux.shape[-1], x.shape[-1] * x.shape[-2]),
+                        nn.BatchNorm1d( x.shape[-1] * x.shape[-2]),
                         nn.ReLU()
-                    ).to(x.device)
-                proj = self.projectors[name](aux)  # (B, 64, H, W)
+                ).to(x.device)
+            proj = self.projectors[name](aux)  # (B, 1, H * W) # H * W == Net Layer Dim
+            proj = proj.unsqueeze(-1).unsqueeze(-1).expand(-1, -1,  x.shape[-2],  x.shape[-1])  # (B, 1, H, W)
 
-            # Flat/global features: use Linear
-            else:
-                aux = aux.view(B, -1)  # (B, H*W) = (B, 1)
-                if name not in self.projectors:
-                    self.projectors[name] = nn.Sequential(
-                            nn.Linear(aux.shape[1], 256),
-                            nn.BatchNorm1d(256),
-                            nn.ReLU()
-                    ).to(x.device)
-                proj = self.projectors[name](aux)  # (B, 256)
-                proj = proj.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, x.shape[2], x.shape[3])  # (B, 256, H, W)
-
-            # Match ResNet branch channels if needed
+            # Reshape # Match ResNet branch channels if needed
             if proj.shape[1] != x.shape[1]:
                 fusion_key = f"{layer_name}_{name}"
                 if fusion_key not in self.fusion_convs:
@@ -102,28 +85,15 @@ class ResNet_Fused_Model(nn.Module):
                         out_channels=x.shape[1],
                         kernel_size=1
                     ).to(x.device)
-                proj = self.fusion_convs[fusion_key](proj)
+                proj = self.fusion_convs[fusion_key](proj) # (B, C, H, W)
 
             proj_list.append(proj)
 
         # Multi-branch fusion (ResNet + all aux branches)
         if len(proj_list) > 1:
-            # Ensure all tensors have the same spatial size as x
-            target_h, target_w = x.shape[2], x.shape[3]
-            proj_list_resized = []
-            for p in proj_list:
-                if p.shape[2] != target_h or p.shape[3] != target_w:
-                    p = torch.nn.functional.interpolate(p, size=(target_h, target_w), mode='bilinear', align_corners=False)
-                proj_list_resized.append(p)
-            fusion_key = f"{layer_name}_multi"
-            total_channels = sum(p.shape[1] for p in proj_list_resized)
-            if fusion_key not in self.fusion_convs:
-                self.fusion_convs[fusion_key] = nn.Conv2d(
-                    in_channels=total_channels,
-                    out_channels=x.shape[1],
-                    kernel_size=1
-                ).to(x.device)
-            x = self.fusion_convs[fusion_key](torch.cat(proj_list_resized, dim=1))
+            x = proj_list[0]
+            for proj in proj_list[1:]:
+                x = x + proj # add alpha fusion as treinable parameter
         else:
             x = proj_list[0]
 

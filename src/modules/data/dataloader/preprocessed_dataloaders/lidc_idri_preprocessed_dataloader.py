@@ -10,6 +10,13 @@ import torchvision
 from src.modules.data.data_augmentation.ct_image_augmenter \
     import CTImageAugmenter
 from src.modules.features.feature_extractors import FeatureExtractorManager
+import os
+
+def nested_defaultdict():
+    return defaultdict(list)
+
+def transpose_if_3d(x):
+    return numpy.transpose(x, axes=(1, 2, 0)) if x.ndim == 3 else x
 
 def custom_collate_fn(batch):
     # batch = [(data, label), (data, label), ...]
@@ -57,7 +64,7 @@ class LIDCIDRIPreprocessedKFoldDataLoader:
         self.dataloaders = defaultdict(list)
         self.dataloaders_by_subset = defaultdict(list)
         self.data_names_by_subset = defaultdict(list)
-        self.data_splits = defaultdict(lambda: defaultdict(list))
+        self.data_splits = defaultdict(nested_defaultdict)
         self.load_data_name = load_data_name
         self.torch_generator = torch.Generator()
 
@@ -90,7 +97,6 @@ class LIDCIDRIPreprocessedKFoldDataLoader:
                 load_data_name=self.load_data_name,
                 subset_type=subset_type
             ),
-            generator=self.torch_generator,
             shuffle=True if subset_type == "train" else False,
             worker_init_fn=self._get_torch_dataloader_worker_init_fn,
 
@@ -233,15 +239,13 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
                 parameters=config.data_augmentation.parameters
             )
         self.image_transformer = torchvision.transforms.Compose([
-            lambda x: numpy.transpose(x, axes=(1, 2, 0))
-                if x.ndim == 3 else x,
+            transpose_if_3d,
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize(mean=0.5, std=0.5),
         ])
         self.lnva_names = config.lnva_names
         self.mask_transformer = torchvision.transforms.Compose([
-            lambda x: numpy.transpose(x, axes=(1, 2, 0))
-                if x.ndim == 3 else x,
+            transpose_if_3d,
             torchvision.transforms.ToTensor(),
         ])
 
@@ -283,19 +287,36 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
             image=image,
             mask=mask
         )
-        
-        # Extract features and add them to data
-        feature_extractor = FeatureExtractorManager()
-        # Add batch dimension for feature extractor (expects (B, H, W))
-        features = feature_extractor(image, mask)
-        # Remove batch dimension from each feature and add to data dict
-        for key, value in features.items():
-            if isinstance(value, torch.Tensor) and value.shape[0] == 1:
-                data[key] = value.squeeze(0)
-                if value.device != image.device:
-                    data[key] = value.to(image.device)
-            else:
+        # Path to the handcrafted features directory
+        # Get the path to the handcrafted_features directory relative to the script folder
+        handcrafted_features_dir = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\data\\features"
+        # Ensure handcrafted_features_dir exists before proceeding
+        os.makedirs(handcrafted_features_dir, exist_ok=True)
+        feature_file_path = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\data\\features\\{}.pt".format(
+            self.file_names[data_index]
+        )
+
+        if os.path.exists(feature_file_path):
+            # Load handcrafted features if they exist
+            handcrafted_features = torch.load(feature_file_path)
+            for key, value in handcrafted_features.items():
                 data[key] = value
+        else:
+            # Compute and store handcrafted features
+            feature_extractor = FeatureExtractorManager()
+            features = feature_extractor(image, mask)
+            # Remove batch dimension from each feature and add to data dict
+            for key, value in features.items():
+                if isinstance(value, torch.Tensor) and value.shape[0] == 1:
+                    data[key] = value.squeeze(0)
+                    if value.device != image.device:
+                        data[key] = value.to(image.device)
+                else:
+                    data[key] = value
+
+            # Save the handcrafted features to a file
+            torch.save(handcrafted_features, feature_file_path)
+
         return data
 
     def _get_labels(self, data_index):

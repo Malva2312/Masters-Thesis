@@ -16,7 +16,12 @@ Information Fusion-Based Model for Lung Nodule Characterization
     ```commandline
     conda activate lung_fusion_env
     ```
-
+    
+    [OPTIONAL] To update the created Conda virtual environment, execute:
+   ```commandline
+   conda env update --name lung_fusion_env --file ./conda_env/conda_env.yaml --prune
+   ```
+   
     [OPTIONAL] To remove the created Conda virtual environment, execute:
 
     ```commandline
@@ -24,12 +29,12 @@ Information Fusion-Based Model for Lung Nodule Characterization
     conda env remove --name lung_fusion_env
     ```
 
-2. **Replace the CSV Logger File**:
+3. **Replace the CSV Logger File**:
     - Navigate to the Conda environment's site-packages directory:
       `<template_venv_name>/lib/python3.11/site-packages/pytorch_lightning/loggers/`.
     - Replace the `csv_logs.py` file with the provided version located at `src/files_to_replace/csv_logs.py`.
 
-3. **Prepare the Data**:
+4. **Prepare the Data**:
     - If running locally:
       1. Navigate to the `data` directory in your project.
       2. Unzip the `data.zip` file located in the `data` directory.
@@ -50,7 +55,7 @@ Information Fusion-Based Model for Lung Nodule Characterization
         - Sync the local project directory with the remote server using a tool like WinSCP (for example):
         - Ensure the data is available on the remote server.
 
-4. **Run the Experiment Pipeline**:
+5. **Run the Experiment Pipeline**:
     - For remote execution, use the provided Slurm shell script:
       ```commandline
       sbatch ./slurm_files/shell_script_files/run_experiment_pipeline_job.sh

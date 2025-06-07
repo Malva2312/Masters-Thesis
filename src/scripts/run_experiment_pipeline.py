@@ -23,6 +23,8 @@ from src.modules.results_analysis.model_training_performance_metrics_figure \
     import ModelTrainingPerformanceMetricsFigure
 from src.modules.results_analysis.model_test_performance_metrics_dataframe \
     import ModelTestPerformanceMetricsDataframe
+import shutil
+import os
 experiment_execution_prints = ExperimentExecutionPrints()
 
 
@@ -168,5 +170,9 @@ def run_experiment_pipeline(config):
     experiment_execution_datetimes.save()
 
 if __name__ == "__main__":
+    handcrafted_features_dir = "/nas-ctm01/homes/jmalva/Masters-Thesis/data/features"
+    #if os.path.exists(handcrafted_features_dir):
+    #    shutil.rmtree(handcrafted_features_dir)
+    #    print(f"Removed directory: {handcrafted_features_dir}")
     run_hyperparameter_grid_based_execution_pipeline()
 

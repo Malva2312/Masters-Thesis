@@ -30,7 +30,7 @@ class FeatureExtractorManager:
         #self.mean_extractor = Mean()
         #self.std_extractor = StandardDeviation()
         self.lbp_extractor = LBP()
-        self.wavelet_extractor = Wavelet()
+        #self.wavelet_extractor = Wavelet()
         self.fof_extractor = FirstOrderFeatures2D()
         self.haralick_extractor = Haralick()
 

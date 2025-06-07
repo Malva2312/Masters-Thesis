@@ -3,48 +3,10 @@ hyperparameter_combination:
   index: None
   used: None
 hyperparameter_grid:
-  model.pytorch_lightning_model.hyperparameters.svm_config.extractors:
-    - 
-      - name: fft_magnitude
-    - 
-      - name: fft_phase
-    - 
-      - name: gabor
-    - 
-      - name: hog
-    - 
-      - name: entropy
-    - 
-      - name: mean
-    - 
-      - name: std
-    - 
-      - name: MeshSurface
-    - 
-      - name: Perimeter
-    - 
-      - name: Sphericity
-    - 
-      - name: glcm
-    - 
-      - name: lbp
-    - 
-      - name: glcm_contrast
-    - 
-      - name: glcm_dissimilarity
-    - 
-      - name: glcm_homogeneity
-    - 
-      - name: glcm_energy
-    - 
-      - name: glcm_correlation
-    - 
-      - name: glcm_ASM
-  model.pytorch_lightning_model.hyperparameters.resnet_config.default_layer:
-    - layer1
-    - layer2
-    - layer3
-    - layer4
+  seed_value:
+    - 1
+    - 30
+    - 900
   model.pytorch_lightning_model.hyperparameters.optimiser.kwargs.lr:
     - 0.001
     - 0.0001
@@ -54,7 +16,22 @@ hyperparameter_grid:
     - 32
     - 64
     - 128
-  seed_value:
-    - 1
-    - 30
-    - 900
+
+  model.pytorch_lightning_model.hyperparameters.resnet_config.extractors:
+    - 
+      - name: shape
+    -
+      - name: gabor
+    -
+      - name: hog
+    -
+      - name: lbp
+    -
+      - name: fof
+    -
+      - name: haralick
+  model.pytorch_lightning_model.hyperparameters.resnet_config.default_layer:
+    - layer1
+    - layer2
+    - layer3
+    - layer4

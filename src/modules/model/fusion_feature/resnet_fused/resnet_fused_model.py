@@ -60,10 +60,11 @@ class ResNet_Fused_Model(nn.Module):
             if name not in aux_input:
                 continue
             aux = aux_input[name]  # Expected shape: (B, 1, N) # N is the extractor feature dimension
-            if aux.ndim != 3 or aux.shape[1] != 1:
-                raise ValueError(f"Expected aux input '{name}' to have shape (B, 1, N), got {aux.shape}")
-
+            if aux.shape[1] != 1 or aux.shape[2] != 1:
+                raise ValueError(f"Extractor '{name}' must have shape (B, 1, 1, N) but got {aux.shape}")
+                
             aux = aux.to(x.device)
+            aux = aux.view(-1, 1, aux.shape[-1])  # Ensure shape is (B, 1, N)
             B, _, N = aux.shape
 
             if name not in self.projectors:

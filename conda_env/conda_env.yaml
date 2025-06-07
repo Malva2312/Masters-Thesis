@@ -21,3 +21,4 @@ dependencies:
       - kaleido
       - pyradiomics
       - scikit-image
+      - mahotas

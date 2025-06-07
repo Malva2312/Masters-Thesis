@@ -2,7 +2,11 @@ apply: True
 hyperparameter_combination:
   index: None
   used: None
-hyperparameter_grid:    
+hyperparameter_grid:
+  seed_value:
+    - 1
+    - 30
+    - 900
   model.pytorch_lightning_model.hyperparameters.optimiser.kwargs.lr:
     - 0.001
   #  - 0.0001
@@ -10,9 +14,24 @@ hyperparameter_grid:
   data.dataloader.torch_dataloader_kwargs.batch_size:
 #    - 16 # <-- this generate a error: the last batch only has 1 sample
     - 32
-  #  - 64
-  #  - 128
-  seed_value:
-    - 1
-  #  - 30
-  #  - 900
+    - 64
+    - 128
+
+  model.pytorch_lightning_model.hyperparameters.resnet_config.extractors:
+    - 
+      - name: shape
+    -
+      - name: gabor
+    -
+      - name: hog
+    -
+      - name: lbp
+    -
+      - name: fof
+    -
+      - name: haralick
+  model.pytorch_lightning_model.hyperparameters.resnet_config.default_layer:
+    - layer1
+    - layer2
+    - layer3
+    - layer4

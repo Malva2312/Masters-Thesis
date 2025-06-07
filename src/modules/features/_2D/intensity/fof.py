@@ -1,26 +1,34 @@
 import torch
 import numpy as np
-from radiomics.shape2D import RadiomicsShape2D
+from radiomics.firstorder import RadiomicsFirstOrder
 from typing import Dict, Any
 import SimpleITK as sitk
 
-
-class ShapeFeatures2D:
+class FirstOrderFeatures2D:
     def __init__(self):
         # List of desired feature keys as they appear in PyRadiomics output
         self.selected_features = [
-            'MeshSurface',
-            'Perimeter',
-            'PerimeterSurfaceRatio',
-            'Sphericity',
-            
-            'MaximumDiameter',
-            'MajorAxisLength',
-            'MinorAxisLength',
-            'Elongation',
+            'Energy',
+            'TotalEnergy',
+            'Entropy',
+            'Minimum',
+            '10Percentile',
+            '90Percentile',
+            'Maximum',
+            'Mean',
+            'Median',
+            'InterquartileRange',
+            'Range',
+            'MeanAbsoluteDeviation',
+            'RobustMeanAbsoluteDeviation',
+            'RootMeanSquared',
+            'Skewness',
+            'Kurtosis',
+            'Variance',
+            'Uniformity'
         ]
 
-    def __call__(self, images: torch.Tensor, masks: torch.Tensor) -> Dict[str, Any]:
+    def extract(self, images: torch.Tensor, masks: torch.Tensor) -> Dict[str, Any]:
         if images.dim() == 2:
             return self._extract_single(images, masks)
         elif images.dim() == 3:
@@ -28,7 +36,7 @@ class ShapeFeatures2D:
             for idx, (img, msk) in enumerate(zip(images, masks)):
                 single_features = self._extract_single(img, msk)
                 for k, v in single_features.items():
-                    features_dict[f"{k}_{idx}"] = v
+                    features_dict[f"{k}"] = v
             return features_dict
         else:
             raise ValueError("Input images and masks must be 2D or 3D tensors.")
@@ -39,18 +47,15 @@ class ShapeFeatures2D:
 
         # Check if mask is empty to avoid invalid calculations
         if np.count_nonzero(mask_np) == 0:
-            # Return NaN or 0 for each selected feature if mask is empty
             return {k: float('nan') for k in self.selected_features}
 
         img_sitk = sitk.GetImageFromArray(img_np)
         mask_sitk = sitk.GetImageFromArray(mask_np)
 
-        shape_extractor = RadiomicsShape2D(img_sitk, mask_sitk)
-        #shape_extractor.disableAllFeatures()
-        #for feature in self.selected_features:
-        #    shape_extractor.enableFeatureByName(feature)
-        shape_extractor.enableAllFeatures()  # Enable all features for extraction
-        results = shape_extractor.execute()
+        firstorder_extractor = RadiomicsFirstOrder(img_sitk, mask_sitk)
+        for feature in self.selected_features:
+            firstorder_extractor.enableFeatureByName(feature)
+        results = firstorder_extractor.execute()
 
         # Replace NaN values in results with 0
         results = {k: (0 if np.isnan(v) else v) for k, v in results.items()}

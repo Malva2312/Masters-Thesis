@@ -6,6 +6,8 @@ from src.modules.model.standalone.linear_svm.linear_svm_model import LinearSVMMo
 from src.modules.loss_functions.hinge_loss_functions import HingeLossFunction
 
 from src.modules.features.feature_extractors import FeatureExtractorManager
+import functools
+import operator
 
 
 class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
@@ -25,23 +27,21 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         dummy_data =  torch.zeros(1, 32, 32)
         dummy_mask = torch.zeros(1, 32, 32)  # Dummy mask if needed
         self.features_extractor(dummy_data, dummy_mask)
+        self.features_names = [self.config.svm_config.extractors] if not isinstance(self.config.svm_config.extractors, list) else self.config.svm_config.extractors
 
-        self.input_dim = 0
-        for key, value in self.features_extractor.feature_dims.items():
-            if key in self.extractors:
-                # Ensure value is a tuple or list before converting to tensor
-                if isinstance(value, (list, tuple)):
-                    dim = int(torch.prod(torch.tensor(value)))
-                else:
-                    dim = int(value)
-                self.input_dim += dim
+        def prod(iterable):
+            return functools.reduce(operator.mul, iterable, 1)
+
+        self.input_dim = sum(
+            prod(self.features_extractor.feature_dims[key]) for key in self.features_names
+        )
+
         self.model = LinearSVMModel(input_dim=self.input_dim)
 
         self.labels = None
         self.predicted_labels = None
         self.weighted_losses = None
 
-        self.features_names = [self.config.svm_config.extractors] if not isinstance(self.config.svm_config.extractors, list) else self.config.svm_config.extractors
 
         self.to(torch.device(self.config.device))
 

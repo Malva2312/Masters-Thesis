@@ -59,7 +59,6 @@ class ResNet_Fused_Model(nn.Module):
         for name in self.layer_map[layer_name]: # for each extractor vector (B, 1, N) -> B(B, 1, H * W) -> (B, 1, H, W) -> (B, C, H, W)
             if name not in aux_input:
                 continue
-
             aux = aux_input[name]  # Expected shape: (B, 1, N) # N is the extractor feature dimension
             if aux.ndim != 3 or aux.shape[1] != 1:
                 raise ValueError(f"Expected aux input '{name}' to have shape (B, 1, N), got {aux.shape}")
@@ -70,11 +69,12 @@ class ResNet_Fused_Model(nn.Module):
             if name not in self.projectors:
                 self.projectors[name] = nn.Sequential(
                         nn.Linear(aux.shape[-1], x.shape[-1] * x.shape[-2]),
-                        nn.BatchNorm1d( x.shape[-1] * x.shape[-2]),
+                        nn.BatchNorm1d(x.shape[-1] * x.shape[-2]),
                         nn.ReLU()
                 ).to(x.device)
-            proj = self.projectors[name](aux)  # (B, 1, H * W) # H * W == Net Layer Dim
-            proj = proj.unsqueeze(-1).unsqueeze(-1).expand(-1, -1,  x.shape[-2],  x.shape[-1])  # (B, 1, H, W)
+            aux_flat = aux.squeeze(1)  # (B, N)
+            proj = self.projectors[name](aux_flat)  # (B, H*W)
+            proj = proj.view(B, 1, x.shape[-2], x.shape[-1])  # (B, 1, H, W)
 
             # Reshape # Match ResNet branch channels if needed
             if proj.shape[1] != x.shape[1]:

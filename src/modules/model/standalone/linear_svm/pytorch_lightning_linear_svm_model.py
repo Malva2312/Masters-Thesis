@@ -27,13 +27,13 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         dummy_data =  torch.zeros(1, 32, 32)
         dummy_mask = torch.zeros(1, 32, 32)  # Dummy mask if needed
         self.features_extractor(dummy_data, dummy_mask)
-        self.features_names = [self.config.svm_config.extractors] if not isinstance(self.config.svm_config.extractors, list) else self.config.svm_config.extractors
+        self.features_names = self.config.svm_config.get('extractors', list(self.features_extractor.feature_dims.keys()))
 
         def prod(iterable):
             return functools.reduce(operator.mul, iterable, 1)
 
         self.input_dim = sum(
-            prod(self.features_extractor.feature_dims[key]) for key in self.features_names
+            prod(self.features_extractor.feature_dims[key]) for key in self.features_extractor.feature_dims.keys() if key in self.extractors
         )
 
         self.model = LinearSVMModel(input_dim=self.input_dim)

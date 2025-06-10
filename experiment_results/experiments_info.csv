@@ -2,3 +2,4 @@ Experiment ID,Who ran it?,When was it run?,What was run?
 13,Joao Malva,2025-05-31 20:24,"EffNet w/out extractors - b0, b1, b2 - Grid Hyperparameter Combination"
 15,Joao Malva,2025-06-03 09:10,"ResNet w/out extractors - 18, 50, 101 - Grid Hyperparameter Combination"
 21,Joao Malva,2025-06-08 19:51,SVM w/ extractors - Grid Hyperparameter Combination - Feature Predictive Power
+25,Joao Malva,2025-06-11 00:05,Exp 17 - Continuation rest of 64 batch_size

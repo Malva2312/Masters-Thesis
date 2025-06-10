@@ -7,6 +7,8 @@ import random
 import torch
 import torchvision
 
+import os
+
 from src.modules.data.data_augmentation.ct_image_augmenter \
     import CTImageAugmenter
 from src.modules.features.feature_extractors import FeatureExtractorManager
@@ -283,19 +285,29 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
             image=image,
             mask=mask
         )
-        
-        # Extract features and add them to data
-        feature_extractor = FeatureExtractorManager()
-        # Add batch dimension for feature extractor (expects (B, H, W))
-        features = feature_extractor(image, mask)
-        # Remove batch dimension from each feature and add to data dict
-        for key, value in features.items():
-            if isinstance(value, torch.Tensor) and value.shape[0] == 1:
-                data[key] = value.squeeze(0)
-                if value.is_cuda != image.is_cuda:
-                    data[key] = value.to(image.device)
-            else:
-                data[key] = value
+
+        handcrafted_features_dir = "/nas-ctm01/homes/jmalva/Masters-Thesis/data/features"
+        os.makedirs(handcrafted_features_dir, exist_ok=True)
+        feature_file_path = "/nas-ctm01/homes/jmalva/Masters-Thesis/data/features/{}.pt".format(
+            self.file_names[data_index]
+        )
+        if os.path.exists(feature_file_path):
+            features = torch.load(feature_file_path)
+            data.update(features)
+        else:
+            # Extract features and add them to data
+            feature_extractor = FeatureExtractorManager()
+            features = feature_extractor(image, mask)
+            # Remove batch dimension from each feature and add to data dict
+            for key, value in features.items():
+                if isinstance(value, torch.Tensor) and value.shape[0] == 1:
+                    data[key] = value.view(1, 1, 1, -1) 
+                    if value.device != image.device:
+                        data[key] = value.to(image.device)
+                else:
+                    data[key] = value
+
+            torch.save(features, feature_file_path)
         return data
 
     def _get_labels(self, data_index):

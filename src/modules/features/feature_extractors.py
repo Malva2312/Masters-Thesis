@@ -145,6 +145,7 @@ class FeatureExtractorManager:
                 features[key] = self._ensure_chw(shape_tensor[:, idx])
                 self.feature_dims[key] = features[key].shape
             features['shape'] = shape_tensor.view(batch_size, 1, -1)
+            self.feature_dims['shape'] = features['shape'].shape
 
         # GLCM and its properties
         if hasattr(self, 'glcm_extractor'):

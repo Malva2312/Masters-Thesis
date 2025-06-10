@@ -7,6 +7,8 @@ import random
 import torch
 import torchvision
 
+import os
+
 from src.modules.data.data_augmentation.ct_image_augmenter \
     import CTImageAugmenter
 from src.modules.features.feature_extractors import FeatureExtractorManager

@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+
 from src.modules.model.standalone.resnet.resnet_model import ResNetModel
 
 class ResNet_Fused_Model(nn.Module):
@@ -12,6 +14,16 @@ class ResNet_Fused_Model(nn.Module):
         # Parse extractors from config
         self.extractors = config.resnet_config.get('extractors', [])
         self.default_layer = config.resnet_config.get('default_layer', 'layer3')
+
+        # Initialize a parameter dictionary for trainable parameters: feature_weights[layer][feature]
+        self.feature_weights = nn.ModuleDict()
+        for extractor in self.extractors:
+            name = extractor['name']
+            layer = extractor.get('layer', self.default_layer)
+            if layer not in self.feature_weights:
+                self.feature_weights[layer] = nn.ParameterDict()
+                self.feature_weights[layer][name] = nn.Parameter(torch.randn(()))
+        self.scale = nn.Parameter(torch.randn(()))  # Will use sigmoid for [0,1], multiplied by 0.5
 
         # Track which extractor injects at which layer
         self.layer_map = {}  # e.g., {"layer3": ["lbp", "rad"]}
@@ -92,10 +104,39 @@ class ResNet_Fused_Model(nn.Module):
 
         # Multi-branch fusion (ResNet + all aux branches)
         if len(proj_list) > 1:
-            x = proj_list[0]
-            for proj in proj_list[1:]:
-                x = x + proj # add alpha fusion as treinable parameter
+            weights = self._forward_feature_weights(layer_name)
+            x = weights['main'] * proj_list[0]
+            for i, name in enumerate(self.layer_map[layer_name]):
+                if i + 1 < len(proj_list):  # proj_list[0] is main, proj_list[1:] are aux
+                    x = x + weights[name] * proj_list[i + 1]
         else:
             x = proj_list[0]
 
         return x
+
+    def _forward_feature_weights(self, layer):
+        """
+        Returns a dict: {feature: normalized_weight, ...} for the given layer.
+        Also includes 'main' for the main ResNet branch for that layer.
+        """
+        forward_weights = {}
+        if layer not in self.feature_weights:
+            return {'main': torch.tensor(1.0, device=self.scale.device)}
+
+        layer_weights = {}
+        for feature in self.feature_weights[layer].keys():
+            # Use softplus to ensure positivity
+            layer_weights[feature] = F.softplus(self.feature_weights[layer][feature])
+        total = sum(layer_weights.values())
+        
+        if total.item() == 0:
+            # If all weights are zero, set all to zero
+            for feature in layer_weights.keys():
+                forward_weights[feature] = torch.zeros_like(total)
+        else:
+            norm = torch.sigmoid(self.scale) * 0.5
+            for feature in layer_weights.keys():
+                forward_weights[feature] = norm * (layer_weights[feature] / total)
+        # Main branch gets the remaining weight
+        forward_weights['main'] = 1 - sum(forward_weights.values())
+        return forward_weights

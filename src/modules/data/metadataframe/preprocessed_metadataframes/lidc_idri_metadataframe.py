@@ -90,7 +90,22 @@ class LIDCIDRIPreprocessedMetaDataFrame:
 
         # filter nodules with mean nodule malignancy score != 3
         self.lung_nodule_metadataframe = self.lung_nodule_metadataframe[
-            self.lung_nodule_metadataframe[f"Mean Nodule Malignancy"] != 3]
+            self.lung_nodule_metadataframe[f"Mean Nodule Malignancy"] != 3
+
+            # Comment and uncomment the following lines to filter out based on need 
+            # If uncommented:
+                # (A) only easier nodules will be included
+                # (B) only difficult nodules will be included
+            # Warning: Only one of the following two blocks should be uncommented at a time
+
+            # A . filter nodules with mean nodule malignancy score != 2 or 4 
+            #& self.lung_nodule_metadataframe["Mean Nodule Malignancy"] != 2 
+            #& self.lung_nodule_metadataframe["Mean Nodule Malignancy"] != 4
+
+            # B. filter nodules with mean nodule malignancy score != 1 or 5
+            #& self.lung_nodule_metadataframe["Mean Nodule Malignancy"] != 1
+            #& self.lung_nodule_metadataframe["Mean Nodule Malignancy"] != 5
+        ]
 
         # reset index due to applied filters
         self.lung_nodule_metadataframe.reset_index(drop=True, inplace=True)

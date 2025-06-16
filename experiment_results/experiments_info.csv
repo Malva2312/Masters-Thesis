@@ -5,5 +5,3 @@ Experiment ID,Who ran it?,When was it run?,What was run?
 21,Joao Malva,2025-06-08 19:51,SVM w/ extractors - Grid Hyperparameter Combination - Feature Predictive Power
 22,Joao Malva,2025-06-11 02:22,SVM w/ extractors - Grid Hyperparameter Combination - All & All w/out one at the time
 23,Joao Malva,2025-06-11 02:33,Exp 17 - Continuation rest of 128 batch_size (ALL)
-31,Joao Malva,2025-06-14 02:34,ResNet18 - Only More Identifiable Nodules (1 & 5)
-33,Joao Malva,2025-06-14 23:29,ResNet18 - Only Difficult Identifiable Nodules (2 & 4)

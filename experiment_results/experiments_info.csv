@@ -5,3 +5,5 @@ Experiment ID,Who ran it?,When was it run?,What was run?
 21,Joao Malva,2025-06-08 19:51,SVM w/ extractors - Grid Hyperparameter Combination - Feature Predictive Power
 22,Joao Malva,2025-06-11 02:22,SVM w/ extractors - Grid Hyperparameter Combination - All & All w/out one at the time
 23,Joao Malva,2025-06-11 02:33,Exp 17 - Continuation rest of 128 batch_size (ALL)
+32,Joao Malva,2025-06-16 20:15,"ResNet18 - Featur Combination (Shape, LBP, FOF)"
+34,Joao Malva,2025-06-16 23:27,ResNet18 Baseline - Malignacy score 1&5

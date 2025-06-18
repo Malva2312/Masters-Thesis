@@ -44,3 +44,9 @@ hyperparameters:
     optimiser: ${..optimiser}
     extractors:
       - name: lbp
+        layer: layer1
+      - name: shape
+        layer: layer2
+      - name: fof
+        layer: layer1
+      

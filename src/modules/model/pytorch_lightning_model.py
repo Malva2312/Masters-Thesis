@@ -9,6 +9,9 @@ from src.modules.model.standalone.resnet.pytorch_lightning_resnet_model \
 
 from src.modules.model.fusion_feature.resnet_fused.pytorch_lightning_resnet_fused_model \
     import PyTorchLightningResNetFusedModel
+
+from src.modules.model.fusion_feature.effnet_fused.pytorch_lightning_effnet_fused_model \
+    import PyTorchLightningEffNetFusedModel
     
 class PyTorchLightningModel:
     def __new__(cls, config, experiment_execution_paths):
@@ -29,6 +32,11 @@ class PyTorchLightningModel:
             )
         elif config.model_name == "ResNetFusionModel":
             return PyTorchLightningResNetFusedModel(
+                config=config.hyperparameters,
+                experiment_execution_paths=experiment_execution_paths
+            )
+        elif config.model_name == "EffNetFusionModel":
+            return PyTorchLightningEffNetFusedModel(
                 config=config.hyperparameters,
                 experiment_execution_paths=experiment_execution_paths
             )

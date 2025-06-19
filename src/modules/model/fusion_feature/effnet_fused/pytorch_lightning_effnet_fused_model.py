@@ -1,20 +1,16 @@
 from torchmetrics.functional import accuracy, auroc, precision, recall
 import pytorch_lightning
 import torch
+
 from src.modules.model.fusion_feature.effnet_fused.effnet_fused_model import EffNet_Fused_Model
-from src.modules.loss_functions.effnet_loss_functions import EffNetLossFunction
-from src.modules.features.feature_extractors import FeatureExtractorManager
-
-# filepath: /nas-ctm01/homes/jmalva/Masters-Thesis/src/modules/model/fusion_feature/effnet_fused/pytorch_lightening_effnet_fused_model.py
-
-
+from src.modules.loss_functions.efficient_net_loss_functions import EfficientNetLossFunction
 
 class PyTorchLightningEffNetFusedModel(pytorch_lightning.LightningModule):
     def __init__(self, config, experiment_execution_paths):
         super().__init__()
         self.config = config
 
-        self.criterion = EffNetLossFunction(
+        self.criterion = EfficientNetLossFunction(
             config=self.config.effnet_config.criterion,
             experiment_execution_paths=experiment_execution_paths
         )
@@ -145,4 +141,5 @@ class PyTorchLightningEffNetFusedModel(pytorch_lightning.LightningModule):
         predicted_labels = torch.argmax(model_output, dim=1, keepdim=True)
         self.labels.append(labels)
         self.predicted_labels.append(predicted_labels)
+        
         return model_output, labels

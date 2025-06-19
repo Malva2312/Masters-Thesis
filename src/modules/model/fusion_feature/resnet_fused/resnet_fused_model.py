@@ -15,12 +15,6 @@ class ResNet_Fused_Model(nn.Module):
         self.extractors = config.resnet_config.get('extractors', [])
         self.default_layer = config.resnet_config.get('default_layer', 'layer3')
 
-        # Initialize a parameter dictionary for trainable parameters: feature_weights[layer][feature]
-        self.feature_weights = nn.ModuleDict()
-        for extractor in self.extractors:
-            name = extractor['name']
-            layer = extractor.get('layer', self.default_layer)
-
         # Track which extractor injects at which layer
         self.layer_map = {}  # e.g., {"layer3": ["lbp", "rad"]}
 

@@ -20,11 +20,6 @@ class ResNet_Fused_Model(nn.Module):
         for extractor in self.extractors:
             name = extractor['name']
             layer = extractor.get('layer', self.default_layer)
-            #if layer not in self.feature_weights:
-            #    self.feature_weights[layer] = nn.ParameterDict()
-            #if name not in self.feature_weights[layer]:
-            #    self.feature_weights[layer][name] = nn.Parameter(torch.randn(()))
-        #self.scale = nn.Parameter(torch.randn(()))  # Will use sigmoid for [0,1], multiplied by 0.5
 
         # Track which extractor injects at which layer
         self.layer_map = {}  # e.g., {"layer3": ["lbp", "rad"]}
@@ -74,7 +69,6 @@ class ResNet_Fused_Model(nn.Module):
                 continue
             aux = aux_input[name]  # Expected shape: (B, C, 1, N) # N is the extractor feature dimension
             
-
             aux = aux.to(x.device)
             aux = aux.view(aux_input['image'].shape[0], aux_input['image'].shape[1], 1, -1)
             B, C, _, N = aux.shape
@@ -110,50 +104,10 @@ class ResNet_Fused_Model(nn.Module):
 
         # Multi-branch fusion (ResNet + all aux branches)
         if len(proj_list) > 1:
-            #weights = self._forward_feature_weights(layer_name)
-            #x = weights['main'] * proj_list[0]
             for i, name in enumerate(self.layer_map[layer_name]):
                 if i + 1 < len(proj_list):  # proj_list[0] is main, proj_list[1:] are aux
-                    #x = x + weights[name] * proj_list[i + 1]
                     x = x + proj_list[i + 1]
         else:
             x = proj_list[0]
 
         return x
-
-    def _forward_feature_weights(self, layer):
-        """
-        Returns a dict: {feature: normalized_weight, ...} for the given layer.
-        Also includes 'main' for the main ResNet branch for that layer.
-        """
-        print(f"[DEBUG] Calculating feature weights for layer: {layer}")
-        print(f"[DEBUG] Features available for layer '{layer}': {self.layer_map.get(layer, [])}")
-        print(f"[DEBUG] Features available for layer '{layer}': {self.feature_weights}")
-        forward_weights = {}
-        if layer not in self.feature_weights:
-            print(f"[DEBUG] Layer '{layer}' not in feature_weights. Returning main=1.0")
-            return {'main': torch.tensor(1.0, device=self.scale.device)}
-
-        layer_weights = {}
-        for feature in self.feature_weights[layer].keys():
-            # Use softplus to ensure positivity
-            layer_weights[feature] = F.softplus(self.feature_weights[layer][feature])
-            print(f"[DEBUG] Feature '{feature}' raw weight: {self.feature_weights[layer][feature].item()}, softplus: {layer_weights[feature].item()}")
-        total = sum(layer_weights.values())
-        print(f"[DEBUG] Sum of feature weights (softplus): {total.item()}")
-        
-        if total.item() == 0:
-            # If all weights are zero, set all to zero
-            print("[DEBUG] All feature weights are zero after softplus. Setting all to zero.")
-            for feature in layer_weights.keys():
-                forward_weights[feature] = torch.zeros_like(total)
-        else:
-            norm = torch.sigmoid(self.scale) * 0.5
-            print(f"[DEBUG] Normalization factor (sigmoid(scale) * 0.5): {norm.item()}")
-            for feature in layer_weights.keys():
-                forward_weights[feature] = norm * (layer_weights[feature] / total)
-                print(f"[DEBUG] Normalized weight for feature '{feature}': {forward_weights[feature].item()}")
-        # Main branch gets the remaining weight
-        forward_weights['main'] = 1 - sum(forward_weights.values())
-        print(f"[DEBUG] Main branch weight: {forward_weights['main'].item()}")
-        return forward_weights

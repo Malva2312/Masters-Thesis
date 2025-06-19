@@ -317,7 +317,7 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
                     data[key] = value
 
             # Save the handcrafted features to a file
-            torch.save(handcrafted_features, feature_file_path)
+            torch.save(features, feature_file_path)
 
         return data
 

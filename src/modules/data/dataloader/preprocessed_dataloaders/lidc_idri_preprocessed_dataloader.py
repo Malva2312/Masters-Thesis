@@ -30,9 +30,7 @@ def custom_collate_fn(batch):
     for key in keys:
         values = [d[key] for d in data_dicts]
         try:
-            print(f"[STACK] Feature '{key}' original values: {[v.shape for v in values]}")
             batched_data[key] = torch.cat(values, dim)
-            print(f"[STACK] Feature '{key}' stacked shape: {batched_data[key].shape}")
         except RuntimeError:
             # Mantém como lista se não empilhável
             batched_data[key] = values
@@ -290,8 +288,9 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
 
         handcrafted_features_dir = "/nas-ctm01/homes/jmalva/Masters-Thesis/data/features"
         os.makedirs(handcrafted_features_dir, exist_ok=True)
-        feature_file_path = "/nas-ctm01/homes/jmalva/Masters-Thesis/data/features/n_channels_{}/{}.pt".format(
+        feature_file_path = "/nas-ctm01/homes/jmalva/Masters-Thesis/data/features/n_channels_{}/image_size_{}/{}.pt".format(
             image.shape[0],
+            image.shape[1],
             self.file_names[data_index]
         )
         if os.path.exists(feature_file_path):
@@ -303,17 +302,12 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
             features = feature_extractor(image, mask)
             # Remove batch dimension from each feature and add to data dict
             for key, value in features.items():
-                print(f"Feature '{key}' original shape: {value.shape}")
                 if isinstance(value, torch.Tensor) and value.shape[0] == 1:
                     data[key] = value.view(1, image.shape[0], 1, -1)
-                    print(f"Feature '{key}' reshaped to: {data[key].shape}")
                     if value.device != image.device:
                         data[key] = value.to(image.device)
-                        print(f"Feature '{key}' moved to device: {data[key].device}")
                 else:
                     data[key] = value
-                    if isinstance(value, torch.Tensor):
-                        print(f"Feature '{key}' assigned with shape: {value.shape}")
             # Save features to file
             os.makedirs(os.path.dirname(feature_file_path), exist_ok=True)
             torch.save(features, feature_file_path)

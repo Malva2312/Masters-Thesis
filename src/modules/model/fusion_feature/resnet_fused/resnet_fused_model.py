@@ -76,8 +76,8 @@ class ResNet_Fused_Model(nn.Module):
             
 
             aux = aux.to(x.device)
-            aux = aux.view(aux_input['image'].shape[0], aux_input['image'].shape[1], -1)
-            B, C, N = aux.shape
+            aux = aux.view(aux_input['image'].shape[0], aux_input['image'].shape[1], 1, -1)
+            B, C, _, N = aux.shape
 
             if name not in self.projectors:
                 self.projectors[name] = nn.Sequential(

@@ -90,7 +90,26 @@ class LIDCIDRIPreprocessedMetaDataFrame:
 
         # filter nodules with mean nodule malignancy score != 3
         self.lung_nodule_metadataframe = self.lung_nodule_metadataframe[
-            self.lung_nodule_metadataframe[f"Mean Nodule Malignancy"] != 3]
+            self.lung_nodule_metadataframe[f"Mean Nodule Malignancy"] != 3
+        ]
+
+
+        # filter nodules with mean nodule malignancy score in range 2-4
+        # Hardcoded 
+        extreme_subset = None # True for 1 & 5 malignancy, False for 2-4 malignancy, None for all malignancy scores
+
+        if extreme_subset is not None:
+            self.new_lung_nodule_metadataframe = self.lung_nodule_metadataframe[
+                (self.lung_nodule_metadataframe[f"Mean Nodule Malignancy"] >= 2)
+                & (self.lung_nodule_metadataframe[f"Mean Nodule Malignancy"] <= 4)
+            ]
+            if extreme_subset:
+                self.lung_nodule_metadataframe = self.lung_nodule_metadataframe[
+                    ~self.lung_nodule_metadataframe.index.isin(self.new_lung_nodule_metadataframe.index)
+                ]
+            else:
+                self.lung_nodule_metadataframe = self.new_lung_nodule_metadataframe
+
 
         # reset index due to applied filters
         self.lung_nodule_metadataframe.reset_index(drop=True, inplace=True)

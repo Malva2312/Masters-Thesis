@@ -37,7 +37,7 @@ def custom_collate_fn(batch):
     for key in keys:
         values = [d[key] for d in data_dicts]
         try:
-            batched_data[key] = torch.stack(values)
+            batched_data[key] = torch.cat(values, dim)
         except RuntimeError:
             # Mantém como lista se não empilhável
             batched_data[key] = values
@@ -102,7 +102,7 @@ class LIDCIDRIPreprocessedKFoldDataLoader:
             shuffle=True if subset_type == "train" else False,
             worker_init_fn=self._get_torch_dataloader_worker_init_fn,
 
-            collate_fn=custom_collate_fn,  # Use custom collate function
+            #collate_fn=custom_collate_fn,  # Use custom collate function
 
             **torch_dataloader_kwargs
         )

@@ -3,3 +3,4 @@ docs/Deliveries/Versions/
 data/*
 !data/*.zip
 .vscode/sftp.json
+.vscode/settings.json

@@ -31,7 +31,7 @@ hyperparameters:
     # R: <value>
      # method: <value>
     extractors:
-      - fft_magnitude
+      - lbp
 
   # ResNet parameters
   resnet_config:
@@ -43,4 +43,10 @@ hyperparameters:
       metadataframe: ${......data.metadataframe}
     optimiser: ${..optimiser}
     extractors:
-      - name: fft_magnitude
+      - name: lbp
+        layer: layer1
+      - name: shape
+        layer: layer2
+      - name: fof
+        layer: layer1
+      

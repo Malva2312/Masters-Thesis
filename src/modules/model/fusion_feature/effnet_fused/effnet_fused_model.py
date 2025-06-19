@@ -4,6 +4,7 @@ from src.modules.model.standalone.efficientnet.efficientnet_model import Efficie
 import torch.nn as nn
 
 class EffNet_Fused_Model(nn.Module):
+
     def __init__(self, config):
         super().__init__()
         self.config = config
@@ -46,40 +47,32 @@ class EffNet_Fused_Model(nn.Module):
             return x
 
         proj_list = [x]
+
         for name in self.layer_map[layer_name]:
             if name not in aux_input:
                 continue
-
             aux = aux_input[name]
-            if aux.ndim != 3:
-                raise ValueError(f"Expected aux input '{name}' to have shape (B, H, W), got {aux.shape}")
 
             aux = aux.to(x.device)
-            B, H, W = aux.shape
+            aux = aux.view(aux_input['image'].shape[0], aux_input['image'].shape[1], 1, -1)
+            B, C, _, N = aux.shape
 
-            if H > 1 and W > 1:
-                aux = aux.unsqueeze(1)
-                if name not in self.projectors:
-                    self.projectors[name] = nn.Sequential(
-                        nn.Conv2d(1, 32, kernel_size=3, padding=1),
-                        nn.BatchNorm2d(32),
-                        nn.ReLU(),
-                        nn.Conv2d(32, 64, kernel_size=3, padding=1),
-                        nn.BatchNorm2d(64),
+            if name not in self.projectors:
+                self.projectors[name] = nn.Sequential(
+                        nn.Linear(aux.shape[-1], x.shape[-1] * x.shape[-2]),
+                        nn.BatchNorm1d(x.shape[-1] * x.shape[-2]),
                         nn.ReLU()
-                    ).to(x.device)
-                proj = self.projectors[name](aux)
-            else:
-                aux = aux.view(B, -1)
-                if name not in self.projectors:
-                    self.projectors[name] = nn.Sequential(
-                        nn.Linear(aux.shape[1], 256),
-                        nn.BatchNorm1d(256),
-                        nn.ReLU()
-                    ).to(x.device)
-                proj = self.projectors[name](aux)
-                proj = proj.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, x.shape[2], x.shape[3])
-
+                ).to(x.device)
+            
+            # Process each channel separately, then stack
+            proj_channels = []
+            for c in range(C):
+                aux_c = aux[:, c, :, :].reshape(B, -1)  # (B, H*W)
+                proj_c = self.projectors[name](aux_c)  # (B, H*W)
+                proj_c = proj_c.view(B, 1, x.shape[-2], x.shape[-1])  # (B, 1, H, W)
+                proj_channels.append(proj_c)
+            proj = torch.cat(proj_channels, dim=1)  # (B, C, H, W)
+        
             if proj.shape[1] != x.shape[1]:
                 fusion_key = f"{layer_name}_{name}"
                 if fusion_key not in self.fusion_convs:
@@ -93,21 +86,9 @@ class EffNet_Fused_Model(nn.Module):
             proj_list.append(proj)
 
         if len(proj_list) > 1:
-            target_h, target_w = x.shape[2], x.shape[3]
-            proj_list_resized = []
-            for p in proj_list:
-                if p.shape[2] != target_h or p.shape[3] != target_w:
-                    p = torch.nn.functional.interpolate(p, size=(target_h, target_w), mode='nearest')
-                proj_list_resized.append(p)
-            fusion_key = f"{layer_name}_multi"
-            total_channels = sum(p.shape[1] for p in proj_list_resized)
-            if fusion_key not in self.fusion_convs:
-                self.fusion_convs[fusion_key] = nn.Conv2d(
-                    in_channels=total_channels,
-                    out_channels=x.shape[1],
-                    kernel_size=1
-                ).to(x.device)
-            x = self.fusion_convs[fusion_key](torch.cat(proj_list_resized, dim=1))
+            for i, name in enumerate(self.layer_map[layer_name]):
+                if i + 1 < len(proj_list):  # proj_list[0] is main, proj_list[1:] are aux
+                    x = x + proj_list[i + 1]
         else:
             x = proj_list[0]
 

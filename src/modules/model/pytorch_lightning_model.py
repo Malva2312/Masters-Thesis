@@ -12,6 +12,10 @@ from src.modules.model.fusion_feature.resnet_fused.pytorch_lightning_resnet_fuse
 
 from src.modules.model.fusion_feature.effnet_fused.pytorch_lightning_effnet_fused_model \
     import PyTorchLightningEffNetFusedModel
+
+from src.modules.model.fusion_feature.convnext.pytorch_lightning_convnext_fused_model \
+    import PyTorchLightningConvNextFusedModel
+
     
 class PyTorchLightningModel:
     def __new__(cls, config, experiment_execution_paths):
@@ -37,6 +41,11 @@ class PyTorchLightningModel:
             )
         elif config.model_name == "EffNetFusionModel":
             return PyTorchLightningEffNetFusedModel(
+                config=config.hyperparameters,
+                experiment_execution_paths=experiment_execution_paths
+            )
+        elif config.model_name == "ConvNextFusionModel":
+            return PyTorchLightningConvNextFusedModel(
                 config=config.hyperparameters,
                 experiment_execution_paths=experiment_execution_paths
             )

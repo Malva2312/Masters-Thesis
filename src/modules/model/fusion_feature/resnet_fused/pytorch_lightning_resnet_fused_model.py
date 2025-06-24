@@ -4,7 +4,6 @@ import torch
 
 from src.modules.model.fusion_feature.resnet_fused.resnet_fused_model import ResNet_Fused_Model
 from src.modules.loss_functions.resnet_loss_functions import ResNetLossFunction
-from src.modules.features.feature_extractors import FeatureExtractorManager
 
 class PyTorchLightningResNetFusedModel(pytorch_lightning.LightningModule):
     def __init__(self, config, experiment_execution_paths):

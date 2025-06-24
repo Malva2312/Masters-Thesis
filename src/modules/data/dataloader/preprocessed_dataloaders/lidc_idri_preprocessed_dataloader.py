@@ -310,7 +310,8 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
             # Remove batch dimension from each feature and add to data dict
             for key, value in features.items():
                 if isinstance(value, torch.Tensor) and value.shape[0] == 1:
-                    data[key] = value.squeeze(0)
+                    data[key] = value.squeeze(0).unsqueeze(2)
+                    
                     if value.device != image.device:
                         data[key] = value.to(image.device)
                 else:

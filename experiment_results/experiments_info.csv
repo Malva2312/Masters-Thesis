@@ -12,3 +12,10 @@ Experiment ID,Who ran it?,When was it run?,What was run?
 37,Joao Malva,2025-06-18 10:10,ResNet18 Baseline - Exp32 Continuation for real this time :()
 39,Joao Malva,2025-06-18 15:23,ResNet18 Solution - 1&5 Nodules
 40,Joao Malva,2025-06-19 03:47,ResNet18 Solution - 2&4 Nodules
+41,Joao Malva,2025-06-20 05:46,Baseline ResNet18 with 64 by 64 input images
+42,Joao Malva,2025-06-20 06:56,Fused ResNet18 with 64 by 64 input images
+43,Joao Malva,2025-06-21 02:47,Baseline ResNet18 - 32 by 32 - 2.5D
+44,Joao Malva,2025-06-21 12:27,Fused ResNet18 - 32 by 32 - 2.5D
+45,Joao Malva,2025-06-21 21:19,Fused ResNet18 - 32 by 32 - 2.5D
+46,Joao Malva,2025-06-21 21:34,Baseline Best Model - 2D - 32x32
+48,Joao Malva,2025-06-22 16:29,Fused Best Model - 2D - 32x32

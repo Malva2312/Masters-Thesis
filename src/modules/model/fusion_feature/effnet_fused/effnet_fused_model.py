@@ -1,5 +1,5 @@
 import torch
-from src.modules.model.standalone.efficientnet.efficientnet_model import EfficientNetModel
+from src.modules.model.standalone.effnet.efficient_net_model import EfficientNetModel
 
 import torch.nn as nn
 
@@ -12,7 +12,9 @@ class EffNet_Fused_Model(nn.Module):
 
         # Parse extractors from config
         self.extractors = config.effnet_config.get('extractors', [])
-        self.default_layer = config.effnet_config.get('default_layer', 'blocks.5')
+        # Set default_layer to the last block if not provided
+        num_blocks = len(self.effnet_model.model.features) - 1  # exclude features[0]
+        self.default_layer = config.effnet_config.get('default_layer', f'blocks.{num_blocks}')
 
         # Track which extractor injects at which layer
         self.layer_map = {}  # e.g., {"blocks.5": ["lbp", "rad"]}
@@ -28,12 +30,14 @@ class EffNet_Fused_Model(nn.Module):
 
     def forward(self, data):
         model_input = data['image']
+        # If input is grayscale, repeat channels to get 3 channels
         if model_input.shape[1] == 1:
             model_input = model_input.repeat(1, 3, 1, 1)
 
+        # Forward through EfficientNet stem
         x = self.effnet_model.model.features[0](model_input)
         for i, block in enumerate(self.effnet_model.model.features[1:]):
-            layer_name = f'blocks.{i}'
+            layer_name = f'blocks.{i+1}'
             x = block(x)
             x = self._fuse_layer(layer_name, x, data)
 
@@ -73,6 +77,7 @@ class EffNet_Fused_Model(nn.Module):
                 proj_channels.append(proj_c)
             proj = torch.cat(proj_channels, dim=1)  # (B, C, H, W)
         
+            # If the projected shape does not match x, apply a 1x1 conv to adjust channels
             if proj.shape[1] != x.shape[1]:
                 fusion_key = f"{layer_name}_{name}"
                 if fusion_key not in self.fusion_convs:
@@ -85,6 +90,7 @@ class EffNet_Fused_Model(nn.Module):
 
             proj_list.append(proj)
 
+        # Multi-branch fusion (EffNet + all aux branches)
         if len(proj_list) > 1:
             for i, name in enumerate(self.layer_map[layer_name]):
                 if i + 1 < len(proj_list):  # proj_list[0] is main, proj_list[1:] are aux

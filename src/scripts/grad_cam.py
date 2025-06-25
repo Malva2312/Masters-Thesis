@@ -1,10 +1,11 @@
-from datetime import datetime, UTC
+from datetime import datetime
 from os.path import abspath, dirname, join
+import os
 import hydra
 import sys
-import shap
 import torch
 import matplotlib.pyplot as plt
+import torchvision.transforms.functional as TF
 
 sys.path.append(abspath(join(dirname('.'), "../../")))
 
@@ -15,19 +16,14 @@ setup.set_precision(level="high")
 
 from src.modules.data.dataloader.preprocessed_dataloader import PreprocessedDataLoader
 from src.modules.data.metadataframe.metadataframe import MetadataFrame
-from src.modules.experiment_execution.datetimes import ExperimentExecutionDatetimes
 from src.modules.experiment_execution.config import experiment_execution_config
-from src.modules.experiment_execution.info import ExperimentExecutionInfo
-from src.modules.experiment_execution.prints import ExperimentExecutionPrints
-from src.modules.model.model_pipeline import ModelPipeline
-
-from src.modules.model.pytorch_lightning_model import PyTorchLightningModel
-from src.modules.model.fusion_feature.resnet_fused.pytorch_lightning_resnet_fused_model \
-    import PyTorchLightningResNetFusedModel
 from src.modules.model.fusion_feature.resnet_fused.resnet_fused_model import ResNet_Fused_Model
-import torch.nn as nn
+from skimage.transform import resize
 
 
+fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_48\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=57-var=last_epoch.ckpt"
+non_fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_46\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=39-var=last_epoch.ckpt"
+datafold_idx = [4]
 
 # --- GradCAM definition ---
 class GradCAM:
@@ -48,14 +44,13 @@ class GradCAM:
 
     def generate_cam(self, input_dict, class_idx=None):
         image_tensor = input_dict['image'].requires_grad_()
-        self.model = self.model.eval()  # Ensure model is in eval mode
+        self.model.eval()
         output = self.model(input_dict)
         if class_idx is None:
             class_idx = output.argmax(dim=1).item()
 
         self.model.zero_grad()
-        loss = output[:, class_idx]
-        loss.backward()
+        output[:, class_idx].backward()
 
         pooled_gradients = self.gradients.mean(dim=(2, 3), keepdim=True)
         cam = (pooled_gradients * self.activations).sum(dim=1, keepdim=True)
@@ -65,114 +60,111 @@ class GradCAM:
         cam = (cam - cam.min()) / (cam.max() + 1e-6)
         return cam
 
+def save_images(base_path, name_prefix, image_tensor, cam_array):
+    os.makedirs(base_path, exist_ok=True)
 
+    original_path = join(base_path, f"{name_prefix}_original.png")
+    zoom_path = join(base_path, f"{name_prefix}_zoom.png")
+    cam_overlay_path = join(base_path, f"{name_prefix}_gradcam.png")
+
+    original_np = image_tensor.squeeze().cpu().numpy()
+    plt.imsave(original_path, original_np, cmap='gray')
+
+    # Zoom (central crop and resize for easier interpretation)
+    h, w = original_np.shape
+    crop_size = int(min(h, w) * 0.5)
+    top = (h - crop_size) // 2
+    left = (w - crop_size) // 2
+    zoomed = original_np[top:top+crop_size, left:left+crop_size]
+    # Resize to make it bigger (e.g., 256x256) using nearest neighbor for pixelation
+    zoomed_resized = resize(zoomed, (256, 256), order=0, mode='reflect', anti_aliasing=False, preserve_range=True)
+    plt.imsave(zoom_path, zoomed_resized.astype(original_np.dtype), cmap='gray')
+
+    #original_np = (original_np - original_np.min()) / (original_np.max() - original_np.min())
+
+    # CAM overlay
+    fig, ax = plt.subplots(figsize=(5, 5))
+    ax.imshow(original_np, cmap='gray')
+    ax.imshow(cam_array, cmap='jet', alpha=0.5)
+    ax.axis('off')
+    ax.set_aspect('equal')
+    plt.tight_layout()
+    plt.savefig(cam_overlay_path, dpi=300)
+    plt.close()
 
 @hydra.main(version_base=None, config_path="../../config_files", config_name="main")
 def run_explainability(config):
-    print("Setting experiment ID...")
+    print("Setting seed:", config.seed_value)
+    setup.set_seed(config.seed_value)
+
     experiment_execution_config.set_experiment_id(config)
-
-    experiment_execution_config.delete_key(
-            config, key='hyperparameter_grid_based_execution'
-        )
-
-    print("Setting experiment version ID and paths...")
+    experiment_execution_config.delete_key(config, key='hyperparameter_grid_based_execution')
     experiment_execution_config.set_experiment_version_id(config)
     experiment_execution_config.set_paths(config)
-    setup.create_experiment_dir(dir_path=config.experiment_execution.paths.experiment_version_dir_path)
+    setup.create_experiment_dir(config.experiment_execution.paths.experiment_version_dir_path)
 
-
-    print("Loading metadataframe...")
     metadataframe = MetadataFrame(config=config.data.metadataframe,
                                   experiment_execution_paths=config.experiment_execution.paths)
-    print("Loading dataloader...")
     dataloader = PreprocessedDataLoader(
         config=config.data.dataloader,
         lung_nodule_metadataframe=metadataframe.get_lung_nodule_metadataframe()
     )
-
-    print("Getting k-fold dataloaders and data names...")
     kfold_dataloaders = dataloader.get_dataloaders()
-    kfold_data_names = dataloader.get_data_names()
-
-    print(f"Setting random seed: {config.seed_value}")
-    setup.set_seed(seed_value=config.seed_value)
-
-    # Load model
-    print("Loading model...")
-
-    model_path = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_48\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=32-var=val_auroc=0.924.ckpt"
-    # Load the model with required arguments
-    print(f"Model checkpoint path: {model_path}")
-
-    checkpoint = torch.load(model_path)
-    weight_dict = checkpoint['state_dict']
-    
-    print("Filtering state_dict keys for ResNet model...")
-    weight_dict = {k: v for k, v in weight_dict.items() if k.startswith("model.resnet_model.model.")}
-    print(f"Filtered state_dict keys: {list(weight_dict.keys())[:5]}... (showing first 5)")
-
-    print("Instantiating ResNet_Fused_Model...")
-    model = ResNet_Fused_Model(
-        config=config.model.pytorch_lightning_model.hyperparameters,
-    )
-
-    # Sample from dataloader
-    for datafold_id in range(1, 6):
-        print(f"\nProcessing datafold {datafold_id}...")
-
-        test_dataloader = kfold_dataloaders['test'][datafold_id - 1]
-        print("Iterating over test dataloader...")
-        for batch in test_dataloader:
-            print("Preparing input dict for model...")
-            input_dict = {
-                'image': batch[0]['image'][0].repeat(1, 3, 1, 1),
-                'lbp': batch[0]['lbp'][0].repeat(1, 3, 1, 1),
-                'shape': batch[0]['shape'][0].repeat(1, 3, 1, 1),
-                'fof': batch[0]['fof'][0].repeat(1, 3, 1, 1),
-            }
-            input_dict_train = {
-                'image': batch[0]['image'].repeat(1, 3, 1, 1),
-                'lbp': batch[0]['lbp'].repeat(1, 3, 1, 1),
-                'shape': batch[0]['shape'].repeat(1, 3, 1, 1),
-                'fof': batch[0]['fof'].repeat(1, 3, 1, 1),
-            }
-
-            model = ResNet_Fused_Model(
-                config=config.model.pytorch_lightning_model.hyperparameters,
-            )
-            model(input_dict_train)
-            model.load_state_dict(weight_dict, strict=False)
-            model.eval()
-
-            # Grad-CAM
-            print("Running Grad-CAM...")
-            grad_cam = GradCAM(model, target_layer=model.resnet_model.model.layer2)
-            cam = grad_cam.generate_cam(input_dict)
-            print("Grad-CAM completed.")
 
 
-            # Plot and save
-            print("Plotting and saving explainability results...")
-            fig, ax = plt.subplots(1, 1, figsize=(6, 5))
-            ax.imshow(batch[0]['image'][0].squeeze().cpu(), cmap='gray')
-            ax.imshow(cam, cmap='jet', alpha=0.5)
-            ax.set_title("Grad-CAM")
-            ax.axis('off')
+    # Load checkpoints
+    fused_ckpt = torch.load(fused_model_ckpt)
+    non_fused_ckpt = torch.load(non_fused_model_ckpt)
 
+    fused_weights = {k: v for k, v in fused_ckpt['state_dict'].items()}
+    non_fused_weights = {k: v for k, v in non_fused_ckpt['state_dict'].items()}
 
-            plt.tight_layout()
-            # Save Grad-CAM overlay
-            save_path = join("C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\explainability", "explainability_sample.png")
-            # Save original image
-            original_image_path = join("C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\explainability", "original_image_sample.png")
-            plt.imsave(original_image_path, batch[0]['image'][0].squeeze().cpu().numpy(), cmap='gray')
-            plt.savefig(save_path)
-            print(f"Explainability results saved to {save_path}")
-            plt.close()
-            break  # only one sample
+    # Process only the first fold
+    for fold_idx, test_dataloader in enumerate(kfold_dataloaders['test']):
+        if datafold_idx:
+            if fold_idx not in datafold_idx:
+                continue
+        for idx, batch in enumerate(test_dataloader):
+            for img_idx in range(batch[0]['image'].shape[0]):
+                input_dict = {
+                    'image': batch[0]['image'][img_idx].unsqueeze(0).repeat(1, 3, 1, 1),
+                    'lbp': batch[0]['lbp'][img_idx].unsqueeze(0).repeat(1, 3, 1, 1),
+                    'shape': batch[0]['shape'][img_idx].unsqueeze(0).repeat(1, 3, 1, 1),
+                    'fof': batch[0]['fof'][img_idx].unsqueeze(0).repeat(1, 3, 1, 1),
+                }
 
-    print("Execution completed.")
+                input_dict_train = {
+                    'image': batch[0]['image'].repeat(1, 3, 1, 1),
+                    'lbp': batch[0]['lbp'].repeat(1, 3, 1, 1),
+                    'shape': batch[0]['shape'].repeat(1, 3, 1, 1),
+                    'fof': batch[0]['fof'].repeat(1, 3, 1, 1),
+                }
+
+                # Fused model
+                config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.fused_resnet_config
+                fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
+                fused_model(input_dict_train)
+                fused_model.load_state_dict(fused_weights, strict=False)
+                fused_model.eval()
+
+                cam_fused = GradCAM(fused_model, fused_model.resnet_model.model.layer2).generate_cam(input_dict)
+
+                # Non-fused model
+                config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.base_resnet_config
+                non_fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
+                non_fused_model(input_dict_train)  # trigger lazy init
+                non_fused_model.load_state_dict(non_fused_weights, strict=False)
+                non_fused_model.eval()
+
+                cam_non_fused = GradCAM(non_fused_model, non_fused_model.resnet_model.model.layer2).generate_cam(input_dict)
+
+                # Save in separate folder for each image
+                base_dir = join(config.experiment_execution.paths.experiment_dir_path, "explainability")
+                fused_dir = join(base_dir, "fused", f"fold_{fold_idx}", f"batch_{idx}_{img_idx}")
+                non_fused_dir = join(base_dir, "non_fused", f"fold_{fold_idx}", f"batch_{idx}_{img_idx}")
+                save_images(fused_dir, "sample", batch[0]['image'][img_idx], cam_fused)
+                save_images(non_fused_dir, "sample", batch[0]['image'][img_idx], cam_non_fused)
+                print(f"Saved fused and non-fused explainability outputs for fold {fold_idx}, batch {idx}, image {img_idx}.")
 
 if __name__ == "__main__":
     run_explainability()

@@ -21,27 +21,53 @@ from src.modules.experiment_execution.config import experiment_execution_config
 from src.modules.model.fusion_feature.resnet_fused.resnet_fused_model import ResNet_Fused_Model
 
 
-fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_48\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=57-var=last_epoch.ckpt"
+fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_48\\version_1\\datafold_1\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=2-var=val_loss=0.308.ckpt"
 non_fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_46\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=39-var=last_epoch.ckpt"
 datafold_idx = [4]
 
 
 class SHAPFeatureWrapper(torch.nn.Module):
-    def __init__(self, model, fixed_image_tensor):
+    def __init__(self, model, fixed_image_tensor, feature_name):
         super().__init__()
         self.model = model.eval()
         self.fixed_image = fixed_image_tensor
+        self.feature_name = feature_name
 
     def forward(self, features):
         B = features.shape[0]
         images = self.fixed_image.repeat(B, 1, 1, 1)
-        input_dict = {'image': images}
-        return self.model(input_dict)
+        input_dict = {'image': images, self.feature_name: features}
+        output = self.model(input_dict)
+        # If output is [B, 2], select one class (e.g., positive class)
+        if output.dim() == 2 and output.shape[1] == 2:
+            return output[:, 1]  # or use output.softmax(dim=1)[:, 1] if needed
+        # If output is [B], return as is
+        return output
+
+def run_shap_analysis(model, image_tensor, feature_tensor, feature_name, save_path_prefix):
+    wrapper = SHAPFeatureWrapper(model, image_tensor, feature_name)
+    background = feature_tensor[:30]
+    test_sample = feature_tensor[0].unsqueeze(0)
+
+    # Flatten features if needed
+    background_flat = background.view(background.size(0), -1)
+    test_sample_flat = test_sample.view(1, -1)
+
+    explainer = shap.KernelExplainer(
+        lambda x: wrapper(torch.tensor(x, dtype=torch.float)).detach().numpy(),
+        background_flat.numpy()
+    )
+    shap_vals = explainer.shap_values(test_sample_flat.numpy())
+    save_shap_plot(save_path_prefix, feature_name, shap_vals)
 
 def save_shap_plot(save_dir, prefix, shap_vals):
     os.makedirs(save_dir, exist_ok=True)
     fig, ax = plt.subplots(figsize=(6, 5))
-    ax.barh(range(len(shap_vals[0][0])), shap_vals[0][0], color='darkgreen')
+    shap_array = np.array(shap_vals[0])
+    if shap_array.ndim == 1:
+        ax.barh(range(len(shap_array)), shap_array, color='darkgreen')
+    else:
+        ax.barh(range(shap_array.shape[1]), shap_array[0], color='darkgreen')
     ax.set_title("SHAP (Handcrafted Features)")
     ax.set_xlabel("SHAP Value")
     ax.set_ylabel("Feature Index")
@@ -84,18 +110,18 @@ def run_explainability(config):
 
         for batch_idx, batch in enumerate(test_dataloader):
             for img_idx in range(batch[0]['image'].shape[0]):
+                image_tensor = batch[0]['image'][img_idx].repeat(1, 1, 1, 1)
 
-                # Prepare common image
-                image_tensor = batch[0]['image'][img_idx].unsqueeze(0).repeat(1, 3, 1, 1)
-                handcrafted_tensor = batch[0]['lbp'][img_idx].unsqueeze(0)
-
-                # Prepare training input for model instantiation
+                # Inputs para treino
                 input_dict_train = {
-                    'image': batch[0]['image'].repeat(1, 3, 1, 1),
-                    'lbp': batch[0]['lbp'].repeat(1, 3, 1, 1),
-                    'shape': batch[0]['shape'].repeat(1, 3, 1, 1),
-                    'fof': batch[0]['fof'].repeat(1, 3, 1, 1),
+                    'image': batch[0]['image'].repeat(1, 1, 1, 1),
+                    'lbp': batch[0]['lbp'].repeat(1, 1, 1, 1),
+                    'shape': batch[0]['shape'].repeat(1, 1, 1, 1),
+                    'fof': batch[0]['fof'].repeat(1, 1, 1, 1),
                 }
+                # For each feature, print its shape for debugging
+                for feature_name in ['lbp', 'fof', 'shape']:
+                    print(f"Feature '{feature_name}' shape:", batch[0][feature_name].shape)
 
                 # --- FUSED MODEL ---
                 config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.fused_resnet_config
@@ -104,41 +130,44 @@ def run_explainability(config):
                 fused_model.load_state_dict(fused_weights, strict=False)
                 fused_model.eval()
 
-                fused_wrapper = SHAPFeatureWrapper(fused_model, image_tensor)
-                background_fused = batch[0]['lbp'][:30]
-                test_sample_fused = handcrafted_tensor
-
-                explainer_fused = shap.KernelExplainer(
-                    lambda x: fused_wrapper(torch.tensor(x, dtype=torch.float)).detach().numpy(),
-                    background_fused.numpy()
-                )
-                shap_vals_fused = explainer_fused.shap_values(test_sample_fused.numpy().reshape(1, -1))
-
                 save_dir_fused = join(base_dir, "fused", f"fold_{fold_idx}", f"batch_{batch_idx}_{img_idx}")
-                save_shap_plot(save_dir_fused, "sample", shap_vals_fused)
+                os.makedirs(save_dir_fused, exist_ok=True)
+
+                # SHAP for each feature separately
+                for feature_name in ['lbp', 'fof', 'shape']:
+                    feature_tensor = batch[0][feature_name].repeat(1, 1, 1, 1)
+                    run_shap_analysis(
+                        fused_model,
+                        image_tensor=image_tensor,
+                        feature_tensor=feature_tensor,
+                        feature_name=feature_name,
+                        save_path_prefix=save_dir_fused
+                    )
+
+                
 
                 # --- NON-FUSED MODEL ---
+                # Only run SHAP for the image, since non-fused doesn't use features
                 config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.base_resnet_config
                 non_fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
                 non_fused_model(input_dict_train)
                 non_fused_model.load_state_dict(non_fused_weights, strict=False)
                 non_fused_model.eval()
 
-                non_fused_wrapper = SHAPFeatureWrapper(non_fused_model, image_tensor)
-                background_nf = batch[0]['lbp'][:30]
-                test_sample_nf = handcrafted_tensor
-
-                explainer_nf = shap.KernelExplainer(
-                    lambda x: non_fused_wrapper(torch.tensor(x, dtype=torch.float)).detach().numpy(),
-                    background_nf.numpy()
-                )
-                shap_vals_nf = explainer_nf.shap_values(test_sample_nf.numpy().reshape(1, -1))
-
                 save_dir_nf = join(base_dir, "non_fused", f"fold_{fold_idx}", f"batch_{batch_idx}_{img_idx}")
-                save_shap_plot(save_dir_nf, "sample", shap_vals_nf)
+                os.makedirs(save_dir_nf, exist_ok=True)
+
+                # If you want to run SHAP for the image input only:
+                # run_shap_analysis(
+                #     non_fused_model,
+                #     image_tensor=image_tensor,
+                #     feature_tensor=image_tensor,  # or whatever is appropriate
+                #     feature_name="image",
+                #     save_path_prefix=save_dir_nf
+                # )
 
                 print(f"SHAP saved for fold {fold_idx}, batch {batch_idx}, sample {img_idx}.")
-                break  # Limit to one sample if needed
+                break
             break
         break
 

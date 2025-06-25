@@ -14,7 +14,7 @@ class EffNet_Fused_Model(nn.Module):
         self.extractors = config.effnet_config.get('extractors', [])
         # Set default_layer to the last block if not provided
         num_blocks = len(self.effnet_model.model.features) - 1  # exclude features[0]
-        self.default_layer = config.effnet_config.get('default_layer', f'blocks.{num_blocks}')
+        self.default_layer = config.effnet_config.get('default_layer', f'blocks_{num_blocks}')
 
         # Track which extractor injects at which layer
         self.layer_map = {}  # e.g., {"blocks.5": ["lbp", "rad"]}

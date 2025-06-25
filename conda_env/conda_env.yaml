@@ -22,3 +22,7 @@ dependencies:
       - pyradiomics
       - scikit-image
       - mahotas
+
+      - shap
+      - matplotlib
+

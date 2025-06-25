@@ -21,9 +21,9 @@ from src.modules.experiment_execution.config import experiment_execution_config
 from src.modules.model.fusion_feature.resnet_fused.resnet_fused_model import ResNet_Fused_Model
 
 
-fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_48\\version_1\\datafold_1\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=2-var=val_loss=0.308.ckpt"
+fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_48\\version_1\\datafold_3\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=32-var=val_auroc=0.834.ckpt"
 non_fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_46\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=39-var=last_epoch.ckpt"
-datafold_idx = [4]
+datafold_idx = [3]
 
 
 class SHAPFeatureWrapper(torch.nn.Module):
@@ -59,6 +59,18 @@ def run_shap_analysis(model, image_tensor, feature_tensor, feature_name, save_pa
     )
     shap_vals = explainer.shap_values(test_sample_flat.numpy())
     save_shap_plot(save_path_prefix, feature_name, shap_vals)
+
+def save_combined_feature_importance_plot(shap_vals_dict, save_path):
+    plt.figure(figsize=(6, 4))
+    feature_names = list(shap_vals_dict.keys())
+    scores = [np.sum((np.array(shap_vals_dict[f][0]))) for f in feature_names]
+
+    plt.barh(feature_names, scores, color='darkred')
+    plt.title("Combined SHAP Feature Contributions")
+    plt.xlabel("Summed |SHAP Value|")
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close()
 
 def save_shap_plot(save_dir, prefix, shap_vals):
     os.makedirs(save_dir, exist_ok=True)
@@ -134,15 +146,29 @@ def run_explainability(config):
                 os.makedirs(save_dir_fused, exist_ok=True)
 
                 # SHAP for each feature separately
+                shap_vals_dict = {}
+
                 for feature_name in ['lbp', 'fof', 'shape']:
                     feature_tensor = batch[0][feature_name].repeat(1, 1, 1, 1)
-                    run_shap_analysis(
-                        fused_model,
-                        image_tensor=image_tensor,
-                        feature_tensor=feature_tensor,
-                        feature_name=feature_name,
-                        save_path_prefix=save_dir_fused
+                    wrapper = SHAPFeatureWrapper(fused_model, image_tensor, feature_name)
+                    background = feature_tensor[:30]
+                    test_sample = feature_tensor[0].unsqueeze(0)
+
+                    background_flat = background.view(background.size(0), -1)
+                    test_sample_flat = test_sample.view(1, -1)
+
+                    explainer = shap.KernelExplainer(
+                        lambda x: wrapper(torch.tensor(x, dtype=torch.float)).detach().numpy(),
+                        background_flat.numpy()
                     )
+                    shap_vals = explainer.shap_values(test_sample_flat.numpy())
+                    shap_vals_dict[feature_name] = shap_vals
+                    save_shap_plot(save_dir_fused, feature_name, shap_vals)
+
+                # Save combined SHAP bar plot
+                combined_save_path = join(save_dir_fused, "combined_shap_summary.png")
+                save_combined_feature_importance_plot(shap_vals_dict, combined_save_path)
+
 
                 
 

@@ -21,8 +21,8 @@ from src.modules.model.fusion_feature.resnet_fused.resnet_fused_model import Res
 from skimage.transform import resize
 
 
-fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_48\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=57-var=last_epoch.ckpt"
-non_fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_46\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=39-var=last_epoch.ckpt"
+fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_48\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=32-var=val_auroc=0.924.ckpt"
+non_fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_46\\version_1\\datafold_3\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=70-var=last_epoch.ckpt"
 datafold_idx = [4]
 
 # --- GradCAM definition ---
@@ -70,14 +70,8 @@ def save_images(base_path, name_prefix, image_tensor, cam_array):
     original_np = image_tensor.squeeze().cpu().numpy()
     plt.imsave(original_path, original_np, cmap='gray')
 
-    # Zoom (central crop and resize for easier interpretation)
-    h, w = original_np.shape
-    crop_size = int(min(h, w) * 0.5)
-    top = (h - crop_size) // 2
-    left = (w - crop_size) // 2
-    zoomed = original_np[top:top+crop_size, left:left+crop_size]
-    # Resize to make it bigger (e.g., 256x256) using nearest neighbor for pixelation
-    zoomed_resized = resize(zoomed, (256, 256), order=0, mode='reflect', anti_aliasing=False, preserve_range=True)
+    # Zoom: resize the whole image to 512x512 for easier interpretation
+    zoomed_resized = resize(original_np, (512, 512), order=0, mode='reflect', anti_aliasing=False, preserve_range=True)
     plt.imsave(zoom_path, zoomed_resized.astype(original_np.dtype), cmap='gray')
 
     #original_np = (original_np - original_np.min()) / (original_np.max() - original_np.min())

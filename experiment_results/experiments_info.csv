@@ -19,3 +19,4 @@ Experiment ID,Who ran it?,When was it run?,What was run?
 45,Joao Malva,2025-06-21 21:19,Fused ResNet18 - 32 by 32 - 2.5D
 46,Joao Malva,2025-06-21 21:34,Baseline Best Model - 2D - 32x32
 48,Joao Malva,2025-06-22 16:29,Fused Best Model - 2D - 32x32
+50,Joao Malva,2025-06-25 02:45,"Fused EfficientNet (FC)- Feature Combination (shape, fof, lbp)"

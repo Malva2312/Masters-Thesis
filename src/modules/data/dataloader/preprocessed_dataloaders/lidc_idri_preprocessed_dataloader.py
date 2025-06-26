@@ -52,7 +52,7 @@ class LIDCIDRIPreprocessedKFoldDataLoader:
             self,
             config,
             lung_nodule_image_metadataframe,
-            load_data_name=False
+            load_data_name=True
     ):
         self.config = config
 
@@ -260,7 +260,7 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
         if not self.load_data_name:
             return data, labels
         else:
-            return self.file_names[data_index], data, labels
+            return data, labels, self.file_names[data_index]
 
     def _get_data(self, data_index):
         image = numpy.load(

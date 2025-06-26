@@ -21,9 +21,9 @@ from src.modules.experiment_execution.config import experiment_execution_config
 from src.modules.model.fusion_feature.resnet_fused.resnet_fused_model import ResNet_Fused_Model
 
 
-fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_48\\version_1\\datafold_3\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=32-var=val_auroc=0.834.ckpt"
-non_fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_46\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=39-var=last_epoch.ckpt"
-datafold_idx = [3]
+fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_48\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=32-var=val_auroc=0.924.ckpt"
+non_fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_46\\version_1\\datafold_3\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=70-var=last_epoch.ckpt"
+datafold_idx = [4]
 
 
 class SHAPFeatureWrapper(torch.nn.Module):
@@ -111,8 +111,8 @@ def run_explainability(config):
     fused_ckpt = torch.load(fused_model_ckpt)
     non_fused_ckpt = torch.load(non_fused_model_ckpt)
 
-    fused_weights = {k: v for k, v in fused_ckpt['state_dict'].items()}
-    non_fused_weights = {k: v for k, v in non_fused_ckpt['state_dict'].items()}
+    fused_weights = {k.replace("model.", "", 1): v for k, v in fused_ckpt['state_dict'].items()}
+    non_fused_weights = {k.replace("model.", "", 1): v for k, v in non_fused_ckpt['state_dict'].items()}
 
     base_dir = join(config.experiment_execution.paths.experiment_dir_path, "explainability_shap")
 
@@ -139,7 +139,7 @@ def run_explainability(config):
                 config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.fused_resnet_config
                 fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
                 fused_model(input_dict_train)
-                fused_model.load_state_dict(fused_weights, strict=False)
+                fused_model.load_state_dict(fused_weights, strict=True)
                 fused_model.eval()
 
                 save_dir_fused = join(base_dir, "fused", f"fold_{fold_idx}", f"batch_{batch_idx}_{img_idx}")
@@ -174,11 +174,11 @@ def run_explainability(config):
 
                 # --- NON-FUSED MODEL ---
                 # Only run SHAP for the image, since non-fused doesn't use features
-                config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.base_resnet_config
-                non_fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
-                non_fused_model(input_dict_train)
-                non_fused_model.load_state_dict(non_fused_weights, strict=False)
-                non_fused_model.eval()
+                #config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.base_resnet_config
+                #non_fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
+                #non_fused_model(input_dict_train)
+                #non_fused_model.load_state_dict(non_fused_weights, strict=False)
+                #non_fused_model.eval()
 
                 save_dir_nf = join(base_dir, "non_fused", f"fold_{fold_idx}", f"batch_{batch_idx}_{img_idx}")
                 os.makedirs(save_dir_nf, exist_ok=True)

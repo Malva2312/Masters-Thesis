@@ -97,8 +97,8 @@ def run_explainability(config):
 
     fused_ckpt = torch.load(fused_model_ckpt)
     non_fused_ckpt = torch.load(non_fused_model_ckpt)
-    fused_weights = {k: v for k, v in fused_ckpt['state_dict'].items()}
-    non_fused_weights = {k: v for k, v in non_fused_ckpt['state_dict'].items()}
+    fused_weights = {k.replace("model.", "", 1): v for k, v in fused_ckpt['state_dict'].items()}
+    non_fused_weights = {k.replace("model.", "", 1): v for k, v in non_fused_ckpt['state_dict'].items()}
 
     for fold_idx, test_dataloader in enumerate(kfold_dataloaders['test']):
         if datafold_idx and fold_idx not in datafold_idx:
@@ -115,30 +115,30 @@ def run_explainability(config):
             labels = batch[1]
 
             input_dict_train = {
-                    'image': batch[0]['image'].repeat(1, 3, 1, 1),
-                    'lbp': batch[0]['lbp'].repeat(1, 3, 1, 1),
-                    'shape': batch[0]['shape'].repeat(1, 3, 1, 1),
-                    'fof': batch[0]['fof'].repeat(1, 3, 1, 1),
+                    'image': batch[0]['image'].repeat(1, 1, 1, 1),
+                    'lbp': batch[0]['lbp'].repeat(1, 1, 1, 1),
+                    'shape': batch[0]['shape'].repeat(1, 1, 1, 1),
+                    'fof': batch[0]['fof'].repeat(1, 1, 1, 1),
                 }
 
             # Fused model
             config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.fused_resnet_config
             fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
             fused_model(input_dict_train)
-            fused_model.load_state_dict(fused_weights, strict=False)
+            fused_model.load_state_dict(fused_weights, strict=True)
             fused_model.eval()
             # Non-fused model
             config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.base_resnet_config
             non_fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
-            non_fused_model.load_state_dict(non_fused_weights, strict=False)
+            non_fused_model.load_state_dict(non_fused_weights, strict=True)
             non_fused_model.eval()
 
             for img_idx in range(batch_size):
                 input_dict = {
-                    'image': batch[0]['image'][img_idx].unsqueeze(0).repeat(1, 3, 1, 1),
-                    'lbp': batch[0]['lbp'][img_idx].unsqueeze(0).repeat(1, 3, 1, 1),
-                    'shape': batch[0]['shape'][img_idx].unsqueeze(0).repeat(1, 3, 1, 1),
-                    'fof': batch[0]['fof'][img_idx].unsqueeze(0).repeat(1, 3, 1, 1),
+                    'image': batch[0]['image'][img_idx].unsqueeze(0).repeat(1, 1, 1, 1),
+                    'lbp': batch[0]['lbp'][img_idx].unsqueeze(0).repeat(1, 1, 1, 1),
+                    'shape': batch[0]['shape'][img_idx].unsqueeze(0).repeat(1, 1, 1, 1),
+                    'fof': batch[0]['fof'][img_idx].unsqueeze(0).repeat(1, 1, 1, 1),
                 }
 
 
@@ -193,7 +193,7 @@ def run_explainability(config):
                     json.dump(metadata, f, indent=2)
 
                 print(f"Saved outputs for fold {fold_idx}, batch {idx}, image {img_idx}, file {file_base}.")
-                # break
+            #    break
             # break  # Remove this break to process all images in the batch
 
         # fused_class_prob and non_fused_class_prob are not used since softmax is removed

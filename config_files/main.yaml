@@ -21,4 +21,4 @@ hydra:
   output_subdir: null
   run:
     dir: .
-seed_value: 900
+seed_value: 1

@@ -23,18 +23,24 @@ hyperparameters:
 
   # SVM parameters
   svm_config:
-    #input_dim: 1024 # number of LBP features per image
     criterion: hinge
     optimiser: ${..optimiser}
-    #TODO: GRID of the following hyperparameters for LBP extraction (maybe not needed)
-    # P: <value>
-    # R: <value>
-     # method: <value>
+
     extractors:
       - lbp
 
   # ResNet parameters
   resnet_config:
+    architecture: 18         # Options: 18, 34, 50, 101, 152, etc.
+    default_layer: layer3  # Options: layer1, layer2, layer3, layer4
+    criterion:
+      apply_weights: True
+      device: ${...device}
+      metadataframe: ${......data.metadataframe}
+    optimiser: ${..optimiser}
+    
+
+  fused_resnet_config:
     architecture: 18         # Options: 18, 34, 50, 101, 152, etc.
     default_layer: layer3  # Options: layer1, layer2, layer3, layer4
     criterion:
@@ -50,3 +56,11 @@ hyperparameters:
       - name: fof
         layer: layer1
       
+  base_resnet_config:
+    architecture: 18         # Options: 18, 34, 50, 101, 152, etc.
+    default_layer: layer3  # Options: layer1, layer2, layer3, layer4
+    criterion:
+      apply_weights: True
+      device: ${...device}
+      metadataframe: ${......data.metadataframe}
+    optimiser: ${..optimiser}

@@ -20,16 +20,15 @@ hyperparameters:
       device: ${...device}
       metadataframe: ${......data.metadataframe}
     optimiser: ${..optimiser}
+    extractors:
+        - name: lbp
+        - name: shape
+        - name: fof
 
   # SVM parameters
   svm_config:
-    #input_dim: 1024 # number of LBP features per image
     criterion: hinge
     optimiser: ${..optimiser}
-    #TODO: GRID of the following hyperparameters for LBP extraction (maybe not needed)
-    # P: <value>
-    # R: <value>
-     # method: <value>
     extractors:
       - lbp
 
@@ -49,4 +48,15 @@ hyperparameters:
         layer: layer2
       - name: fof
         layer: layer1
-      
+  
+  convnext_config:
+    architecture: tiny
+    criterion:
+      apply_weights: True
+      device: ${...device}
+      metadataframe: ${......data.metadataframe}
+    optimiser: ${..optimiser}
+    extractors:
+        - name: lbp
+        - name: shape
+        - name: fof

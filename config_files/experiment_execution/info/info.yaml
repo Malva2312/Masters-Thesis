@@ -1,2 +1,2 @@
 who: Joao Malva
-what: ResNet w/ extractors - Grid Hyperparameter Combination - Feature / Layer Relation
+what: Fused ConvNeXt (FC)- Feature Combination (shape, fof, lbp) 

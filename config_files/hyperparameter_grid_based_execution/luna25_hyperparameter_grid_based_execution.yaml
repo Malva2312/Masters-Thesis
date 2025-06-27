@@ -3,6 +3,25 @@ hyperparameter_combination:
   index: None
   used: None
 hyperparameter_grid:
+  model.pytorch_lightning_model.hyperparameters.convnext_config.extractors:
+    - - name: lbp
+      - name: fof
+      - name: shape
+      
+    - - name: lbp
+      - name: shape
+
+    - - name: fof
+      - name: shape
+
+    - - name: lbp
+      - name: fof
+
+    - - name: lbp
+
+    - - name: fof
+
+    - - name: shape
   seed_value:
     - 1
     - 30
@@ -16,22 +35,3 @@ hyperparameter_grid:
     - 32
     - 64
     - 128
-
-  model.pytorch_lightning_model.hyperparameters.resnet_config.extractors:
-    - 
-      - name: shape
-    -
-      - name: gabor
-    -
-      - name: hog
-    -
-      - name: lbp
-    -
-      - name: fof
-    -
-      - name: haralick
-  model.pytorch_lightning_model.hyperparameters.resnet_config.default_layer:
-    - layer1
-    - layer2
-    - layer3
-    - layer4

@@ -1,13 +1,14 @@
 #model_id: SVM 
 #model_name: LinearSVM
 
-#model_id: EfNet
-#model_name: EfficientNet
-
-
 #model_id: ResNet
 #model_name: ResNet
 
+#model_id: ResNetFusionModel
+#model_name: ResNetFusionModel
 
-model_id: ResNetFusionModel
-model_name: ResNetFusionModel
+#model_id: EffNetFusionModel
+#model_name: EffNetFusionModel
+
+model_id: ConvNextFusionModel
+model_name: ConvNextFusionModel

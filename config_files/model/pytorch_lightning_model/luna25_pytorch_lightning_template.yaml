@@ -20,12 +20,15 @@ hyperparameters:
       device: ${...device}
       metadataframe: ${......data.metadataframe}
     optimiser: ${..optimiser}
+    extractors:
+        - name: lbp
+        - name: shape
+        - name: fof
 
   # SVM parameters
   svm_config:
     criterion: hinge
     optimiser: ${..optimiser}
-
     extractors:
       - lbp
 
@@ -55,12 +58,15 @@ hyperparameters:
         layer: layer2
       - name: fof
         layer: layer1
-      
-  base_resnet_config:
-    architecture: 18         # Options: 18, 34, 50, 101, 152, etc.
-    default_layer: layer3  # Options: layer1, layer2, layer3, layer4
+  
+  convnext_config:
+    architecture: tiny
     criterion:
       apply_weights: True
       device: ${...device}
       metadataframe: ${......data.metadataframe}
     optimiser: ${..optimiser}
+    extractors:
+        - name: lbp
+        - name: shape
+        - name: fof

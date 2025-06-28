@@ -23,7 +23,7 @@ from src.modules.experiment_execution.config import experiment_execution_config
 from src.modules.model.fusion_feature.resnet_fused.resnet_fused_model import ResNet_Fused_Model
 
 fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_48\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=32-var=val_auroc=0.924.ckpt"
-non_fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_46\\version_1\\datafold_3\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=70-var=last_epoch.ckpt"
+non_fused_model_ckpt = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\Dissertação\\Masters-Thesis\\data\\experiment_46\\version_1\\datafold_5\\models\\mod=ResNetFusionModel-exp=X-ver=Y-dtf=Z-epoch=39-var=last_epoch.ckpt"
 datafold_idx = [4]
 
 class GradCAM:
@@ -100,38 +100,44 @@ def run_explainability(config):
     fused_weights = {k.replace("model.", "", 1): v for k, v in fused_ckpt['state_dict'].items()}
     non_fused_weights = {k.replace("model.", "", 1): v for k, v in non_fused_ckpt['state_dict'].items()}
 
+    all_labels = []
+    all_fused_preds = []
+    all_non_fused_preds = []
+
     for fold_idx, test_dataloader in enumerate(kfold_dataloaders['test']):
         if datafold_idx and fold_idx not in datafold_idx:
             continue
 
-        all_labels = []
-        all_fused_preds = []
-        all_non_fused_preds = []
-        all_fused_probs = []
-        all_non_fused_probs = []
+        iterator = iter(test_dataloader)
+        first_batch = next(iterator)
+        
+        input_dict_train = {
+            'image': first_batch[0]['image'].repeat(1, 1, 1, 1),
+            'lbp': first_batch[0]['lbp'].repeat(1, 1, 1, 1),
+            'shape': first_batch[0]['shape'].repeat(1, 1, 1, 1),
+            'fof': first_batch[0]['fof'].repeat(1, 1, 1, 1),
+        }
+
+        # Fused model
+        config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.fused_resnet_config
+        fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
+        fused_model(input_dict_train)
+        fused_model.load_state_dict(fused_weights, strict=True)
+        fused_model.eval()
+        fused_model.resnet_model.eval()
+        fused_model.resnet_model.model.eval()
+        
+        # Non-fused model
+        config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.base_resnet_config
+        non_fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
+        non_fused_model.load_state_dict(non_fused_weights, strict=True)
+        non_fused_model.eval()
+        non_fused_model.resnet_model.eval()
+        non_fused_model.resnet_model.model.eval()
 
         for idx, batch in enumerate(test_dataloader):
             batch_size = batch[0]['image'].shape[0]
             labels = batch[1]
-
-            input_dict_train = {
-                    'image': batch[0]['image'].repeat(1, 1, 1, 1),
-                    'lbp': batch[0]['lbp'].repeat(1, 1, 1, 1),
-                    'shape': batch[0]['shape'].repeat(1, 1, 1, 1),
-                    'fof': batch[0]['fof'].repeat(1, 1, 1, 1),
-                }
-
-            # Fused model
-            config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.fused_resnet_config
-            fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
-            fused_model(input_dict_train)
-            fused_model.load_state_dict(fused_weights, strict=True)
-            fused_model.eval()
-            # Non-fused model
-            config.model.pytorch_lightning_model.hyperparameters.resnet_config = config.model.pytorch_lightning_model.hyperparameters.base_resnet_config
-            non_fused_model = ResNet_Fused_Model(config=config.model.pytorch_lightning_model.hyperparameters)
-            non_fused_model.load_state_dict(non_fused_weights, strict=True)
-            non_fused_model.eval()
 
             for img_idx in range(batch_size):
                 input_dict = {
@@ -141,12 +147,10 @@ def run_explainability(config):
                     'fof': batch[0]['fof'][img_idx].unsqueeze(0).repeat(1, 1, 1, 1),
                 }
 
-
                 file_base = batch[2][img_idx]
 
-                cam_fused = GradCAM(fused_model, fused_model.resnet_model.model.layer2).generate_cam(input_dict)
-
-                cam_non_fused = GradCAM(non_fused_model, non_fused_model.resnet_model.model.layer2).generate_cam(input_dict)
+                cam_fused = GradCAM(fused_model, fused_model.resnet_model.model.layer3).generate_cam(input_dict)
+                cam_non_fused = GradCAM(non_fused_model, non_fused_model.resnet_model.model.layer3).generate_cam(input_dict)
 
                 base_dir = join(config.experiment_execution.paths.experiment_dir_path, "explainability")
                 img_dir = join(base_dir, f"fold_{fold_idx}", file_base)
@@ -165,25 +169,27 @@ def run_explainability(config):
                 plt.savefig(cam_non_fused_path, dpi=300)
                 plt.close()
 
-                with torch.no_grad():
-                    fused_logits = fused_model(input_dict)
-                    non_fused_logits = non_fused_model(input_dict)
-                    fused_pred = torch.argmax(fused_logits, dim=1, keepdim=True)
-                    non_fused_pred = torch.argmax(non_fused_logits, dim=1, keepdim=True)
+                # Get model predictions
+                fused_logits = fused_model(input_dict)
+                non_fused_logits = non_fused_model(input_dict)
 
+                fused_pred = torch.argmax(fused_logits, dim=1).item()
+                non_fused_pred = torch.argmax(non_fused_logits, dim=1).item()
                 label = batch[1][img_idx].item()
 
+                # Store results for metrics
                 all_labels.append(label)
                 all_fused_preds.append(fused_pred)
                 all_non_fused_preds.append(non_fused_pred)
 
+                # Save metadata for this sample
                 metadata = {
                     "file_base": file_base,
                     "fold_idx": fold_idx,
                     "batch_idx": idx,
                     "img_idx": img_idx,
-                    "fused_model_prediction": int(fused_pred),
-                    "non_fused_model_prediction": int(non_fused_pred),
+                    "fused_model_prediction": fused_pred,
+                    "non_fused_model_prediction": non_fused_pred,
                     "label": label,
                     "timestamp": datetime.now().isoformat(),
                     "input_shape": list(batch[0]['image'][img_idx].shape),
@@ -193,43 +199,38 @@ def run_explainability(config):
                     json.dump(metadata, f, indent=2)
 
                 print(f"Saved outputs for fold {fold_idx}, batch {idx}, image {img_idx}, file {file_base}.")
-            #    break
-            # break  # Remove this break to process all images in the batch
 
-        # fused_class_prob and non_fused_class_prob are not used since softmax is removed
-
-
-        # Convert lists to numpy arrays for logical operations
+        # Calculate metrics for this fold
         labels_np = np.array(all_labels)
         fused_preds_np = np.array(all_fused_preds)
         non_fused_preds_np = np.array(all_non_fused_preds)
 
-        # True/False Positives/Negatives for fused model
-        tp_fused = np.sum((fused_preds_np == 1) & (labels_np == 1))
-        tn_fused = np.sum((fused_preds_np == 0) & (labels_np == 0))
-        fp_fused = np.sum((fused_preds_np == 1) & (labels_np == 0))
-        fn_fused = np.sum((fused_preds_np == 0) & (labels_np == 1))
+        def compute_metrics(preds, labels):
+            tp = np.sum((preds == 1) & (labels == 1))
+            tn = np.sum((preds == 0) & (labels == 0))
+            fp = np.sum((preds == 1) & (labels == 0))
+            fn = np.sum((preds == 0) & (labels == 1))
+            acc = (tp + tn) / (tp + tn + fp + fn)
+            precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+            recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+            f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+            auc = roc_auc_score(labels, preds)
+            return {
+                "auc": auc,
+                "acc": acc,
+                "precision": precision,
+                "recall": recall,
+                "f1": f1,
+                "tp": int(tp),
+                "tn": int(tn),
+                "fp": int(fp),
+                "fn": int(fn),
+            }
 
-        # True/False Positives/Negatives for non-fused model
-        tp_non_fused = np.sum((non_fused_preds_np == 1) & (labels_np == 1))
-        tn_non_fused = np.sum((non_fused_preds_np == 0) & (labels_np == 0))
-        fp_non_fused = np.sum((non_fused_preds_np == 1) & (labels_np == 0))
-        fn_non_fused = np.sum((non_fused_preds_np == 0) & (labels_np == 1))
+        fused_metrics = compute_metrics(fused_preds_np, labels_np)
+        non_fused_metrics = compute_metrics(non_fused_preds_np, labels_np)
 
-        # Metrics for fused model
-        fused_acc = (tp_fused + tn_fused) / (tp_fused + tn_fused + fp_fused + fn_fused)
-        fused_precision = tp_fused / (tp_fused + fp_fused) if (tp_fused + fp_fused) > 0 else 0
-        fused_recall = tp_fused / (tp_fused + fn_fused) if (tp_fused + fn_fused) > 0 else 0
-        fused_f1 = 2 * fused_precision * fused_recall / (fused_precision + fused_recall) if (fused_precision + fused_recall) > 0 else 0
-        fused_auc = roc_auc_score(labels_np.flatten(), fused_preds_np.flatten())
-
-        # Metrics for non-fused model
-        non_fused_acc = (tp_non_fused + tn_non_fused) / (tp_non_fused + tn_non_fused + fp_non_fused + fn_non_fused)
-        non_fused_precision = tp_non_fused / (tp_non_fused + fp_non_fused) if (tp_non_fused + fp_non_fused) > 0 else 0
-        non_fused_recall = tp_non_fused / (tp_non_fused + fn_non_fused) if (tp_non_fused + fn_non_fused) > 0 else 0
-        non_fused_f1 = 2 * non_fused_precision * non_fused_recall / (non_fused_precision + non_fused_recall) if (non_fused_precision + non_fused_recall) > 0 else 0
-        non_fused_auc = roc_auc_score(labels_np.flatten(), non_fused_preds_np.flatten())
-
+        # Save overall metrics
         overall_metadata = {
             "fold_idx": fold_idx,
             "num_batches": idx + 1,
@@ -237,26 +238,9 @@ def run_explainability(config):
             "timestamp": datetime.now().isoformat(),
             "fused_model_ckpt": fused_model_ckpt,
             "non_fused_model_ckpt": non_fused_model_ckpt,
-            "fused_model_auc": fused_auc,
-            "fused_model_acc": fused_acc,
-            "fused_model_precision": fused_precision,
-            "fused_model_recall": fused_recall,
-            "fused_model_f1": fused_f1,
-            "fused_model_tp": int(tp_fused),
-            "fused_model_tn": int(tn_fused),
-            "fused_model_fp": int(fp_fused),
-            "fused_model_fn": int(fn_fused),
-            "non_fused_model_auc": non_fused_auc,
-            "non_fused_model_acc": non_fused_acc,
-            "non_fused_model_precision": non_fused_precision,
-            "non_fused_model_recall": non_fused_recall,
-            "non_fused_model_f1": non_fused_f1,
-            "non_fused_model_tp": int(tp_non_fused),
-            "non_fused_model_tn": int(tn_non_fused),
-            "non_fused_model_fp": int(fp_non_fused),
-            "non_fused_model_fn": int(fn_non_fused),
+            **{f"fused_model_{k}": v for k, v in fused_metrics.items()},
+            **{f"non_fused_model_{k}": v for k, v in non_fused_metrics.items()},
         }
-
 
         overall_metadata_path = join(base_dir, f"fold_{fold_idx}", "overall_metadata.json")
         with open(overall_metadata_path, "w") as f:

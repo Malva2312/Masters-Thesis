@@ -58,6 +58,15 @@ hyperparameters:
         layer: layer2
       - name: fof
         layer: layer1
+
+  base_resnet_config:
+    architecture: 18         # Options: 18, 34, 50, 101, 152, etc.
+    default_layer: layer3  # Options: layer1, layer2, layer3, layer4
+    criterion:
+      apply_weights: True
+      device: ${...device}
+      metadataframe: ${......data.metadataframe}
+    optimiser: ${..optimiser}
   
   convnext_config:
     architecture: tiny
@@ -66,7 +75,7 @@ hyperparameters:
       device: ${...device}
       metadataframe: ${......data.metadataframe}
     optimiser: ${..optimiser}
-    extractors:
-        - name: lbp
-        - name: shape
-        - name: fof
+    #extractors:
+    #    - name: lbp
+    #    - name: shape
+    #    - name: fof

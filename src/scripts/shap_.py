@@ -59,7 +59,8 @@ def save_shap_plot(save_dir, prefix, shap_vals):
 def save_combined_feature_importance_plot(shap_vals_dict, save_path):
     plt.figure(figsize=(6, 4))
     feature_names = list(shap_vals_dict.keys())
-    scores = [np.sum(np.abs(np.array(shap_vals_dict[f][0]))) for f in feature_names]
+    #scores = [np.sum(np.abs(np.array(shap_vals_dict[f][0]))) for f in feature_names]
+    scores = [np.sum(shap_vals_dict[f][0]) for f in feature_names]
     plt.barh(feature_names, scores, color='darkred')
     plt.title("Combined SHAP Feature Contributions")
     plt.xlabel("Summed |SHAP Value|")
@@ -125,16 +126,42 @@ def run_explainability(config):
         non_fused_model.resnet_model.model.eval()
 
         for batch_idx, batch in enumerate(test_dataloader):
-            for img_idx in range(batch[0]['image'].shape[0]):
-                image_tensor = batch[0]['image'][img_idx].unsqueeze(0)
-                input_dict_train = {
-                    'image': batch[0]['image'],
-                    'lbp': batch[0]['lbp'],
-                    'shape': batch[0]['shape'],
-                    'fof': batch[0]['fof'],
-                }
 
-                save_dir_fused = join(base_dir, "fused", f"fold_{fold_idx}", f"batch_{batch_idx}_{img_idx}")
+            import torch.nn.functional as F
+
+            # Get predictions and ground truths for the batch
+            images = batch[0]['image']
+            lbps = batch[0]['lbp']
+            shapes = batch[0]['shape']
+            fofs = batch[0]['fof']
+            labels = batch[1]  # Assuming batch[1] contains ground truth labels
+
+            input_dict = {'image': images, 'lbp': lbps, 'shape': shapes, 'fof': fofs}
+            with torch.no_grad():
+                outputs = fused_model(input_dict)
+                probs = torch.sigmoid(outputs) if outputs.shape[1] == 1 else F.softmax(outputs, dim=1)[:, 1]
+                preds = (probs > 0.5).long()
+
+            # Find indices for TP, TN, FP, FN
+            tp_idx = ((preds == 1) & (labels == 1)).nonzero(as_tuple=True)[0]
+            tn_idx = ((preds == 0) & (labels == 0)).nonzero(as_tuple=True)[0]
+            fp_idx = ((preds == 1) & (labels == 0)).nonzero(as_tuple=True)[0]
+            fn_idx = ((preds == 0) & (labels == 1)).nonzero(as_tuple=True)[0]
+
+            selected_indices = {
+                'true_positive': tp_idx[0] if len(tp_idx) > 0 else None,
+                'true_negative': tn_idx[0] if len(tn_idx) > 0 else None,
+                'false_positive': fp_idx[0] if len(fp_idx) > 0 else None,
+                'false_negative': fn_idx[0] if len(fn_idx) > 0 else None,
+            }
+
+            for case, img_idx in selected_indices.items():
+                if img_idx is None:
+                    print(f"No sample found for {case}")
+                    continue
+
+                image_tensor = images[img_idx].unsqueeze(0)
+                save_dir_fused = join(base_dir, "fused", f"fold_{fold_idx}", f"{case}_idx_{img_idx}")
                 os.makedirs(save_dir_fused, exist_ok=True)
 
                 shap_vals_dict = {}
@@ -156,23 +183,7 @@ def run_explainability(config):
                 combined_save_path = join(save_dir_fused, "combined_shap_summary.png")
                 save_combined_feature_importance_plot(shap_vals_dict, combined_save_path)
 
-                # --- Non-fused model: SHAP for image only (optional) ---
-                # save_dir_nf = join(base_dir, "non_fused", f"fold_{fold_idx}", f"batch_{batch_idx}_{img_idx}")
-                # os.makedirs(save_dir_nf, exist_ok=True)
-                # wrapper_nf = SHAPFeatureWrapper(non_fused_model, image_tensor, "image")
-                # background_nf = batch[0]['image'][:30]
-                # test_sample_nf = batch[0]['image'][img_idx].unsqueeze(0)
-                # background_nf_flat = background_nf.view(background_nf.size(0), -1)
-                # test_sample_nf_flat = test_sample_nf.view(1, -1)
-                # explainer_nf = shap.KernelExplainer(
-                #     lambda x: wrapper_nf(torch.tensor(x, dtype=torch.float)).detach().numpy(),
-                #     background_nf_flat.numpy()
-                # )
-                # shap_vals_nf = explainer_nf.shap_values(test_sample_nf_flat.numpy())
-                # save_shap_plot(save_dir_nf, "image", shap_vals_nf)
-
-                print(f"SHAP saved for fold {fold_idx}, batch {batch_idx}, sample {img_idx}.")
-                break
+                print(f"SHAP saved for fold {fold_idx}, {case}, sample {img_idx}.")
             break
         break
 

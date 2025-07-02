@@ -58,6 +58,190 @@ class GradCAM:
         cam = (cam - cam.min()) / (cam.max() + 1e-6)
         return cam
 
+class GradCAMPlusPlus:
+    def __init__(self, model, target_layer):
+        self.model = model.eval()
+        self.target_layer = target_layer
+        self.gradients = None
+        self.activations = None
+        self._register_hooks()
+
+    def _register_hooks(self):
+        def forward_hook(module, input, output):
+            self.activations = output.detach()
+        def backward_hook(module, grad_input, grad_output):
+            self.gradients = grad_output[0].detach()
+        self.target_layer.register_forward_hook(forward_hook)
+        self.target_layer.register_full_backward_hook(backward_hook)
+
+    def generate_cam(self, input_dict, class_idx=None):
+        image_tensor = input_dict['image'].requires_grad_()
+        self.model.eval()
+        output = self.model(input_dict)
+        if class_idx is None:
+            class_idx = output.argmax(dim=1).item()
+        self.model.zero_grad()
+        score = output[:, class_idx]
+        score.backward(retain_graph=True)
+
+        gradients = self.gradients  # shape: (B, C, H, W)
+        activations = self.activations  # shape: (B, C, H, W)
+
+        # Grad-CAM++ weights calculation
+        gradients = gradients[0]
+        activations = activations[0]
+        grads2 = gradients ** 2
+        grads3 = grads2 * gradients
+
+        # global sum over spatial dimensions
+        sum_activations = torch.sum(activations, dim=(1, 2), keepdim=True)
+
+        eps = 1e-8
+        alpha_num = grads2
+        alpha_denom = 2 * grads2 + sum_activations * grads3
+        alpha_denom = torch.where(alpha_denom != 0.0, alpha_denom, torch.ones_like(alpha_denom) * eps)
+        alphas = alpha_num / alpha_denom
+
+        positive_gradients = torch.relu(score.exp() * gradients)
+        weights = (alphas * positive_gradients).sum(dim=(1, 2))
+
+        cam = (weights[:, None, None] * activations).sum(dim=0)
+        cam = torch.relu(cam)
+        cam = torch.nn.functional.interpolate(
+            cam.unsqueeze(0).unsqueeze(0),
+            size=image_tensor.shape[2:],
+            mode='bilinear',
+            align_corners=False
+        )
+        cam = cam.squeeze().cpu().detach().numpy()
+        denom = cam.max() - cam.min()
+        cam = (cam - cam.min()) / (denom + 1e-6) if denom > 0 else cam
+        return cam
+
+
+class ScoreCAM:
+    def __init__(self, model, target_layer):
+        self.model = model.eval()
+        self.target_layer = target_layer
+        self.activations = None
+        self._register_hooks()
+
+    def _register_hooks(self):
+        def forward_hook(module, input, output):
+            self.activations = output.detach()
+        self.target_layer.register_forward_hook(forward_hook)
+
+    def generate_cam(self, input_dict, class_idx=None, n_samples=32, batch_size=16):
+        """
+        Args:
+            input_dict: dictionary with {'image': image_tensor}
+            class_idx: target class for visualization
+            n_samples: how many masks to use (default 32)
+            batch_size: mini-batch size for masked forward passes
+        """
+        image_tensor = input_dict['image']
+        self.model.eval()
+        with torch.no_grad():
+            output = self.model(input_dict)
+        if class_idx is None:
+            class_idx = output.argmax(dim=1).item()
+        # Forward to get activations
+        _ = self.model(input_dict)
+        activations = self.activations[0]  # (C, H, W)
+        b, c, h, w = self.activations.shape
+
+        # Normalize activations to [0, 1]
+        activation_maps = (activations - activations.min(dim=1, keepdim=True)[0].min(dim=2, keepdim=True)[0])
+        activation_maps = activation_maps / (activation_maps.max(dim=1, keepdim=True)[0].max(dim=2, keepdim=True)[0] + 1e-8)
+
+        weights = []
+        for i in range(c):
+            # Upsample activation to input size
+            act = activation_maps[i].unsqueeze(0).unsqueeze(0)
+            upsampled = torch.nn.functional.interpolate(act, size=image_tensor.shape[2:], mode='bilinear', align_corners=False)
+            norm_mask = upsampled.squeeze().clamp(0, 1)
+            # Apply mask to input image
+            masked_img = image_tensor[0] * norm_mask
+            masked_input = {'image': masked_img.unsqueeze(0)}
+            with torch.no_grad():
+                score = self.model(masked_input)[0, class_idx].item()
+            weights.append(score)
+        weights = torch.tensor(weights)
+        # Weighted sum
+        cam = (weights.view(-1, 1, 1) * activation_maps).sum(dim=0)
+        cam = torch.relu(cam)
+        cam = torch.nn.functional.interpolate(cam.unsqueeze(0).unsqueeze(0),
+                                              size=image_tensor.shape[2:],
+                                              mode='bilinear', align_corners=False)
+        cam = cam.squeeze().cpu().numpy()
+        cam = (cam - cam.min()) / (cam.max() + 1e-6)
+        return cam
+
+class SmoothGradCAMPlusPlus:
+    def __init__(self, model, target_layer, n_samples=25, stdev_spread=0.15):
+        self.model = model.eval()
+        self.target_layer = target_layer
+        self.n_samples = n_samples
+        self.stdev_spread = stdev_spread
+        self.gradients = None
+        self.activations = None
+        self._register_hooks()
+
+    def _register_hooks(self):
+        def forward_hook(module, input, output):
+            self.activations = output.detach()
+        def backward_hook(module, grad_input, grad_output):
+            self.gradients = grad_output[0].detach()
+        self.target_layer.register_forward_hook(forward_hook)
+        self.target_layer.register_full_backward_hook(backward_hook)
+
+    def generate_cam(self, input_dict, class_idx=None):
+        image_tensor = input_dict['image']
+        self.model.eval()
+        stdev = self.stdev_spread * (image_tensor.max() - image_tensor.min()).item()
+        cams = []
+        for i in range(self.n_samples):
+            noise = torch.normal(0, stdev, size=image_tensor.shape, device=image_tensor.device)
+            noisy_image = image_tensor + noise
+            noisy_input_dict = {'image': noisy_image}
+            # Forward
+            output = self.model(noisy_input_dict)
+            if class_idx is None:
+                idx = output.argmax(dim=1).item()
+            else:
+                idx = class_idx
+            self.model.zero_grad()
+            score = output[:, idx]
+            score.backward(retain_graph=True)
+            gradients = self.gradients[0]
+            activations = self.activations[0]
+            grads2 = gradients ** 2
+            grads3 = grads2 * gradients
+            sum_activations = torch.sum(activations, dim=(1, 2), keepdim=True)
+            eps = 1e-8
+            alpha_num = grads2
+            alpha_denom = 2 * grads2 + sum_activations * grads3
+            alpha_denom = torch.where(alpha_denom != 0.0, alpha_denom, torch.ones_like(alpha_denom) * eps)
+            alphas = alpha_num / alpha_denom
+            positive_gradients = torch.relu(score.exp() * gradients)
+            weights = (alphas * positive_gradients).sum(dim=(1, 2))
+            cam = (weights[:, None, None] * activations).sum(dim=0)
+            cam = torch.relu(cam)
+            cam = torch.nn.functional.interpolate(
+                cam.unsqueeze(0).unsqueeze(0),
+                size=image_tensor.shape[2:],
+                mode='bilinear',
+                align_corners=False
+            )
+            cam = cam.squeeze().cpu().detach().numpy()
+            denom = cam.max() - cam.min()
+            cam = (cam - cam.min()) / (denom + 1e-6) if denom > 0 else cam
+            cams.append(cam)
+        # Average the cams
+        cam = np.mean(np.stack(cams), axis=0)
+        cam = (cam - cam.min()) / (cam.max() + 1e-6)
+        return cam
+   
 def save_images(base_path, name_prefix, image_tensor, cam_array):
     os.makedirs(base_path, exist_ok=True)
     original_path = join(base_path, f"{name_prefix}_original.png")
@@ -152,6 +336,15 @@ def run_explainability(config):
                 cam_fused = GradCAM(fused_model, fused_model.resnet_model.model.layer3).generate_cam(input_dict)
                 cam_non_fused = GradCAM(non_fused_model, non_fused_model.resnet_model.model.layer3).generate_cam(input_dict)
 
+                #cam_fused = GradCAMPlusPlus(fused_model, fused_model.resnet_model.model.layer3[-1]).generate_cam(input_dict)
+                #cam_non_fused = GradCAMPlusPlus(non_fused_model, non_fused_model.resnet_model.model.layer3[-1]).generate_cam(input_dict)
+
+                #cam_fused = SmoothGradCAMPlusPlus(fused_model, fused_model.resnet_model.model.layer3).generate_cam(input_dict)
+                #cam_non_fused = SmoothGradCAMPlusPlus(non_fused_model, non_fused_model.resnet_model.model.layer3).generate_cam(input_dict)
+
+                #cam_fused = ScoreCAM(fused_model, fused_model.resnet_model.model.layer3).generate_cam(input_dict)
+                #cam_non_fused = ScoreCAM(non_fused_model, non_fused_model.resnet_model.model.layer3).generate_cam(input_dict)
+                
                 base_dir = join(config.experiment_execution.paths.experiment_dir_path, "explainability")
                 img_dir = join(base_dir, f"fold_{fold_idx}", file_base)
                 os.makedirs(img_dir, exist_ok=True)

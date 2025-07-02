@@ -35,4 +35,3 @@ hyperparameter_grid:
     - 32
     - 64
     - 128
-    - 128

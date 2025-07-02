@@ -1,0 +1,95 @@
+\chapter{Conclusions}\label{chap:conclusions}
+
+\section{Research Questions}
+
+
+This work set out to answer three principal research questions:
+
+\begin{enumerate}
+  \item \textbf{Does fusing information from shallow and deep feature extractors improve classification or generalization performance compared to using a deep extractor?}\\
+From all the experiments performed, we were able to identify robust evidence that fusing shallow radiomics features with deep neural representations leads to consistent improvements in both classification and generalization performance when compared to conventional standalone deep learning models.
+
+The established base models - the families of ResNet and EfficientNet, along with ConvNeXt-Tiny, demonstrate an already competitive performance on the LIDC-IDRI, defining a target to be surpassed by fused models. The fact that lighter architectures match or even outperform deeper counterparts, such as EfficientNet-B0 and ResNet-18, respectively, suggests that merely increasing network depth or complexity would result in diminishing returns for this specific domain.
+
+For example, combining Shape, \ac{lbp}, and \ac{fof} features at empirically optimal points in ResNet-18 led to an improvement in \ac{auc} from 0.82 to 0.86, along with a notable increase in accuracy, precision, and sensitivity compared to the baseline, as shown in Table~\ref{tab:resnet18_fusion_metrics}.
+
+Notably, most effective gains were observed when complementary radiomics features were fused, indicating the existence of synergy in combining diverse shallow descriptors with hierarchical deep features. In particular, with the 2D Shape descriptors, this synergy consistently contributed to the most significant performance boost; however, combinations of two or three features performed better than any individual feature when fused.
+
+The benefits of fusion generalization are evident in the stability of performance improvements, which remain consistent across variations in model hyperparameters and fused blocks (Tables~\ref{tab:fof_hyperparam}--\ref{tab:2dshape_hyperparam}).
+Most of the optimal fusion occurred at earlier ResNet blocks, suggesting that shallow features can be most effective when complementing deep representations before excessive abstraction. 
+
+In summary, these results underscore that carefully designed fusion could lead to improvements in state-of-the-art shallow and deep-only approaches.
+
+  
+  \item \textbf{How does the fusion approach behave under varying dataset conditions, such as different sample sizes, bounding‐box definitions, and image representations?}\\
+The ablation study conducted—detailed in Table~\ref{tab:resnet18_vs_fused}—investigated how the Fused model and its corresponding Baseline performed under various conditions. Across all scenarios, the fusion solution demonstrated superior performance, with the exception of sensitivity in the Central Scores case where it matches. However, the magnitude of its improvements was influenced by the complexity and representation of the subsets presented.
+
+The results indicate that the auxiliary information derived from radiomics features is particularly valuable in challenging classification scenarios, where deep models alone may struggle to capture subtle and discriminative cues.
+
+Importantly, fusion retained its advantage even as the nature of the input data changed. Suggesting that shallow features encode information orthogonal to that of deep network representations, and that their integration is beneficial across diverse imaging resolutions and multi-view data. 
+
+Collectively, these findings indicate that the fusion approach is more robust and adaptable than the non-fused approach, capable of better generalizing across a range of clinical data conditions.
+  
+  \item \textbf{In what ways does information fusion contribute to the explainability of lung nodule malignancy predictions?}\\
+Using Grad-CAM (Figure~\ref{fig:heatmap_grid}), we exhibited that the fused model generates \ac{cam} that exhibit more anatomically relevant attention, centralizing on nodule regions and boundaries. In contrast, the non-fused model tended to show a more diffuse or background-oriented focus. This suggests that the incorporation of shallow features assists in directing the model’s attention toward appropriate clinical structures, proposing more trustworthy and easier decisions for clinicians to interpret.
+
+The \ac{shap} analyses (Figure~\ref{fig:shap_analysis}) offer additional insights by quantifying the influence of each radiomics feature vector on individual predictions. \ac{shap} revealed that the 2D Shape feature positively affects true positives and false negatives, while negatively impacting true negatives and false positives, always leaning towards the correct decision. The other tested features, \ac{fof} and \ac{lbp}, contribute in a complementary, but less pronounced manner.
+This direct correlation between radiomics descriptors and model outputs facilitates interpretations that coincide with medical reasoning, thereby contributing to the improvement in transparency.
+
+The improvements in interpretability are not simply coincidental, since they are a direct outcome of the fusion process. The rationale behind the model becomes more transparent and easier to audit by systematically integrating features that have clear clinical relevance.
+\end{enumerate}
+
+\section{Hypothesis}
+
+Based on our research and previously analysed research questions, the fusion paradigm between complementary types of features yields higher predictive capability. This statement is supported by tangible improvements in \ac{auc}, accuracy, precision, and sensitivity across all tested architectures over each respective baseline.
+The most significant gains were achieved when multiple handcrafted features were injected, after an optimal block, supporting the hypothesis of enhanced model performance.
+
+The higher adaptability was also observed across different sets of data. Since in all data cases the fused model surpassed or matched the non-fused one, with the most significant disparities in more ambiguous or complex data subsets.
+These exhibits indicate that the fusion approach could be better, more robust, and more adaptable, further validating its reliability for diverse clinical scenarios.
+Information fusion is essential for enhancing advanced deep classifiers when they either reach a performance plateau or show decreased accuracy as their depth or complexity increases.
+
+Additionally, we not only observed increments in quantitative metrics but also in interpretable relationships, as the fused model presented a less diffuse visualization. Additionally, the fused features present a leaning towards the right decision, mainly observed with the Shape descriptor.
+These findings address the need for more reliable and understandable diagnostic systems.
+
+The evidence collected from this study strongly supports our hypothesis that the fusion of shallow and deep features provides a superior paradigm for the detection and diagnosis of lung nodules.
+Fusion methods deliver gains in predictive performance, generalizability, interpretability, and adaptability, which are crucial for lung cancer diagnostics and for supporting real-world practice.
+
+
+\section{Main Contributions}
+
+This dissertation makes significant strides in the realm of \ac{cad} for lung cancer, highlighting several pivotal advancements:
+
+\begin{itemize}
+    \item \textbf{Development of a Fusion-Based Diagnostic Framework:} This research introduces a novel deep learning model that synergistically combines handcrafted radiomics features - such as shape, \ac{lbp}, and the \ac{fof} - with deep features derived from ResNet architectures. The integration of these diverse feature sets led to marked improvements in the model's classification accuracy compared to traditional baseline models, thereby enhancing diagnostic precision.
+
+    \item \textbf{Systematic Evaluation of Fusion Strategies:} Through rigorous experimentation that spanned multiple stages of feature fusion and architectural variations, this work successfully identified the most effective fusion points, particularly at earlier layers of the network. These insights maximized the beneficial interactions between shallow and deep features, thus optimizing overall model performance.
+
+    \item \textbf{Enhanced Explainability in \ac{ai}-Driven Diagnostics:} By employing advanced interpretability techniques such as Grad-CAM and \ac{shap}, the decision-making process of the model was rendered more transparent. This enhancement not only validated the importance of shape features in the diagnostic process but also fostered greater trust and confidence in the \ac{ai} 's predictive outputs among clinicians.
+
+    \item \textbf{Empirical Validation Across Diverse Data Conditions:} The robustness of the proposed fusion approach was thoroughly validated under a variety of dataset conditions, encompassing different image representations, sizes, and bounding box strategies. This comprehensive examination underscored the framework's versatility and broad applicability in real-world scenarios.
+
+    \item \textbf{Contribution to \ac{sdg} 3:} This research aligns with and advances \ac{sdg} 3, focusing on health and well-being. Creating non-invasive, interpretable, and accessible diagnostic tools contributes significantly to the early detection of lung cancer and promotes equitable access to healthcare resources.
+\end{itemize}
+
+\section{Future Work}
+
+Building upon the foundation established for fusion-based lung nodule characterization, numerous intriguing avenues for future research have been identified:
+
+\begin{itemize}
+    \item \textbf{Application to 3D and Temporal Data:} Further development could involve transitioning from current 2D and 2.5D image representations to fully adapting 3D \ac{ct} volumes and longitudinal patient scans. This change would facilitate improved nodule characterization by leveraging the spatial nuances and temporal dynamics of lung nodules.
+
+    \item \textbf{Automated Feature Selection and Optimization:} The exploration of implementing attention mechanisms or strategies for feature selection holds the promise of dynamically adjusting the weighting of features. This could significantly enhance the performance and generalizability of the fusion models.
+
+    \item \textbf{Hyperparameter Tuning of Feature Extractors:} A systematic approach to hyperparameter optimization for each handcrafted feature extractor would likely yield improvements in the quality and discriminative power of the fused features, leading to better diagnostic outcomes.
+
+    \item \textbf{Multi-Label Classification:} Investigating methods for multi-label classification could enable the model to predict multiple attributes or characteristics of a nodule simultaneously, encompassing features such as malignancy, calcification, and spiculation, thereby providing a more comprehensive diagnostic overview.
+
+    \item \textbf{Clinical Validation and Deployment:} Engaging in collaboration with medical professionals to validate the model within real-world clinical environments is critical. This step would include its integration into existing radiology workflows to facilitate practical application and acceptance by the medical community.
+
+    \item \textbf{Benchmarking Against Multicenter Datasets:} Conducting evaluations of the model across diverse datasets collected from multiple hospitals or geographic regions would serve to test its generalizability and fairness, ensuring that it works effectively across varied populations and clinical settings.
+\end{itemize}
+
+
+\section*{Institutional Acknowledgements}
+
+This work is co-financed by Component 5 - Capitalization and Business Innovation, integrated in the Resilience Dimension of the Recovery and Resilience Plan within the scope of the Recovery and Resilience Mechanism~(MRR) of the European Union~(EU), framed in the Next Generation EU, for the period 2021 - 2026, within project HfPT, with reference 41.

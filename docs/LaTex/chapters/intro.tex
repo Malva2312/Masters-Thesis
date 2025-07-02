@@ -1,0 +1,47 @@
+\chapter{Introduction} \label{chap:intro}
+
+
+\section{Context} \label{sec:context}
+
+Lung cancer is the leading cause of cancer-related deaths and is often diagnosed at an advanced stage, contributing to a low 5-year survival rate of less than 10\%, which occurs in 70\% of cases. However, if detected early, the survival rate could exceed 90\%~\cite{ning_early_2021}. In 2022, lung cancer had the highest incidence and mortality rates of all cancers worldwide~\cite{international_agency_for_research_on_cancer_trachea_2024}. In particular, in upper-middle-income countries, there has been a significant increase in lung cancer-related deaths, with a rise of 442,000 deaths, more than 2.5 times the increase in deaths of the combined three other income groups~\cite{world_health_organization_top_2024}.
+
+Efforts to reduce lung cancer mortality by screening have been hampered by the aggressive and diverse nature of the disease~\cite{national_lung_screening_trial_research_team_reduced_2011}. For example, low-dose \ac{ct} screening helps diagnose lung cancer more precisely and produces a reduction of 20\% in mortality. Today, the classification of a pulmonary nodule depends on measuring its growth rate from multiple \ac{ct} scans and following it for approximately two years to avoid performing a biopsy, which entails risks for patients and additional costs for healthcare entities. However, one significant drawback of conducting slice-by-slice \ac{ct} scans in lung cancer detection is that they are challenging for doctors since the process of obtaining this data is time-consuming, expensive, prone to reader bias, and requires a high degree of competence and concentration~\cite{shaffie_computer-assisted_2022}.
+
+As medical data becomes more complex, there is a growing need for models that can effectively integrate and analyze this data to support clinical decision-making~\cite{iqbal_fusion_2023}. \ac{cad} is increasingly being investigated as an alternative and complementary approach to conventional reading, as it avoids many of these issues. Automated nodule diagnostic systems can save both time and money while avoiding the risks of invasive surgical procedures. The noninvasive \ac{cad} system for lung nodule diagnosis is promising and has achieved high accuracy from a single \ac{ct} scan~\cite{shaffie_computer-assisted_2022}.
+
+The combined gains in medical imaging and \ac{dl} complement new approaches that are accurate and allow safer disease recognition. \ac{dl} models can overcome projections that show how medical images are analyzed to locate and determine the type of lung abnormalities that commonly cause cancer.
+
+
+\section{Problem}\label{sec:problem}
+This thesis addresses the need for a more accurate and reliable diagnostic tool. Existing diagnostic systems, primarily based on \ac{dl} models, have certain limitations regarding the accuracy and generalization of medical image datasets. These models are often based on deep features from neural networks, which can overshadow superficial features such as texture and shape that are important for accurately classifying nodules.
+
+In addition, the lack of explainability of the model poses a challenge in clinical contexts, which can limit its reliability in making critical medical decisions. The inability to provide interpretable information hinders the adoption of these methods for diagnosing lung cancer.
+
+
+\section{Hypothesis}\label{sec:hypothesis}
+Feature extraction is critical for the characterization task. 
+Although \acp{dnn}, are widely used to extract deep features, shallow features - such as texture and shape - can also be derived using traditional extractors. State-of-the-art works show that combining shallow and deep features can improve the effectiveness of \ac{dl} models in lung nodule characterization~\cite{xie_fusing_2018}.
+These advancements highlight the need for further research in \ac{dl} and information fusion to prompt early detection, reduce mortality, and provide more effective treatment strategies for lung cancer patients.
+
+We hypothesize that information fusion-based model approaches, with shallow and deep features, will result in a more accurate and reliable model for lung cancer characterization, making it better suited for early detection and precise diagnosis. We seek to overcome the current state-of-the-art limitations in automatic lung cancer diagnostics, offering a solution that not only improves prediction accuracy but also has the potential to assist in clinical decision-making and medical practice.
+
+
+\section{Motivation}\label{sec:motivation}
+
+Promoting the improvement of human life and health through the early detection of diseases continues to be a concern worldwide. Lung cancer is an enemy of public health care, and the development of early and accurate diagnostic tools will help improve survival rates.
+This research aims to contribute to the goal of promoting health by harnessing modern technologies to address one of the most significant diagnostic issues in oncology today. By developing models that support more precise care, this dissertation aligns with the global imperative to promote well-being for all.
+
+
+\section{Research Questions}\label{sec:questions}
+We will break it down into three research questions to bring clarity and precision to the hypothesis. These questions will guide the investigation, helping us understand our hypothesis' main points.
+
+\begin{enumerate}
+    \item \textbf{Does fusing information from shallow and deep feature extractors improve classification or generalization performance when compared to using a deep approach only?}\\
+    \item \textbf{How does the fusion approach behave under varying dataset conditions, such as different sample sizes, bounding‐box definitions, and image representations?}\\
+    \item \textbf{In what ways does information fusion contribute to the explainability of lung nodule malignancy predictions?}\\
+\end{enumerate}
+
+
+
+
+

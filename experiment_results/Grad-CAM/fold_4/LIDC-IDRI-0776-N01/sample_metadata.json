@@ -1,0 +1,15 @@
+{
+  "file_base": "LIDC-IDRI-0776-N01",
+  "fold_idx": 4,
+  "batch_idx": 1,
+  "img_idx": 58,
+  "fused_model_prediction": 1,
+  "non_fused_model_prediction": 0,
+  "label": 1.0,
+  "timestamp": "2025-06-30T04:12:31.409922",
+  "input_shape": [
+    1,
+    32,
+    32
+  ]
+}

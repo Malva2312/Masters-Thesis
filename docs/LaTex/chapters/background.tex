@@ -1,0 +1,689 @@
+\chapter{Theoretical Background}\label{chap:background}
+
+\section{Medical and Clinical Context}\label{sec:med_context}
+
+\subsection{Lung Cancer}
+
+Most of the lung cancer cases diagnosed at a symptomatic stage are related to the primary or metastatic disease or some paraneoplastic syndrome. The process of patient evaluation involves physical examination, \ac{ct} scans of the thorax and abdomen, pulmonary function tests, laboratory tests, monitoring patient weight loss and retrieving tumor tissue to perform histologic diagnosis, in order to determine the stage of the disease based on the international \ac{tnm} staging system~\cite{minna_focus_2002, watanabe_tnm_2003}.
+
+Four major histologic lung cancer types comprise the majority of them, including small cell lung cancer and three non-small cell lung cancer types~\cite{travis_pathology_2011}.
+Small cell lung cancer and squamous cell carcinoma arise mainly in the central airways, while adenocarcinomas are located more peripherally. The large-cell carcinoma is less differentiated from the other non-small cell lung cancer types and arises from metaplastic changes resulting from smoking.
+
+Patients with small-cell lung cancer confined to the chest undergo treatment that includes thoracic radio and chemotherapy. In contrast, patients with more advanced stages of the disease receive chemotherapy along with various other drug combinations. Treatments normally result in tumor shrinkage, symptom relief, and an increase in median survival~\cite{minna_focus_2002}.
+
+On the other hand, patients with non-small cell lung cancer whose disease is confined to the chest undergo surgical evaluation of the mediastinum to check for lymph node involvement. More recently, they have also been subjected to \ac{pet} scans, a functional imaging technique that detects radiotracer uptake to assess metabolic activity, providing complementary information ~\cite{buzug_computed_2011}.
+In the cases where there is no evidence of mediastinal lymph node involvement or distant metastatic disease, patients have surgical resection of the primary tumor. Those with mediastinal lymph node involvement are submitted either to (1) preoperative chemotherapy followed by an attempt at surgical resection, as in the previous case, or (2) a combination of chemotherapy and chest radiotherapy administered as part of a curative treatment strategy. These therapies may not cure the condition, but they can relieve symptoms and extend life by 2 to 10 months~\cite{minna_focus_2002}.
+
+
+\subsection{Lung Nodule}
+According to \textcite{baum_incidental_2024, loverdos_lung_2019}, a lung nodule can be defined "as a more or less round, well-demarcated lesion measuring up to 3 cm in diameter".
+
+Lung nodules in \ac{ct} imaging are classified into three distinct categories based on their attenuation: solid nodules, the most common form, characterized by a consistent homogeneous soft-tissue attenuation; ground-glass nodules, which present a non-uniform appearance with a hazy increase in local attenuation of the lung parenchyma, while still clearly displaying the underlying bronchial and vascular structures; and part-solid nodules, which include both solid and ground-glass attenuation components~\cite{loverdos_lung_2019}.
+
+Incidental detection of pulmonary nodules is prevalent, occurring in up to 75\% of \ac{ct} scans performed for other clinical reasons, with more than half of patients presenting with two or more nodules. In this context, morphological assessment by \ac{ct} plays a crucial role in stratifying the risk of malignancy. Specific benign lesions show characteristic morphological patterns that allow for non-invasive diagnosis. For example, granulomas often show central, laminar, or diffuse calcifications, while the presence of "popcorn" calcifications is pathognomonic of hamartomas. In addition, well-defined perifissural nodules are generally benign lymph nodes with an extremely low risk of malignancy~\cite{baum_incidental_2024}.
+
+The increasing occurrence of incidental findings in asymptomatic individuals undergoing imaging poses notable challenges in clinical practice. One major issue is the overestimation of minor nodule volumes due to the partial volume effect, which can result in inaccurate assessments and potential misclassification~\cite{larici_lung_2017}. Additionally, distinguishing between benign and malignant nodules is complex, potentially resulting in delayed diagnoses or unnecessary invasive procedures.
+This diagnostic uncertainty is worsened by the absence of standardized and reliable management algorithms, which are essential for the timely detection and treatment of malignant lesions~\cite{loverdos_lung_2019}.
+
+By effectively addressing these challenges and accurately interpreting imaging characteristics to assess the risk of malignancy, healthcare providers can improve the precision of screening practices. This strategy significantly decreases the need for unnecessary invasive diagnostic procedures, ultimately leading to safer, more efficient, and cost-effective clinical follow-up for patients.
+
+\section{Medical Imaging and CT Scans}\label{sec:med_image}
+
+\subsection{Computed Tomography}\label{subsec:ct}
+
+\acf{ct} is an imaging modality that uses X-ray technology to generate detailed cross-sectional images of the body by measuring the attenuation of X-ray beams as they pass through different tissues.
+The attenuation caused by the absorption and scattering of some photons prevents them from reaching the detector, resulting in a record of this variation at different angles during a complete rotation.
+The projections are then reconstructed in a 3D volume made up of volumetric pixels (voxels). Each pixel is assigned a \ac{ct} number, measured in \ac{hu}, which reflects the local attenuation of the X-rays corresponding to the density of the tissue (air has -1000 \ac{hu}, water has 0 \ac{hu}, and values above 400 \ac{hu} indicate the density of hard tissues)~\cite{rodrigues_efficient-proto-caps_2025}. In spatial resolution, each voxel shares the respective dimension with the pixels present in the X and Y axes of the image, while the slice thickness determines the Z dimension~\cite{cantatore_introduction_2011, buzug_computed_2011, mazonakis_computed_2016}.
+
+The process of generating a \ac{ct} scan involves several key steps: scanning of an object with a specific configuration and parameters (such as magnification, orientation, X-ray energy); reconstruction of 2D projections in a 3D vortex matrix; determining a threshold value for accurate segmentation; generating surface or volume data; and conducting dimensional measurements or geometric analysis~\cite{cantatore_introduction_2011}.
+
+\subsection{Screening Challenges}
+
+When tasked with evaluating the malignancy of lung nodules, the first step is to segment the lung parenchyma\footnote{The functional tissue of an organ as distinguished from the connective and supporting tissue.
+}, followed by the segmentation of the nodules. Large solid nodules ($> 10 mm$) present a unique challenge for identification, as they have a different intensity range compared to smaller lesions.
+Predicting lung cancer at an early stage using \ac{ct} images poses significant challenges for radiologists. This process requires a significant investment of time and resources, and it is susceptible to errors. Screening requires a high level of concentration and expertise due to various factors, including low contrast variation, heterogeneity, and the visual similarities between benign and malignant nodules~\cite{jassim_systematic_2022}.
+
+Accurate detection of lung nodules is a difficult task in the field of medical imaging. The nodules are often extremely unbalanced, exhibiting high intra-class variance, and the complex structure of the lungs further complicates this issue.
+
+
+\section{Handcrafted Features in Radiomics}\label{sec_features}
+
+Radiomics is a topic of much discussion in the fields of nuclear medicine and medical imaging. It aims to extract quantitative and reproducible insights from diagnostic images by capturing complex patterns that are often difficult for the human eye to recognize or measure~\cite{cantatore_introduction_2011}.
+
+These features can be classified into the following categories: statistical, which includes histogram-based and texture-based; model-based; transform-based; and shape-based, derived from the type of information that is extracted and the way it is extracted
+~\cite{cantatore_introduction_2011, abbasian_ardakani_interpretation_2022}.
+To enhance readability, we use the term \ac{roi} to refer to both 2D areas and 3D volumes.
+
+In the following sections, we will provide an overview of the features used in this thesis, as well as others that help to understand them.
+
+\subsection{First-Order Features}
+
+\acf{fof}, often known as histogram-based features or intensity features, describe the distribution of voxel intensities within a region of interest and are derived from the histogram of an image. These features are computed using the gray-level histogram and provide the simplest information extracted from the image. They specifically reflect individual voxel intensities without taking into account any relationships with neighboring voxels~\cite{abbasian_ardakani_interpretation_2022}.
+
+We will assume the following foundational premises~\cite{van_griethuysen_computational_2017}:
+\begin{itemize}
+  \item $\mathbf{X}$ is the set of $N_p$ voxels included in the \ac{roi}.
+  \item $\mathbf{P}(i)$ is the first-order histogram with $N_g$ discrete intensity levels, where $N_g$ is the number of non-zero bins, equally spaced from 0 with a width defined by the \texttt{binWidth} parameter.
+  \item $p(i)$ is the normalized first-order histogram, defined as $p(i) = \frac{\mathbf{P}(i)}{N_p}$.
+\end{itemize}
+
+\subsubsection*{Energy}
+Energy serves as a quantitative measure of the magnitude of voxel values within an image. Higher voxel values indicate a greater cumulative total of the squares of these values, reflecting enhanced intensity characteristics within the image data.
+
+\begin{equation}
+    \textit{energy} = \displaystyle\sum^{N_p}_{i=1}{(\textbf{X}(i))^2}
+\end{equation}
+
+\subsubsection*{Total Energy}
+Total Energy represents the quantitative measure of the Energy feature, adjusted by the volume of the voxel, expressed in cubic millimeters.
+
+\begin{equation}
+    \textit{total energy} = V_{voxel}\displaystyle\sum^{N_p}_{i=1}{(\textbf{X}(i))^2}
+\end{equation}
+
+\subsubsection*{Entropy}
+Entropy is a quantitative measure of the uncertainty and randomness inherent in image voxel values, capturing the average information content required for the encoding of those values.
+
+\begin{equation}
+    \textit{entropy} = -\displaystyle\sum^{N_g}_{i=1}{p(i)\log_2\big(p(i)\big)}
+\end{equation}
+
+\subsubsection*{Minimum}
+This feature refers to the smallest gray level intensity value within the \ac{roi}, representing the lowest voxel value detected in the analyzed area.  
+\begin{equation}
+    \textit{minimum} = \min(\textbf{X})
+\end{equation}
+
+\subsubsection*{10$^{\text{th}}$ percentile}
+This value indicates that 10\% of the gray level intensities within the \ac{roi} fall below this threshold.
+This metric offers insight into the lower end of the intensity distribution, assisting in characterizing the presence of darker regions. 
+
+\subsubsection*{90$^{\text{th}}$ percentile}
+This value signifies that 90\% of the gray level intensities in the \ac{roi} are below this mark.
+The 90$^{\text{th}}$ percentile underscores the upper range of intensity distribution, highlighting the presence of brighter regions.  
+
+\subsubsection*{Maximum}
+ This denotes the largest gray level intensity value found within the \ac{roi}, reflecting the highest voxel value identified in the analyzed area and representing the brightest point within that region.  
+\begin{equation}
+    \textit{maximum} = \max(\textbf{X})
+\end{equation}
+
+\subsubsection*{Mean}
+The mean refers to the average gray level intensity calculated from all voxel values within the given \ac{roi}.
+\begin{equation}
+    \textit{mean} = \frac{1}{N_p}\displaystyle\sum^{N_p}_{i=1}{\textbf{X}(i)}
+\end{equation}
+
+\subsubsection*{Median}
+The median refers to the middle value of gray-level intensities within the \ac{roi} when the values from the voxels are ordered. 
+
+\subsubsection*{Interquartile Range}
+The \acf{iqr} is defined as the difference between the 75th percentile ($\mathbf{P}_{75}$) and the 25th percentile  ($\mathbf{P}_{25}$) of a data set. 
+
+\begin{equation}
+    \textit{IQR} = \textbf{P}_{75} - \textbf{P}_{25}
+\end{equation}
+
+
+
+\subsubsection*{Range}
+The range of a dataset is calculated as the difference between the maximum and minimum values of the observed data.
+\begin{equation}
+    \textit{range} = \max(\textbf{X}) - \min(\textbf{X})
+\end{equation}
+
+\subsubsection*{Mean Absolute Deviation}
+The \acf{mad} quantifies the average distance of all intensity values from the overall mean value of the image array. This statistic provides insights into the degree of variation present within the intensity levels.
+\begin{equation}
+    \textit{MAD} = \frac{1}{N_p}\displaystyle\sum^{N_p}_{i=1}{|\textbf{X}(i)-\bar{X}|}
+\end{equation}
+
+\subsubsection*{Robust Mean Absolute Deviation}
+The \acf{rmad} measures the average distance of intensity values from the mean calculated from a subset of the image array. This subset consists of gray levels that fall within the range of the 10th to the 90th percentiles.
+\begin{equation}
+\textit{rMAD} = \frac{1}{N_{10-90}}\displaystyle\sum^{N_{10-90}}_{i=1}
+      {|\textbf{X}_{10-90}(i)-\bar{X}_{10-90}|}
+\end{equation}
+
+\subsubsection*{Root Mean Squared}
+\acf{rms} is defined as the square root of the mean of the squared intensity values. This metric serves as an alternative measure of the overall magnitude of the image values.
+\begin{equation}
+    \textit{RMS} = \sqrt{\frac{1}{N_p}\sum^{N_p}_{i=1}{(\textbf{X}(i))^2}}
+\end{equation}
+
+%\subsubsection*{Standard Deviation}
+%\begin{equation}
+%\textit{standard deviation} = \sqrt{\frac{1}{N_p}\sum^{N_p}_{i=1}{(\textbf{X}(i)-\bar{X})^2}}
+%\end{equation}
+%
+\subsubsection*{Skewness}
+Skewness quantifies the asymmetry of a distribution in relation to its mean. It indicates whether the distribution's tail extends more towards the higher or lower values, which results in positive or negative skewness depending on the concentration of the data.
+\begin{equation}
+    \textit{skewness} = \displaystyle\frac{\mu_3}{\sigma^3} =
+        \frac{\frac{1}{N_p}\sum^{N_p}_{i=1}{(\textbf{X}(i)-\bar{X})^3}}
+        {\left(\sqrt{\frac{1}{N_p}\sum^{N_p}_{i=1}{(\textbf{X}(i)-\bar{X})^2}}\right)^3}
+\end{equation}
+Having $\mu_3$ as the 3$^{\text{rd}}$ central moment.
+
+\subsubsection*{Kurtosis}
+Kurtosis is a statistical measure that describes the 'peakedness' of the distribution of values within the image \ac{roi}. A higher kurtosis indicates that the distribution's mass is concentrated towards the tails rather than the mean. Conversely, a lower kurtosis suggests that the mass is more focused around a spike near the mean value.
+\begin{equation}
+    \textit{kurtosis} = \displaystyle\frac{\mu_4}{\sigma^4} =
+        \frac{\frac{1}{N_p}\sum^{N_p}_{i=1}{(\textbf{X}(i)-\bar{X})^4}}
+        {\left(\frac{1}{N_p}\sum^{N_p}_{i=1}{(\textbf{X}(i)-\bar{X}})^2\right)^2}
+\end{equation}
+Having $\mu_4$ as the 4$^{\text{th}}$ central moment.
+\subsubsection*{Variance}
+Variance is defined as the mean of the squared distances of each intensity value from the overall mean value. By definition, variance is represented as $\sigma^2$.
+\begin{equation}
+    \textit{variance} = \frac{1}{N_p}\displaystyle\sum^{N_p}_{i=1}{(\textbf{X}(i)-\bar{X})^2}
+\end{equation}
+
+\subsubsection*{Uniformity}
+Uniformity quantifies the sum of the squares of intensity values, serving as an indicator of an image array's homogeneity. Higher uniformity signifies greater homogeneity and a reduced range of discrete intensity values.
+\begin{equation}
+    \textit{uniformity} = \displaystyle\sum^{N_g}_{i=1}{p(i)^2}
+\end{equation}
+
+
+\subsection{Texture-based Features}
+In the words of \textcite{kaur_review_2021}, "A textural feature is nothing more than a recurrent arrangement of information in a visual representation". 
+
+Textures provide valuable information about an object's material properties, spatial organization, and surrounding environment.
+Since the textural properties of images contain helpful information for distinguishing between different objects, it is essential to incorporate texture features into the analysis~\cite{haralick_textural_1973}.
+
+By extracting these texture features, we can improve the ability of algorithms to differentiate between various classes of images and identify specific patterns within them. 
+
+\subsubsection{Gray-Level Co-Occurrence Matrix}
+The \acf{glcm} is a statistical method used to analyze textures by considering the spatial relationships between pixels. This technique characterizes an image's texture by quantifying how frequently pairs of pixels with specific values occur in a defined spatial arrangement~\cite{zulpe_glcm_2012}.
+
+In the generation of a \ac{glcm}, each element located at position (i, j) represents the aggregated count of occurrences where a pixel with the intensity value i is found in a specific spatial relationship to a pixel with the intensity value j within the given input image. This matrix captures the frequency of pixel value pairs at a defined distance and orientation, thereby providing insights into the spatial distribution of pixel intensities. Essentially, for each pair of pixel values (i, j), the \ac{glcm} tallies how many times pixels of value i are adjacent to pixels of value j according to the chosen configuration, such as horizontal, vertical, or diagonal arrangements~\cite{zulpe_glcm_2012}.
+
+\subsubsection{Haralick Features}
+Based on the \ac{glcm}, also referred to in earlier literature as the \acf{gtsdm}, \textcite{haralick_textural_1973} proposed a comprehensive suite of 28 textural features that could be extracted from each image matrix. They collected four values for each of the 14 measures and then calculated the average and range for each measure based on these four values~\cite{haralick_textural_1973, zulpe_glcm_2012}. This resulted in a total of 28 features that could be used as inputs for a classifier. 
+
+Let us first establish the needed notation for the calculation of the 14 features:
+
+\begin{itemize}
+
+  \item $p(i,j)$: Normalized value of the \ac{glcm} at row $i$ and column $j$.
+  
+  \item $p_x(i)$: $i$$^{\text{th}}$ entry in the marginal-probability matrix obtained by summing the rows of $p(i,j)$,\\
+  $p_x(i) = \sum_{j=1}^{N_g} p(i,j)$.
+  
+  \item $N_g$: Number of distinct gray levels  in the quantized
+ image (size of the \ac{glcm})
+  
+  \item $\sum_i$ and $\sum_j$, shorthand for $\sum_{i=1}^{N_g}$ and $\sum_{j=1}^{N_g}$, respectively.
+  
+  \item $p_y(j) = \sum_{i=1}^{N_g} p(i,j)$
+  
+  \item $p_{x+y}(k) = \sum_{\substack{i=1 \\ j=1 \\ i+j=k}}^{N_g} p(i,j), \quad k = 2,3,\ldots,2N_g$
+  
+  \item $p_{x-y}(k) = \sum_{\substack{i=1 \\ j=1 \\ |i-j| = k}}^{N_g} p(i,j), \quad k = 0,1,\ldots,N_g - 1$
+\end{itemize}
+
+The presented equations define the proposed features:
+\begin{enumerate}
+\newcommand{\tightitem}[1]{\begin{samepage}\item #1\end{samepage}}
+    \item \textbf{Angular Second Moment:}\\
+    \acf{asm} quantifies the homogeneity of an image and is defined as~\cite {haralick_textural_1973}:
+        \begin{equation}
+            \text{ASM} = \sum_{i} \sum_{j} p(i,j)^2
+        \end{equation}
+    When the pixels present in a given image are very similar, the \ac{asm} value will be significant. In a quantization scheme with $(N_g)$ gray levels, a uniform image will have only one entry in the \ac{glcm}, resulting in a maximum \ac{asm} value of 1. In contrast, given an image that is filled completely randomly, all entries of the $(N_g \times N_g)$ \ac{glcm} matrix will be equally represented, with the probability of each entry defined by $p(i, j) = {1}/{N_g^2}$.
+    This results in the minimum \ac{asm} value being ${1}/{N_g^2}$~\cite{oprisan_bounds_2023}.
+
+    High energy values are indicative of a constant or periodic gray-level distribution. Energy is defined within a normalized range, and the \ac{glcm} of an image with lower homogeneity will display numerous small entries~\cite{oprisan_bounds_2023}.
+    
+    \item \textbf{Contrast:}\\
+    Contrast measures the local variations present in the image and is defined as follows~\cite {haralick_textural_1973}:
+        \begin{equation}
+            \text{Contrast} = \sum_{n=0}^{N_g - 1} n^2 \left[ \sum_{i=1}^{N_g} \sum_{j=1}^{N_g} p(i,j) \quad \text{where} \quad |i - j| = n \right]
+        \end{equation}
+        
+    \item \textbf{Correlation:}\\
+    Correlation explains the relationship between a reference pixel and its neighbor: 0 signifies no correlation, while 1 indicates perfect correlation. This measure is analogous to the known Pearson correlation coefficient~\cite{oprisan_bounds_2023}.
+        \begin{equation}
+            \text{Correlation} = \frac{\sum_{i} \sum_{j} (i - \mu_i)(j - \mu_j) p(i,j)}{\sigma_i \sigma_j}
+        \end{equation}
+    $\mu_i$: Mean of row marginals: $\mu_i = \sum_{i=1}^{N} i \cdot \sum_{j=1}^{N} p(i,j)$ \\
+    $\mu_j$: Mean of column marginals: $\mu_j = \sum_{j=1}^{N} j \cdot \sum_{i=1}^{N} p(i,j)$ \\
+    $\sigma_i$: Standard deviation of row marginals. \\
+    $\sigma_j$: Standard deviation of column marginals.\\
+        
+    \item \textbf{Variance:}\\
+    Variance, also known as the Sum of Squares, measures how the values are dispersed around the mean of reference and neighboring pixels. 
+    Its value increases when the gray-level values deviate from their mean~\cite{oprisan_bounds_2023}.
+        \begin{equation}
+            \text{Variance} = \sum_{i} \sum_{j} (i - \mu)^2 p(i,j)
+        \end{equation}
+      $\mu$: Mean intensity of the \ac{glcm}: $\mu = \frac{1}{N_g}\sum_{i=1}^{N_g} \sum_{j=1}^{N_g} p(i,j)$ \\
+    
+    \item \textbf{Inverse Difference Moment:}\\
+    \acf{idm} measures the homogeneity of an image by giving larger values to smaller gray-tone differences between pairs of elements. This metric is particularly sensitive to near-diagonal elements in the \ac{glcm}. \ac{idm} reaches its maximum value when all elements in the image are identical~\cite{oprisan_bounds_2023}.
+    Its definition is as follows:
+        \begin{equation}
+            \text{IDM} = \sum_{i=1} \sum_{j=1} \frac{p(i,j)}{1 + (i - j)^2}
+        \end{equation}
+        
+    \item \textbf{Sum Average:}\\
+    Represent the sum of the average of all gray levels.
+        \begin{equation}
+            \text{Sum Average} = \sum_{i=2}^{2N_g} i \cdot p_{x+y}(i)
+        \end{equation}
+        
+    \item \textbf{Sum Variance:}\\
+    It represents a heterogeneity measure that assigns higher weights to intensity level pairs from neighbors that deviate more from the mean~\cite{oprisan_bounds_2023}.
+        \begin{equation}
+            \text{Sum Variance} = \sum_{i=2}^{2N} (i - \text{Sum Average})^2 p_{x+y}(i)
+        \end{equation}  
+        
+    \item \textbf{Sum Entropy:}\\
+    Sum entropy measures the non-uniformity present in an image, and in this case, the complexity of the texture~\cite{oprisan_bounds_2023}.
+    
+        \begin{equation}
+            \text{Sum Entropy} = -\sum_{i=2}^{2N} p_{x+y}(i) \log p_{x+y}(i)
+        \end{equation}
+        Since some of the probabilities may be zero, and $log(0)$ is not defined, \textcite{haralick_textural_1973} recommended that the term $log (p + \epsilon)$ be used in place of $log (p)$ in entropy computations, having $\epsilon$ as an arbitrarily small positive constant.
+        
+    \item \textbf{Entropy:}\\
+    Entropy measures the complexity or randomness within an image by analyzing the distribution of values in the \ac{glcm}. It reaches its maximum when all entries in the \ac{glcm} are equally probable, indicating a state of maximum disorder. Also known as "Shannon entropy," this metric is high when the matrix contains a wide variety of small, non-uniform values, which reflects complex and heterogeneous textures~\cite{oprisan_bounds_2023}.
+        \begin{equation}
+            \text{Entropy} = -\sum_{i} \sum_{j} p(i,j) \log p(i,j)
+        \end{equation}
+    Since entropy is inversely related to \ac{asm} (or Energy), images with intricate, non-repetitive patterns tend to exhibit high entropy and low Energy.
+        
+    \item \textbf{Difference Variance:}\\
+    Represents the variance of the difference between gray levels.
+        \begin{equation}
+            \text{Difference Variance} = \sum_{k}^{2N_g} (k - \text{DA})^{2} p_{x-y}(k)
+        \end{equation}
+
+    Where Difference Average: \quad {DA} = $\sum_k^{2N_g} k p_{x-y}(k)$ 
+        
+    \item \textbf{Difference Entropy:}\\
+    Difference entropy is a quantitative measure used to assess the level of randomness or disorder present in the contrast of an image~\cite{oprisan_bounds_2023}.
+        \begin{equation}
+            \text{Difference Entropy} = -\sum_{i=0}^{N_g-1} p_{x-y}(i) \log p_{x-y}(i)
+        \end{equation}
+        
+    \item 13. \textbf{Information Measures of Correlation}\\
+    \acf{imc} involves analyzing different parameters using various techniques. Mutual information is normalized, and information correlation is set to infinity when the denominator is zero~\cite{oprisan_bounds_2023}.
+        \begin{equation}
+            \text{IMC1} = \frac{HXY - HXY1}{\max(HX, HY)}
+        \end{equation}
+        \begin{equation}
+            \text{IMC2} = \sqrt{1 - \exp[-2(HXY2 - HXY)]}
+        \end{equation}
+
+    Where: \\
+        $HXY$: Entropy of $P(i,j)$: $HXY = - \sum_{i=1}^{N} \sum_{j=1}^{N} p(i,j) \log p(i,j)$ \\
+        $HX$: Entropy of $p_x(i) = \sum_{j} p(i,j)$: $HX = -    \sum_{i=1}^{N} p_x(i) \log p_x(i)$ \\
+        $HY$: Entropy of $p_y(j) = \sum_{i} p(i,j)$: $HY = - \sum_{j=1}^{N} p_y(j) \log p_y(j)$ \\
+        $HXY1$: $HXY1 = - \sum_{i=1}^{N} \sum_{j=1}^{N} p(i,j) \log \left( p_x(i) \cdot p_y(j) \right)$ \\
+        $HXY2$: $HXY2 = - \sum_{i=1}^{N} \sum_{j=1}^{N} p_x(i) \cdot p_y(j) \log \left( p_x(i) \cdot p_y(j) \right)$ \\
+    \setcounter{enumi}{13}
+    
+    \item \textbf{Maximal Correlation Coefficient:}\\
+        \begin{equation}
+            \text{MCC} = \sqrt{\text{second largest eigenvalue of} Q}
+        \end{equation}
+    Where Matrix with $Q(i,j) = \frac{p(i,j)}{p_x(i)p_y(j)}$ \\
+    
+    The matrix Q can be seen as the transition matrix for a Markov chain that represents the gray levels of neighboring pixels. The \acf{mcc} indicates the rate at which the Markov chain converges; it serves as a measure of the texture's complexity, whose values range from 0 to 1, inclusive~\cite{oprisan_bounds_2023}.
+\end{enumerate}
+
+
+
+\subsection{2D Shape-based Features}
+In this collection of shape features, descriptions of the 2D dimension and form of the \ac{roi} were incorporated. These characteristics are not influenced by the gray level intensity distribution and are consequently computed solely on the original image and mask.
+We will assume the following foundational premises~\cite{van_griethuysen_computational_2017}:
+\begin{itemize}
+    \item $N_p$ represents the number of pixels included in the region of interest
+    \item $N_f$ represents the number of lines defining the perimeter of the Mesh.
+    \item $A$ is the surface area of the Mesh in $mm^2$
+    \item $P$ is the perimeter of the Mesh in $mm$
+\end{itemize}
+
+\subsubsection*{Mesh Surface}
+To calculate the surface area, first, the signed areas, \(A_i\), of each triangle are computed. The total surface area is then obtained by summing all of these calculated sub-areas. The use of signed areas ensures that we accurately determine the surface area - negative areas from triangles that fall outside the \ac{roi} will cancel out the excess area contributed by triangles that are partially inside and partially outside the \ac{roi}.
+\begin{equation}
+    A_i = \frac{1}{2}\text{Oa}_i \times \text{Ob}_i \text{ (1)}
+\end{equation} \\
+\begin{equation}
+    A = \displaystyle\sum^{N_f}_{i=1}{A_i} \text{ (2)}
+\end{equation}
+Where $O_ia_i$ are edges of the $i^{th}$ triangle present in the Mesh, formed by the $a_i,b_i$ of the perimeter and the origin $O$.
+
+\subsubsection*{Pixel Surface}
+The surface area of the \ac{roi} $A_{pixel}$ is estimated by multiplying the number of pixels in the \ac{roi} by the surface area of a single pixel $A_k$.
+\begin{equation}
+    A_{pixel} = \displaystyle\sum^{N_v}_{k=1}{A_k}    
+\end{equation}
+
+\subsubsection*{Perimeter}
+The perimeter of each individual line within the Mesh is systematically calculated, and the overall perimeter is derived by summing these values.
+\begin{equation}
+    P_i = \sqrt{(\text{a}_i-\text{b}_i)^2} \text{ (1)}
+\end{equation}\\
+\begin{equation}
+    P = \displaystyle\sum^{N_f}_{i=1}{P_i} \text{ (2)}
+\end{equation}
+Where $a_i$ and $b_i$ are vertices of the $i^{th}$ line in the perimeter.
+\subsubsection*{Perimeter to Surface ratio}
+The perimeter-to-surface ratio is not dimensionless, which results in it being dependent on the surface area of the \ac{roi}. With this feature, lower values are indicative of a more compact shape (circle-like).
+\begin{equation}
+    \textit{perimeter to surface ratio} = \frac{P}{A}
+\end{equation}
+
+\subsubsection*{Sphericity}
+Sphericity is a ratio between the perimeter of the tumor region and the perimeter of a circle with the same surface area as the tumor region, resulting in a measure of the roundness of the tumor shape relative to a circle.
+The possible values range from 0 to 1, where 1 is indicative of a perfect circle shape.
+
+\begin{equation}
+    \textit{sphericity} = \frac{2\pi R}{P} = \frac{2\sqrt{\pi A}}{P}
+\end{equation}
+Where $R$ is the radius of the circle with the same surface as the \ac{roi}, and equal to $\sqrt{\frac{A}{\pi}}$
+
+%\subsubsection*{Spherical Disproportion}
+%\begin{equation}
+%    \textit{spherical disproportion} = \frac{P}{2\sqrt{\pi A}}
+%\end{equation}
+
+\subsubsection*{Maximum 2D diameter}
+The maximum diameter refers to the greatest pairwise Euclidean distance between the vertices of the tumor surface mesh.
+
+\subsubsection*{Major Axis Length}
+This feature indicates the length of the largest axis of the ellipsoid that encompasses the \ac{roi}, computed from the largest principal component, $\lambda_{major}$.
+\begin{equation}
+    \textit{major axis} = 4 \sqrt{\lambda_{major}}
+\end{equation}
+
+\subsubsection*{Minor Axis Length}
+Similar to the previous feature, the minor axis length indicates the length of the second-largest axis of the ellipsoid that encompasses the \ac{roi}, computed from the largest principal component, $\lambda_{minor}$.
+\begin{equation}
+     \textit{minor axis} = 4 \sqrt{\lambda_{minor}}
+\end{equation}
+
+\subsubsection*{Elongation}
+Elongation is the result of the relation between the two largest principal components in the \ac{roi} shape. The resultant values range between 1 (non-elongated) and 0 (maximally elongated, e.g., a $1D$ line).
+\begin{equation}
+    \textit{elongation} = \sqrt{\frac{\lambda_{minor}}{\lambda_{major}}}
+\end{equation}
+
+
+
+\subsection{Transform-based Features}
+
+\subsubsection{Absolute gradient matrix}
+Facing the fact that first, second, and higher-order features cannot capture the variation degree of intensity across images, the image gradient has plenty of space to address and overcome this challenge~\cite{abbasian_ardakani_interpretation_2022}.
+
+Considering this problem, the ~\acf{agm} is able to provide information about spatial intensity changes across images, as high and low gradients are representative of abrupt and smooth variations of intensity, respectively.
+
+Given an absolute gradient matrix, the $AGM(i,j)$ contains information about intensity variations in a particular neighborhood. Here, $i$ and $j$ represent the number of central pixels in an $n \times n$ window, corresponding to the vertical and horizontal directions in an image of dimensions $m \times m$, where $i = j = m - (n - 1)$. Each \ac{agm} element is an \ac{agv} determined by the gradients in the "x" (Gx) and "y" (Gy) directions~\cite{abbasian_ardakani_interpretation_2022}.
+
+\subsubsection{Histogram of Oriented Gradients}
+
+Since \ac{agm} features only describe the magnitude of gradients within images and do not provide the direction of gradients, \textcite{dalal_histograms_2005} introduced the \acf{hog} to determine both the magnitude and direction of gradients within images.
+
+\ac{hog} is analogous to \ac{agm} but specifically measures gradients using $G_x$ and $G_y$, where $\theta = \arctan(G_y/G_x)$. It outlines the direction of edges in images, enabling \ac{hog} features to function as descriptors for local objects and respective shapes~\cite{abbasian_ardakani_interpretation_2022}.
+
+These features are derived by binning orientations to ascertain the gradient magnitudes at specific angles. For unsigned and signed gradients, the bins extend from $0^\circ$ to $180^\circ$ and $0^\circ$ to $360^\circ$, respectively. When utilizing eight bins, gradients are represented at $22.5^\circ$ and $45^\circ$ intervals.
+
+\ac{hog} features reflect the magnitudes of gradients at predetermined orientations, with the number of parameters contingent upon the bin count.
+
+
+\subsubsection{Local Binary Pattern}
+
+\acf{lbp} operator functions as a gray-scale invariant texture measure based on a definition of texture within a local neighborhood. For each pixel, a binary code is created by comparing its value to that of the center pixel, and a histogram is compiled to record the occurrences of various binary patterns~\cite{pietikainen_image_2005, abbasian_ardakani_interpretation_2022}.
+
+
+The notation employed for the \ac{lbp} operator is denoted as $\text{LBP}(_{P, R})^{u2}$.
+In this context, the subscript signifies the application of the operator within a \textbf{(P, R)} neighborhood configuration. The superscript \textbf{u2} indicates the utilization of uniform patterns exclusively, categorizing all non-uniform patterns under a singular label.
+Following the computation of the \ac{lbp}-labeled image, denoted as f$_{l}$(x,y), one can subsequently define the \ac{lbp} histogram, which provides a representation of the distribution of these labeled patterns within the image~\cite{pietikainen_local_2010}.
+
+
+\begin{equation} 
+H_i = \sum_{x,y} I\left\{ f_l(x,y) = i \right\}, \quad i = 0, \ldots, n-1
+\end{equation}
+
+To compare histograms of image patches with different sizes, they must be normalized for a consistent description~\cite{pietikainen_local_2010}:
+
+\begin{equation}
+N_i = \frac{H_i}{\sum_{j=0}^{n-1} H_j}
+\end{equation}
+
+This texture characteristic has been extensively employed in the description of regions of interest, demonstrating its capability to elucidate the nuanced details of the surface. It systematically computes a local representation of the texture at the specified point of interest, thereby facilitating a more comprehensive understanding of the material's texture~\cite{kaur_review_2021}.
+
+
+\subsubsection{Gabor Filters}
+
+Gabor filters are widely used in the computer vision literature, especially in face recognition. A two-dimensional Gabor filter is a Gaussian kernel function modulated by a complex sinusoidal plane wave as:
+
+\begin{equation}
+G(x, y) = \frac{f^2}{\pi \gamma \eta} \exp\left( -\frac{x'^2 + \gamma^2 y'^2}{2\sigma^2} \right) \exp\left( j 2 \pi f x' + \varphi \right),
+\end{equation}
+with $x' = x \cos\theta + y \sin\theta, \quad y' = -x \sin\theta + y \cos\theta$,
+where $f$ is the frequency of the sinusoidal factor, the phase offset is $\varphi$,  and  $\gamma$ is the spatial aspect ratio~\cite{farag_feature_2017}.
+
+The response of a filter is determined by either convolution or multiplication of the image with the filter, depending on whether the work is done in the spatial or frequency domain, respectively (as stated by the convolution theorem). The Gabor filter's response highlights edges — areas with the most significant intensity variations - in specific directions and frequencies~\cite{abbasian_ardakani_interpretation_2022}.
+
+\section{Machine Learning}\label{sec:ml}
+\acf{ml} is an \acf{ai} branch focused on analytical prediction building.
+The \ac{ml} model learns from the given data, classifies general patterns, and makes decisions with negligible human interaction. This is principally employed when there is a complex problem that requires data analysis to be solved. Depending on requirements, \ac{ml} can produce an efficient solution, surpassing complex problems~\cite{naidu_review_2023}.
+Although \ac{ml} mainly uses two types of learning techniques - (1) Supervised Learning and (2) Unsupervised Learning -  we will only focus on the supervised technique.
+
+\subsection{Supervised Learning for Classification}
+
+Supervised \ac{ml} is a computational technique where the algorithms attempt to analyze and understand the relationships between observations in a given training dataset. Then, a predictive model is created, based on the learned relationships, that can infer outcomes for unseen received data~\cite{naidu_review_2023}.
+
+In the supervised technique, there is an input, predictor variable, $X$, and a target, output variable, $Y$.
+Any used algorithm, expressed as $f(X) = Y$, tries to approximate $f$ as close as possible to reality - an ideal classifier.
+
+\subsection{Model Evaluation Metrics}\label{subsec:metrics}
+
+Now that we understand what could be a model that addresses our problem, how can we determine if it is a good solution or compare it to existing alternatives? Evaluation metrics come into play to help us with this issue.
+
+These performance metrics, in the binary classification context - where the target is $y\in{0,1}$ -, are typically derived from the confusion matrix. This matrix is constructed based on the following four possible combinations of the ground truth, defined by the provided label, ($y$), and predicted ($y'$) classes:
+\begin{itemize}
+    \item \ac{tp}: both $y$ and $y'$ are positive $(y = y' = 1)$;
+    \item \ac{fp}: $y'$ is positive, but $y$ is negative $(y=0, y' = 1)$;
+    \item \ac{tn}: both $y$ and $y'$ are negative $(y=0, y'=0)$;
+    \item  \ac{fn}: the $y'$ is negative, but $y$ is positive $(y=1,y'= 0)$.
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\setlength{\tabcolsep}{6pt}
+\caption{Common Machine Learning Evaluation Metrics with Descriptions and Equations}
+\label{tab:ml_metrics}
+\begin{tabular}{@{}>{\bfseries}m{3cm} m{6cm} m{6cm}@{}}
+\toprule
+Metric & Description & Equation \\
+\midrule
+Accuracy & Proportion of correct predictions &
+$\displaystyle \frac{TP + TN}{TP + TN + FP + FN}$ \\
+Precision & Correct positive predictions among all predicted positives &
+$\displaystyle \frac{TP}{TP + FP}$ \\
+Recall/Sensitivity & Correct positive predictions among all actual positives &
+$\displaystyle \frac{TP}{TP + FN}$ \\
+F1 Score & Harmonic mean of precision and recall &
+$\displaystyle 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$ \\
+Specificity & Correct negative predictions among all actual negatives &
+$\displaystyle \frac{TN}{TN + FP}$ \\
+\acs{auc-roc} & Area under the ROC curve &
+(Graphical measure, computed numerically) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+When comparing the defined labels with the predicted ones, we can count the outcomes and from them calculate several performance metrics, such as the ones represented in the Table~\ref{tab:ml_metrics}.
+These consist of a set of statistical indicators that we use to measure the effectiveness and suitability of classifiers in relation to the classification data being modeled.
+The choice of metrics is crucial and depends on the specific nature of the problem.
+
+These help us quantify and aggregate the quality of the trained model when it is validated against unseen data. The results of these evaluation metrics will indicate whether the classifier has performed optimally or if further refinement is needed. Note that when a dataset's labels are imbalanced, particularly concerning a specific class, the resulting classification model often exhibits a bias towards that class.
+~\cite{naidu_review_2023}.
+
+
+
+\FloatBarrier
+
+
+\subsection{Convolutional Neural Networks}
+
+The foundation of \acfp{cnn} was established in 1980 when Japanese researcher \textcite{fukushima_neocognitron_1980} introduced the Neocognitron model. The proposed model was a deep-structured neural network that mimicked the visual cortex and was considered one of the earliest \ac{dl} algorithms.
+
+The conventional \ac{cnn} architecture, conceived to extract features from grid-like matrix datasets, is presented in a distinctive structure characterized by specialized hidden layers, including convolutional and pooling, which are unique to them, and fully connected layers.~\cite{lecun_deep_2015, dai_introduction_2021}. 
+
+\subsubsection{Convolutional Layer} %\cite{dai_introduction_2021}
+The convolutional layer, designed to learn spatial hierarchies, is responsible for extracting features from the input data by applying a set of learnable filters known as kernels. During the training process, the \ac{cnn} adjusts the kernel values to enhance feature extraction.
+
+Convolutional kernels are small matrices that function similarly to sliding windows, moving through the input image to perform convolution operations. They compute the dot product between the kernel weights and the corresponding patches of the image, producing feature maps — representations that capture specific patterns or features, often called activation maps. In a convolutional layer, each unit is organized into feature maps and connects to local regions of the previous layer's feature maps through a shared set of weights, referred to as a filter bank.
+All units within a feature map utilize the same filter bank, while different feature maps in a layer employ distinct filter banks.
+ 
+The stride defines the size of the step that the kernel takes as it moves across the input. A stride of 1 allows for detailed feature extraction and results in larger output maps, while higher stride values decrease both the output size and computational cost. This trade-off between spatial resolution and efficiency underscores the importance of stride as a critical parameter in the design of \acp{cnn}.
+
+Following the convolution, a non-linear activation function, such as \ac{relu}, is usually applied to enable the model to understand complex patterns in the data.
+
+This way, convolutional layers are vital for the effectiveness of \acp{cnn} in image classification, object detection, and semantic segmentation tasks, making them a powerful tool in the deep learning field.
+
+
+\subsubsection{Pooling Layer}
+
+Typically, pooling layers follow convolutional layers in the architecture of the network.
+Their main purpose is to decrease the spatial dimensionality of the input feature maps while keeping the most important information, which accelerates computation, reduces memory usage, and mitigates overfitting.
+
+There are several kinds of pooling methods, with max pooling and average pooling being two common ones.
+
+\subsubsection{Fully Connected Layer}
+The \ac{fc} layer, commonly referred to as the linear layer or fully linked layer, is characterized by each neuron connecting to every neuron in the previous layer; therefore, the name.
+Often used after convolution and pooling, it takes the features extracted from the previous layer as inputs and produces the final output for classification or regression tasks.
+
+
+\section{Model Architectures}
+%Optimized with Adam
+% Key architectural components (e.g., number of layers, blocks, special modules).
+% Notable design choices (e.g., depth-wise convolutions, skip connections).
+% How was fusion applied?
+%Computational cost, interpretability, sensitivity to parameters, etc.
+
+\subsection{Linear SVM}
+A Linear \acf{svm} can be implemented using the PyTorch framework by employing a single \ac{fc} layer paired with a hinge loss function. This method enables us to integrate the \ac{svm} into the same infrastructure used for training and testing \ac{dl} models while still preserving its fundamental learning principles.
+
+The linear component of the \ac{fc} layer is defined as follows:
+\begin{equation}
+% Linear decision function
+    f(\mathbf{x}) = \mathbf{W} \mathbf{x} + b
+\end{equation}
+where $W \in \mathbb{R}^{1\times d}$ and $b \in \mathbb{R}$ are trained parameters, and $d$ represents the input of the feature dimension. When used in conjunction with the hinge loss function, we achieve a linear outcome:
+\begin{equation}
+    \mathcal{L}_{\text{hinge}}(\mathbf{x}, y) = \max\big(0, 1 - y \cdot f(\mathbf{x})\big)
+\end{equation}
+where $y \in \{-1, 1\}$ - resulting from the mapping of the previous defined label $\{0, 1\}$ - ,  and the $f(x)$ being the output of the linear model.
+
+Even though this model is not the focus of the research work carried out, it is still possible to use it to try to understand the predictive power of each feature vector merged into the \ac{dl} models.
+
+\subsection{ResNet}
+Residual neural networks, commonly known as ResNet, were first introduced in 2015 by \textcite{he_deep_2015} to address the gradient vanishing and exploding problems that occur in \acp{dnn} as their depth increases. These issues can cause the gradient to either become zero or grow excessively large. Consequently, rather than improving, the network's performance often stagnates or even declines.
+
+Since the deeper the models, with more layers, the more capable they are of capturing more complex patterns, we expected them to perform better than a model with fewer layers.
+However, the gradient issue demonstrates that models struggle when needing to approximate identity mappings by multiple non-linear layers.
+The architecture presented by the authors brings a method designated "skip connections" that connects the activations of one layer to deeper layers without being interfered with in between layers, resulting in the formation of a residual block.
+
+The secret behind ResNets comes from piling these residual blocks concurrently, as instead of learning the underlying mapping through layers, $H(x)$, the network fits the residual map, $F(x) = H(x) - x$~\cite{shehab_efficient_2021}. Solvers are able to reduce the weights of multiple non-linear layers to near zero to achieve identity mappings. The result is that if a layer negatively impacts network performance, it will be skipped, making training fast and overcoming the gradient issue.
+
+The distinguishing feature of each existing ResNet architecture is its depth. For our research,
+we used ResNet-18, ResNet-50, and ResNet-101, which, as the name suggests, have 18, 50, and
+101 layers, respectively. Additionally, in ResNets, we can define stages, which refer to a group
+of layers where the spatial resolution remains constant and usually consists of multiple residual
+blocks. In architecture, a change in dimension marks the start of a new stage.
+
+
+
+\subsection{EfficientNet}
+The following family of the \acp{cnn} was presented in 2019 by \textcite{tan_efficientnet_2020} as it introduces compound scaling, which, instead of scaling one network dimension at a time, uses a compound coefficient, $\phi$, to scale on depth, number of channels, and resolution simultaneously.
+
+The authors stated that different dimensions are dependent on each other. Naturally, we acknowledge that higher-resolution images would need increased depth and larger receptive fields to capture similar features effectively, the same way we need to include more pixels in larger images.
+
+Let $\phi$ be a user-defined coefficient that regulates the availability of additional resources for model scaling, while $\alpha$, $\beta$, and $\gamma$ define how to allocate these extra resources to the network dimensions, such as $\alpha \geq 1, \beta \geq 1, \gamma \geq 1$:
+\begin{equation}
+    depth: d = \alpha^{\phi}, \quad width: w = \beta^{\phi}, \quad resolution: r = \gamma^{\phi}
+\end{equation}
+Where the subject is constrained in order to maintain the \ac{flops} budget:
+\begin{equation}\label{eq:flops_constraints}
+    \alpha \cdot \beta^2 \cdot \gamma^2 \approx 2
+\end{equation}
+
+The establishing of one baseline structure for the EfficientNet architecture starts with the EfficientNet-B0 where the compound scaling is applied: first by fixing $\phi = 1$, assuming there is one extra resource available, and then by performing a small grid search to identify the most optimal values for the constants, $\alpha, \beta, \gamma$, respecting the defined constant in \ref{eq:flops_constraints}.
+
+The EfficientNet family consists of models ranging from EfficientNet-B1 to EfficientNet-B7, which are derived by varying the value of \(\phi \in \mathbf{Z^+}\). Each version is essentially a scaled-up version of the baseline model, EfficientNet-B0.
+
+
+
+\subsection{ConvNeXt}
+Inspired by Vision Transformers, \textcite{liu_convnet_2022} introduced a novel \ac{cnn} architecture termed ConvNeXt, which integrates several innovations from this type of model. ConvNeXt retains the hierarchical, stage-wise structure characteristic of traditional \ac{cnn}s. However, instead of employing the typical $7\times7$ convolution followed by max pooling at the input stage, it utilizes a $4\times4$ convolution with a stride of 4, akin to the patch embedding mechanism used in Vision Transformers.
+
+A significant shift from earlier \acp{cnn} is the adoption of Layer Normalization in place of Batch Normalization, which enhances stability and permits training with smaller batch sizes. Additionally, ConvNeXt features \ac{gelu} activations, replacing the commonly utilized \ac{relu}, and omits the final activation within each block, which is in line with practices established in transformer models.
+
+The architecture also incorporates techniques such as stochastic depth and residual connections, which contribute to improved regularization and model depth. Collectively, these design choices yield a convolutional architecture capable of achieving competitive accuracy on benchmarks like ImageNet while maintaining computational efficiency and inductive biases. This makes \acp{cnn} particularly effective for visual tasks.
+
+\section{Fusion Strategies in Machine Learning}
+
+While \acs{cnn}, using just one type of data, has shown outstanding results in recognizing activities, there's even more potential when we combine different data sources. By bringing together multiple modalities, we can clear up ambiguities that might come from relying on a single source. This combination of information not only enables us to better understand things, but also enhances the accuracy and reliability of recognition systems~\cite{gadzicki_early_2020}.
+
+\subsection{Early Fusion}
+
+Methods that rely only on early fusion first extract various unimodal features and then combine them in a single feature vector before feeding them into a single \ac{ml} model for training~\cite{huang_fusion_2020}.
+The modalities could be fused in different processes, such as concatenation, pooling, or the application of a gated unit.
+
+\subsection{Middle Fusion}
+Middle fusion refers to the procedure of combining feature representations learned from middle layers of neural networks with features learned from other modalities as input to a final model. The key distinction with early fusion is that loss is propagated back to the neural networks that participated in feature extraction during training, thereby allowing for improved feature representations for each training iteration~\cite{gadzicki_early_2020}. 
+
+%Feature-level concatenation
+%Dimensionality issues
+%Benefits and challenges
+
+\subsection{Late Fusion}
+
+Late fusion involves using predictions from multiple models to make a final decision, which is why it is often called decision-level fusion, as it is applied at the model decision. Typically, various modalities are employed to train distinct models, with the ultimate decision being derived through an aggregation function that combines the predictions from these models.
+
+Common examples of aggregation functions include averaging, where the result is the mean of model outputs; majority voting, where the most frequent class wins; weighted voting, similar to majority voting, but the value of each vote depends on its weight or the use of a meta-classifier to analyze the predictions generated by each model, that bring a new model to the outputs that learn how to combine the predictions. The choice of aggregation function is mainly empirical and tailored to the specific application and input modalities involved~\cite{gadzicki_early_2020}.
+
+%Probabilistic fusion
+
+
+% Introduce the importance of explainability in AI, especially in high-stakes domains like healthcare, where understanding model decisions is crucial. Briefly mention the two main methods you will discuss: Class Activation Mapping (CAM) and SHAP.
+\section{Explainable Artificial Intelligence}
+
+With the growth of \ac{ml} solutions, complex problems can be addressed more easily. However, the adoption of these methods raises an important issue: the need to understand the "reasoning" behind the decisions made by these black box algorithms.
+
+The issue presented has led to a surge of \acf{xai} as a research field. The main objective is to provide transparency and understanding without compromising \ac{ai} performance.
+
+\ac{xai} is particularly important in high-risk domains, such as healthcare, where the decisions made by \ac{ml} models may significantly impact patients' lives.
+If the models provided clear, human-understandable explanations for their decisions, our confidence would shift towards the insights provided by the models.
+
+Explainability is essential in building trust and encouraging the adoption of \ac{ai} systems among medical professionals and specialists, as it significantly enhances the reliability of models while ensuring fairness, robustness, and interpretability. By allowing end users, such as physicians, to comprehend the decisions made by deep neural networks, explainability instills confidence that \ac{ai} is making accurate and impartial choices grounded in factual evidence, thereby aiding experts in addressing challenges more effectively. In an era of increasingly stringent regulations, such as the European guidelines for trustworthy \ac{ai}, the capacity to elucidate model decisions is vital for compliance and for advancing scientific discovery, especially in sensitive domains like healthcare~\cite{ali_explainable_2023}. 
+
+\subsection{SHapley Additive exPlanations}
+\acf{shap} provides a unified, model‐agnostic approach to interpreting the output of complex machine learning models by attributing the contribution of each input feature to a given prediction. Grounded in cooperative game theory, \ac{shap} values represent the average marginal contribution of a feature across all possible coalitions of features. 
+%Formally, for a prediction function \(f\) and input instance \(x\), the SHAP value \(\phi_i\) for feature \(i\) is given by
+%\[
+%\phi_i = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!\,(|F|-|S|-1)!}{|F|!}\Bigl[f_{S\cup\{i\}}(x_{S\cup\{i\}}) - f_S(x_S)\Bigr],
+%\] where \(F\) denotes the set of all features, \(S\) is a subset of features not containing \(i\), and \(f_S\) is the model restricted to features in \(S\)~\cite{lundberg_unified_2017}.
+%This axiomatic formulation ensures that \ac{shap} satisfies properties of local accuracy, missingness, and consistency, making it a theoretically sound choice for feature attribution.
+
+Practical estimators such as Kernel \ac{shap} approximate these values by sampling feature coalitions and fitting a weighted linear model to the resulting perturbed predictions, thus enabling application to any differentiable or non‐differentiable model~\cite{lundberg_unified_2017}. Furthermore, SHAP supports both local explanations—clarifying why a model made a specific prediction—and global explanations—summarizing overall feature importance across a dataset—by aggregating individual \ac{shap} values to reveal model behavior patterns and potential biases.
+
+\subsection{Class Activation Mapping and Variations}
+\acf{cam} and its extensions provide spatial explanations for convolutional neural networks by identifying image regions that most influence a particular class score. The original \ac{cam} method requires replacing the final fully connected layers with a global average pooling layer followed by a linear classifier; the resulting class activation map for class \(c\) is obtained as
+\[
+M_c(x,y) = \sum_{k} w_k^c\,a_k(x,y),
+\]
+where \(a_k(x,y)\) is the \(k\)‑th feature map at spatial location \((x,y)\) and \(w_k^c\) is the corresponding weight for class \(c\)~\cite{zhou_learning_2016}. This formulation directly links feature map activations to class scores, yielding interpretable heatmaps without backpropagation.
+
+To accommodate arbitrary \acp{cnn} architectures, Grad‑CAM generalizes \ac{cam} by computing importance weights \(\alpha_k^c\) as the spatial average of the gradients of the class score with respect to feature maps:
+\[
+\alpha_k^c = \frac{1}{Z}\sum_{i,j}\frac{\partial y^c}{\partial a_k(i,j)},
+\] and forming the class activation map via a weighted combination of feature maps followed by a \ac{relu} nonlinearity, \(M_c = \mathrm{ReLU}\bigl(\sum_k \alpha_k^c\,a_k\bigr)\)~\cite{selvaraju_grad-cam_2017}. Grad‑CAM++ further refines this approach by introducing pixel‑wise weighting of gradients to better handle multiple instances of the same class in an image, resulting in sharper and more localized maps~\cite{chattopadhay_grad-cam_2018}. Subsequent variants—such as Score‑CAM and Smooth‑Grad‑CAM++—enhance robustness to noise and improve localization by leveraging class score perturbations and gradient smoothing techniques. Collectively, these methods form a theoretical framework for visual interpretability in \acp{cnn}, firmly grounded in gradient‐based attribution and feature pooling operations.

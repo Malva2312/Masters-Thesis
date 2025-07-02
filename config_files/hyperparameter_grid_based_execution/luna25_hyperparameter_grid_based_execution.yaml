@@ -3,25 +3,25 @@ hyperparameter_combination:
   index: None
   used: None
 hyperparameter_grid:
-  model.pytorch_lightning_model.hyperparameters.convnext_config.extractors:
-    - - name: lbp
-      - name: fof
-      - name: shape
-      
-    - - name: lbp
-      - name: shape
-
-    - - name: fof
-      - name: shape
-
-    - - name: lbp
-      - name: fof
-
-    - - name: lbp
-
-    - - name: fof
-
-    - - name: shape
+  #model.pytorch_lightning_model.hyperparameters.convnext_config.extractors:
+  #  - - name: lbp
+  #    - name: fof
+  #    - name: shape
+  #    
+  #  - - name: lbp
+  #    - name: shape
+#
+  #  - - name: fof
+  #    - name: shape
+#
+  #  - - name: lbp
+  #    - name: fof
+#
+  #  - - name: lbp
+#
+  #  - - name: fof
+#
+  #  - - name: shape
   seed_value:
     - 1
     - 30

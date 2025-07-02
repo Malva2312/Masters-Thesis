@@ -12,6 +12,13 @@ import os
 from src.modules.data.data_augmentation.ct_image_augmenter \
     import CTImageAugmenter
 from src.modules.features.feature_extractors import FeatureExtractorManager
+import os
+
+def nested_defaultdict():
+    return defaultdict(list)
+
+def transpose_if_3d(x):
+    return numpy.transpose(x, axes=(1, 2, 0)) if x.ndim == 3 else x
 
 def custom_collate_fn(batch):
     # batch = [(data, label), (data, label), ...]
@@ -45,7 +52,7 @@ class LIDCIDRIPreprocessedKFoldDataLoader:
             self,
             config,
             lung_nodule_image_metadataframe,
-            load_data_name=False
+            load_data_name=True
     ):
         self.config = config
 
@@ -59,7 +66,7 @@ class LIDCIDRIPreprocessedKFoldDataLoader:
         self.dataloaders = defaultdict(list)
         self.dataloaders_by_subset = defaultdict(list)
         self.data_names_by_subset = defaultdict(list)
-        self.data_splits = defaultdict(lambda: defaultdict(list))
+        self.data_splits = defaultdict(nested_defaultdict)
         self.load_data_name = load_data_name
         self.torch_generator = torch.Generator()
 
@@ -92,7 +99,6 @@ class LIDCIDRIPreprocessedKFoldDataLoader:
                 load_data_name=self.load_data_name,
                 subset_type=subset_type
             ),
-            generator=self.torch_generator,
             shuffle=True if subset_type == "train" else False,
             worker_init_fn=self._get_torch_dataloader_worker_init_fn,
 
@@ -235,15 +241,13 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
                 parameters=config.data_augmentation.parameters
             )
         self.image_transformer = torchvision.transforms.Compose([
-            lambda x: numpy.transpose(x, axes=(1, 2, 0))
-                if x.ndim == 3 else x,
+            transpose_if_3d,
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize(mean=0.5, std=0.5),
         ])
         self.lnva_names = config.lnva_names
         self.mask_transformer = torchvision.transforms.Compose([
-            lambda x: numpy.transpose(x, axes=(1, 2, 0))
-                if x.ndim == 3 else x,
+            transpose_if_3d,
             torchvision.transforms.ToTensor(),
         ])
 
@@ -256,7 +260,7 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
         if not self.load_data_name:
             return data, labels
         else:
-            return self.file_names[data_index], data, labels
+            return data, labels, self.file_names[data_index]
 
     def _get_data(self, data_index):
         image = numpy.load(
@@ -285,19 +289,22 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
             image=image,
             mask=mask
         )
-
-        handcrafted_features_dir = "/nas-ctm01/homes/jmalva/Masters-Thesis/data/features"
+        # Path to the handcrafted features directory
+        # Get the path to the handcrafted_features directory relative to the script folder
+        handcrafted_features_dir = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\data\\features"
+        # Ensure handcrafted_features_dir exists before proceeding
         os.makedirs(handcrafted_features_dir, exist_ok=True)
-        feature_file_path = "/nas-ctm01/homes/jmalva/Masters-Thesis/data/features/n_channels_{}/image_size_{}/{}.pt".format(
-            image.shape[0],
-            image.shape[1],
+        feature_file_path = "C:\\Users\\janto\\OneDrive\\Ambiente de Trabalho\\data\\features\\{}.pt".format(
             self.file_names[data_index]
         )
+
         if os.path.exists(feature_file_path):
-            features = torch.load(feature_file_path)
-            data.update(features)
+            # Load handcrafted features if they exist
+            handcrafted_features = torch.load(feature_file_path)
+            for key, value in handcrafted_features.items():
+                data[key] = value
         else:
-            # Extract features and add them to data
+            # Compute and store handcrafted features
             feature_extractor = FeatureExtractorManager()
             features = feature_extractor(image, mask)
             # Remove batch dimension from each feature and add to data dict
@@ -309,9 +316,10 @@ class LIDCIDRIPreprocessedDataLoader(Dataset):
                         data[key] = value.to(image.device)
                 else:
                     data[key] = value
-            # Save features to file
-            os.makedirs(os.path.dirname(feature_file_path), exist_ok=True)
+
+            # Save the handcrafted features to a file
             torch.save(features, feature_file_path)
+
         return data
 
     def _get_labels(self, data_index):

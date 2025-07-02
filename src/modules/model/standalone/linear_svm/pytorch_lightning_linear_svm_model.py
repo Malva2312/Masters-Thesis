@@ -42,6 +42,10 @@ class PyTorchLightningLinearSVMModel(pytorch_lightning.LightningModule):
         self.predicted_labels = None
         self.weighted_losses = None
 
+        if type(self.config.svm_config.extractors) is str:
+            self.features_names = [self.config.svm_config.extractors]
+        else:
+            self.features_names = self.config.svm_config.extractors
 
         self.to(torch.device(self.config.device))
 

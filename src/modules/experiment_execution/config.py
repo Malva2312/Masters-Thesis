@@ -56,11 +56,11 @@ class ExperimentExecutionConfig:
             elif not any(Path(experiment_dir_path).iterdir()):
                 experiment_version_id = 1
             else:
-                experiment_version_ids = [
+                experiment_version_ids = sorted([
                     int(folder.name.split("_")[1])
                     for folder in Path(experiment_dir_path).iterdir()
                     if folder.is_dir()
-                ]
+                ])
                 experiment_version_id = experiment_version_ids[-1] + 1
         config.experiment_execution.ids.experiment_version_id = \
             experiment_version_id

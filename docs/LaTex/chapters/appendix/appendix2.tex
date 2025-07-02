@@ -1,0 +1,134 @@
+
+\chapter{Best AUC and Stage for Fusion} \label{ap1:Lorem}
+
+\begin{table}[htbp]
+  \centering
+  \caption[Best AUC and Stage for HOG Fusion]{Best AUC and respective Stage for HOG Feature Fusion with ResNet-18 Across Learning Rates and Batch Sizes}
+  \label{tab:hog_hyperparam}
+  \begin{tabular}{@{} c *{3}{cc} @{}}
+    \toprule
+    & \multicolumn{6}{c}{\textbf{Learning Rate}} \\
+    \cmidrule(lr){2-7}
+    \textbf{Batch Size}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-3}}\)}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-4}}\)}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-5}}\)} \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+    & \textbf{AUC} & \textbf{Stage}
+      & \textbf{AUC} & \textbf{Stage}
+      & \textbf{AUC} & \textbf{Stage} \\
+    \midrule
+    32  
+      & $0.81\pm0.02$ & 1 
+      & \textbf{$0.81\pm0.01$} & 4 
+      & \textbf{$0.81\pm0.02$} & 1 \\
+    64  
+      & $0.81\pm0.01$ & 4 
+      & $0.80\pm0.01$ & 3 
+      & $0.80\pm0.02$ & 1 \\
+    128 
+      & \textbf{$0.82\pm0.01$} & 1 
+      & \textbf{$0.81\pm0.01$} & 1 
+      & $0.79\pm0.01$ & 1 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption[Best AUC and Stage for Gabor Fusion]{Best AUC and respective Stage for Gabor Feature Fusion with ResNet-18 Across Learning Rates and Batch Sizes}
+  \label{tab:gabor_hyperparam}
+  \begin{tabular}{@{} c *{3}{cc} @{}}
+    \toprule
+    & \multicolumn{6}{c}{\textbf{Learning Rate}} \\
+    \cmidrule(lr){2-7}
+    \textbf{Batch Size}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-3}}\)}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-4}}\)}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-5}}\)} \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+    & \textbf{AUC} & \textbf{Stage}
+      & \textbf{AUC} & \textbf{Stage}
+      & \textbf{AUC} & \textbf{Stage} \\
+    \midrule
+    32  
+      & $0.81\pm0.01$ & 4 
+      & \textbf{$0.81\pm0.01$} & 3
+      & $0.80\pm0.01$ & 2 \\
+    64  
+      & \textbf{$0.82\pm0.01$} & 1 
+      & \textbf{$0.81\pm0.01$} & 2 
+      & \textbf{$0.81\pm0.01$} & 2 \\
+    128 
+      & $0.82\pm0.02$ & 4 
+      & \textbf{$0.81\pm0.01$} & 1 
+      & $0.80\pm0.01$ & 2 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption[Best AUC and Stage for Shape Fusion]{Best AUC and respective Stage for Shape Feature Fusion with ResNet-18 Across Learning Rates and Batch Sizes}
+  \label{tab:2dshape_hyperparam}
+  \begin{tabular}{@{} c *{3}{cc} @{}}
+    \toprule
+    & \multicolumn{6}{c}{\textbf{Learning Rate}} \\
+    \cmidrule(lr){2-7}
+    \textbf{Batch Size}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-3}}\)}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-4}}\)}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-5}}\)} \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+    & \textbf{AUC} & \textbf{Stage}
+      & \textbf{AUC} & \textbf{Stage}
+      & \textbf{AUC} & \textbf{Stage} \\
+    \midrule
+    32  
+      & \textbf{$0.84\pm0.02$} & 1 
+      & \textbf{$0.83\pm0.01$} & 2 
+      & $0.81\pm0.01$ & 2 \\
+    64  
+      & $0.83\pm0.02$ & 1 
+      & $0.82\pm0.01$ & 1 
+      & $0.81\pm0.01$ & 2 \\
+    128 
+      & $0.82\pm0.01$ & 1 
+      & $0.82\pm0.01$ & 2 
+      & \textbf{$0.81\pm0.00$} & 2 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption[Best AUC and Stage for Haralick Fusion]{Best AUC and respective Stage for Haralick Feature Fusion with ResNet-18 Across Learning Rates and Batch Sizes}
+  \label{tab:haralick_hyperparam}
+  \begin{tabular}{@{} c *{3}{cc} @{}}
+    \toprule
+    & \multicolumn{6}{c}{\textbf{Learning Rate}} \\
+    \cmidrule(lr){2-7}
+    \textbf{Batch Size}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-3}}\)}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-4}}\)}
+      & \multicolumn{2}{c}{\(\mathbf{10^{-5}}\)} \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+    & \textbf{AUC} & \textbf{Stage}
+      & \textbf{AUC} & \textbf{Stage}
+      & \textbf{AUC} & \textbf{Stage} \\
+    \midrule
+    32  
+      & \textbf{$0.82\pm0.02$} & 1 
+      & $0.81\pm0.02$ & 2 
+      & \textbf{$0.80\pm0.01$} & 2 \\
+    64  
+      & $0.81\pm0.02$ & 2 
+      & $0.81\pm0.01$ & 2 
+      & $0.78\pm0.01$ & 1 \\
+    128 
+      & $0.81\pm0.01$ & 3 
+      & \textbf{$0.82\pm0.01$} & 2 
+      & $0.79\pm0.01$ & 2 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

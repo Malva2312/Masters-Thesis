@@ -1,15 +1,14 @@
 %% FEUP THESIS STYLE for LaTeX2e
-%% FEUP, JCL & JCF,  Mon Oct  2 16:35:08 2017
 %%
-%% PLEASE send improvements to jlopes at fe.up.pt and to jcf at fe.up.pt
+%% FEUP, JCL & JCF, October 2024 
+%% PLEASE send improvements to jcf at fe.up.pt and to jlopes at fe.up.pt
 %%
-
 \NeedsTeXFormat{LaTeX2e}
-\def \filename {feupteses.sty}
-\def \filedate {2017/10/02}
-\def \fileversion {1.1.2}
+\def\filename {feupteses.sty}
+\def\filedate {2024/10/07}
+\def\fileversion {1.1.3}
 \ProvidesPackage {feupteses}[\filedate\space\fileversion\space]
-\typeout {Document Style `FEUP Teses' \fileversion\space <\filedate>}
+\typeout{Document Style `FEUP Teses' \fileversion\space <\filedate>}
 
 %% Option for Portuguese
 \newif\if@portugues
@@ -36,6 +35,11 @@
 \@meswfalse
 \DeclareOption{mesw}{\@meswtrue}
 
+%% Option mci
+\newif\if@mci
+\@mcifalse
+\DeclareOption{mci}{\@mcitrue}
+
 %% Option juri
 \newif\if@juri
 \@jurifalse
@@ -56,17 +60,24 @@
 \@onpaperfalse
 \DeclareOption{onpaper}{\@onpapertrue}
 
+%% Option iso
+\newif\if@iso
+\@isofalse
+\DeclareOption{iso}{\@isotrue}
+
 %% Option for numeric references (citation order)
 \newif\if@numericrefs
 \@numericrefsfalse
-%\DeclareOption{numericrefs}{\@numericrefstrue}
 
 %% Option for alpha references
 \newif\if@alpharefs
 \@alpharefsfalse
-%\DeclareOption{alpharefs}{\@alpharefstrue}
 
-%% Internal option: page headers are centered
+%% Option for IEEE references
+\newif\if@ieeerefs
+\@ieeerefsfalse
+
+%% Internal option: page headers are centered (legacy)
 \newif\if@headerscentered
 \@headerscenteredfalse
 
@@ -101,30 +112,34 @@
 \fi
 
 \if@juri
-  \if@meic
-    \@watermarktrue
+  \@watermarktrue
+  \if@meic  
+    \@uselinenotrue
+  \fi
+  \if@mci
     \@uselinenotrue
   \fi
   \if@mesw
-    \@watermarktrue
     \@uselinenotrue
   \fi
 \fi
 
 \if@meec
-  \relax
+  \@ieeerefstrue
+  \@numericrefsfalse
+  \@alpharefsfalse
 \else
   \@committeepagetrue
 \fi
 
 \if@meic
-  \@headerscenteredtrue
-  %\@numericrefstrue
+  \@numericrefstrue
   \@alpharefsfalse
 \fi
 
-\if@meec
-  \@numericrefstrue
+\if@mci
+  \@isotrue
+  \@numericrefsfalse
   \@alpharefsfalse
 \fi
 
@@ -175,40 +190,50 @@ with the `report' document style}{}}{}
 \clubpenalty=6000
 \widowpenalty=6000
 
-\RequirePackage{mathptmx}	   % font times
+\RequirePackage{mathptmx}	       % font times
 \RequirePackage[scaled]{couriers}  % font courier
 \RequirePackage[scaled]{helvet}    % font helvetica
-\RequirePackage[pdftex]{graphicx}
-\RequirePackage{url}
-\RequirePackage{setspace}
-\RequirePackage{makeidx}
-\RequirePackage[tableposition=top]{caption}
-\RequirePackage[pagewise]{lineno}
+\RequirePackage[pdftex]{graphicx}  % direct creation of PDF
+\RequirePackage{url}               % URL-sensitive line breaks
+\RequirePackage{setspace}          % set space between lines
+% \RequirePackage{makeidx}           % creating indexes
+\RequirePackage[tableposition=top]{caption}   % captions in floating environments
+\RequirePackage{xcolor}            % driver-independent color extensions
+\RequirePackage{float}             % Improved interface for floating objects
+\RequirePackage{multirow}          % Create tabular cells spanning multiple rows
+
+\RequirePackage[pagewise]{lineno}  % line numbers on paragraphs
 \modulolinenumbers[2]
 \if@watermark
-\RequirePackage[firstpage]{draftwatermark}
+  \RequirePackage[firstpage]{draftwatermark}
 \fi
-\RequirePackage{xcolor}
 
-\if@numericrefs
-  \newcommand{\citet}{\cite}
-  \newcommand{\citep}{\cite}
+%% bibliography
+\RequirePackage{csquotes}          % context sensitive quotation facilities
+\if@iso
+    \usepackage[backend=biber,style=iso-authoryear]{biblatex}
 \else
-  \if@alpharefs 
-     \newcommand{\citet}{\cite}
-     \newcommand{\citep}{\cite}
-  \else
-     \RequirePackage[numbers]{natbib}
-     
+    \if@numericrefs
+      \usepackage[backend=biber,style=numeric-comp]{biblatex}
+    \else
+      \if@alpharefs 
+         \usepackage[backend=biber,style=alphabetic]{biblatex}
+      \else
+         \if@ieeerefs
+           \usepackage[backend=biber,style=ieee]{biblatex}
+         \else
+           \usepackage[backend=biber,authordate]{biblatex-chicago}
+        \fi
+      \fi
   \fi
 \fi
 
 %% Global style defaults
 
-%% 2021-07-20: Link colors (engineering)
+%% Link colors (engineering)
 \definecolor{engineering}{rgb}{0.549, 0.176, 0.098}
 
-%% 2021-07-20: Centering inside figure and table environments
+%% Centering inside figure and table environments
 \g@addto@macro\@floatboxreset\centering
 
 %% Watermark
@@ -282,30 +307,11 @@ with the `report' document style}{}}{}
 
 %% Working version
 \if@provisional
- \if@meec
-    \if@portugues
+  \if@portugues
        \additionalfronttext{Vers\~{a}o de trabalho}
     \else
        \additionalfronttext{Working version}
-    \fi
- \fi
-\fi
-
-\if@provisional
- \if@meic
-    \if@portugues
-       \additionalfronttext{Vers\~{a}o de trabalho}
-    \else
-       \additionalfronttext{Working version}
-    \fi
- \fi
- \if@mesw
-    \if@portugues
-       \additionalfronttext{Vers\~{a}o de trabalho}
-    \else
-       \additionalfronttext{Working version}
-    \fi
- \fi
+  \fi
 \fi
 
 %% For Jury Evaluation
@@ -335,6 +341,7 @@ with the `report' document style}{}}{}
 \def\copyrightnotice#1{\gdef\@copyrightnotice{\copyright\ #1\par\@permission}}
 
 %% Front pages
+
 \def\maketitle{%
 \newbox\@crestbox
 
@@ -447,15 +454,6 @@ with the `report' document style}{}}{}
 \renewcommand{\footrulewidth}{0pt}
 \addtolength{\headheight}{0.5pt}
 
-% \if@headerscenteredtrue
-%   \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
-%   \fancyhead{} % clear all header fields
-%   \fancyhead[C]{\leftmark}
-%   \fancyfoot{} % clear all footer fields
-%   \fancyfoot[C]{\thepage}
-%   \fancyfoot[RO,LE]{}
-% \fi
-
 %% changes to report.sty
 \lineskip 1pt
 \normallineskip 1pt
@@ -521,7 +519,7 @@ with the `report' document style}{}}{}
     bookmarksnumbered=true,
     breaklinks=true,
     linktocpage,
-    colorlinks=true,     %% 2021-07-20: Use "engineering" color for links
+    colorlinks=true,     %% Use "engineering" color for links
     linkcolor=engineering,
     urlcolor=engineering,
     filecolor=engineering,
@@ -556,10 +554,14 @@ with the `report' document style}{}}{}
   \degree{Mestrado em Engenharia de Software}
 \fi
 
+\if@mci
+  \degree{Mestrado em Ciência da Informação}
+  \school{Faculdade de Engenharia da Universidade do Porto\\[4mm]
+  Faculdade de Letras da Universidade do Porto}
+\fi
+
 %% Some language-dependent definitions
 \if@portugues
-  \RequirePackage{indentfirst}
-
   \newcommand{\@StartDoc}{%
     \renewcommand{\appendixname}{Anexo}%
     \setcounter{page}{-3}%
@@ -568,19 +570,10 @@ with the `report' document style}{}}{}
 
   \newcommand{\PrintBib}[1]{%
     \renewcommand{\bibname}{Refer\^{e}ncias}%
-    \if@numericrefs%
-      \bibliographystyle{plain-pt}%
-    \else%
-      \if@alpharefs%
-        \bibliographystyle{alpha-pt}%
-      \else%
-        \bibliographystyle{plainnat-pt}%
-      \fi%
-    \fi%
     \cleardoublepage%
     \phantomsection%
     \addcontentsline{toc}{chapter}{Refer\^{e}ncias}%
-    \begin{singlespace}\bibliography{#1}\end{singlespace}}
+    \begin{singlespace}\printbibliography\end{singlespace}}
 
   \newcommand{\PrintIndex}{%
     \cleardoublepage%
@@ -596,21 +589,12 @@ with the `report' document style}{}}{}
     \pagestyle{empty}
     \pdfbookmark[0]{Front Page}{init}}
 
-  \newcommand{\PrintBib}[1]{%
+  \newcommand{\PrintBib}{%
     \renewcommand{\bibname}{References}%
-    \if@numericrefs%
-      \bibliographystyle{plain}%
-    \else%
-      \if@alpharefs%
-        \bibliographystyle{alpha}%
-      \else%
-        \bibliographystyle{plainnat}%
-      \fi%
-    \fi%
     \cleardoublepage%
     \phantomsection%
     \addcontentsline{toc}{chapter}{References}%
-    \begin{singlespace}\bibliography{#1}\end{singlespace}}
+    \begin{singlespace}\printbibliography\end{singlespace}}
 
   \newcommand{\PrintIndex}{%
     \cleardoublepage%
@@ -621,5 +605,25 @@ with the `report' document style}{}}{}
 \fi % Some language-dependent definitions
 
 \AtBeginDocument{\@StartDoc}
+%% read specific configuration if it exists in the current directory
+\if@meec
+\InputIfFileExists{./meec.cfg}{\message{^^JFile meec.cfg loaded.^^J}}{}
+\fi
+
+\if@meic
+\InputIfFileExists{./meic.cfg}{\message{^^JFile meic.cfg loaded.^^J}}{}
+\fi
+
+\if@mesw
+\InputIfFileExists{./mesw.cfg}{\message{^^JFile mesw.cfg loaded.^^J}}{}
+\fi
+
+\if@mci
+\InputIfFileExists{./mci.cfg}{\message{^^JFile mci.cfg loaded.^^J}}{}
+\fi
+
+\if@mem
+\InputIfFileExists{./mem.cfg}{\message{^^JFile mem.cfg loaded.^^J}}{}
+\fi
 
 \endinput

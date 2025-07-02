@@ -1,0 +1,33 @@
+\chapter{Datasets}
+This section presents some of the most well-known and widely used datasets in lung nodule detection and characterization tasks. State-of-the-art studies used these datasets, which are public and complete and can be easily accessed through \ac{tcia} or the Grand Challenge.
+
+The malignancy annotations across these datasets are derived either from the judgment of radiologists or from definitive clinical evidence. The \acs{lidc-idri} (and, by extension, \acs{luna16}) relies exclusively on the subjective assessments of experienced radiologists without any histopathologic confirmation. In contrast, both the \acs{nlst} and LUNGx datasets offer accurate ground truth labels, which are based on pathology reports or longitudinal follow-up examinations. Similarly, \acs{anode09} functions solely as a detection challenge and does not incorporate classifications distinguishing benign from malignant cases.
+
+\section{LIDC-IDRI}\label{subsec:lidc}
+The \ac{lidc-idri} is a comprehensive collection of \ac{ct} scans of the thorax designed for diagnosing lung cancer and detecting visualized lesions. This internationally accessible database is a valuable resource for developing \ac{cad} systems focused on lung cancer diagnosis and evaluation. Launched by the \ac{nci} and further developed by the \ac{fnih}, with support from the \ac{fda}, this public-private partnership exemplifies the success of a consensus-based consortium.
+
+The creation of this data registry involved collaboration among seven academic research centers and eight major medical imaging companies, resulting in a total of 1018 cases. Each case includes clinical thoracic \ac{ct} scan images for individual subjects and an XML file detailing the results of a two-phase image annotation process. In the first phase, four radiologists independently reviewed \ac{ct} images and annotated lesions into one of three categories: "nodule >=3 mm", "nodule <3 mm", and "non-nodule >=3 mm." During the second phase, the radiologists reviewed their annotations alongside the anonymized annotations of their peers to reach a consensus. This process was designed to allow for the accurate tallying of lung nodules on a \ac{ct} scan with minimal human intervention, without requiring forced agreement among the radiologists~\cite{armato_iii_data_2015}.
+
+\section{LUNA16}\label{luna16}
+The \acf{luna16} dataset utilizes the publicly available \ac{lidc-idri} database mentioned earlier. Scans with a slice thickness greater than 2.5 mm were excluded from the dataset. In total, there are 888 \ac{ct} scans included. The reference standard for this challenge consists of all 3 mm or larger nodules, which were accepted by at least 3 out of 4 radiologists. Annotations not part of the reference standard, such as non-nodules, nodules smaller than 3 mm, and nodules annotated by only 1 or 2 radiologists, are classified as irrelevant findings~\cite{setio_luna16_2016}.
+
+\section{NLST}\label{nlst}
+The \acf{nlst} was a randomized controlled trial conducted by the \ac{lss} and the \ac{acrin}. The purpose of the trial was to evaluate whether screening for lung cancer with low-dose helical \ac{ct} reduces mortality compared to screening with chest radiography in high-risk individuals. 
+Approximately 54,000 participants were enrolled between August 2002 and April 2004. Data collection for the study has concluded, with the final information gathered by December 31, 2009, including low-dose \ac{ct} scans from 26,254 of these subjects~\cite{national_lung_screening_trial_research_team_data_2013, national_lung_screening_trial_research_team_reduced_2011}.
+
+\section{ANODE09}\label{anode09}
+The \acf{anode09} dataset gathers 55 anonymized \ac{ct} scans provided by the University Medical Center Utrecht from the \ac{nelson} screening program. Five of those exams are supplemented by radiologists' annotations and serve as examples for optimizations. At the same time, the remaining 50 scans are reserved for testing only, with their reference annotations not publicly available. The dataset primarily includes scans from current and former heavy smokers aged 50–75, acquired using 16- or 64-slice \ac{ct} scanners set for low-dose readings.
+
+The dataset was randomly selected from a small subset chosen among the scans with the highest number of annotations. Scans with evident interstitial lung disease were excluded to avoid minimal nodular findings. Although \ac{anode09} emphasizes larger nodules, unlike other datasets, it contains fewer scans, making it more representative of findings in asymptomatic heavy smokers. Given its design, the dataset is intended exclusively for testing and is not recommended for training \ac{cad} algorithms~\cite{ginneken_comparing_2010}.
+
+\section{LUNGx}\label{lungx}
+The LUNGx Challenge aimed to compare the performance of participants' computerized methods for lung nodule characterization with six radiologists who participated in an observer study performing the same tasks on the same dataset. The scans were obtained from the clinical archive at The University of Chicago with Institutional Review Board approval, removing all protected health information before being uploaded to \ac{tcia}. %TODO: Maybe redo this phrase
+
+The challenge required participants to use pre-trained algorithms to proceed with classification tasks. Ten scans were given for calibration purposes - five benign, five malignant - and were followed by a test set of 60 scans with 73 nodules (containing 37 benign and 36 malignant). 
+Nodule sizes were measured through Response Evaluation Criteria in Solid Tumours guidelines, with benign nodules averaging 15.8 mm and malignant nodules 18.6 mm in diameter. This design balanced the nodule's size since it could be a malignancy indicator. In addition, spatial coordinates of each nodule were provided, without its sizes or diagnoses~\cite{kirby_lungx_2016}.
+
+
+\section{Limitations}
+
+It is important to recognize that medical imaging datasets significantly contribute to developing and validating \ac{cad} systems for lung cancer diagnosis. Nevertheless, even the most commonly used datasets, such as \ac{lidc-idri} and \ac{luna16}, have some limitations that can impact model performance and generalizability. These challenges include a lack of annotated data, subjectivity in labelling, inter-observer variability, and potential biases within the datasets. These factors complicate the creation of robust and broadly applicable models. Additionally, we acknowledge that annotating medical images is time-consuming and costly, often leading to size-limited datasets. This limitation is further exacerbated by patient data privacy regulations, which restrict access to larger datasets~\cite{gu_survey_2021}.
+   

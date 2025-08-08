@@ -32,7 +32,7 @@ The ConvNeXt (Tiny), while imposing higher computational demands, achieved an \a
     \end{tabular}
 \end{table}
 
-The results indicate that lighter-weight architectures may perform competitively in lung nodule classification on the \ac{lidc-idri} dataset, achieving balanced performance across all metrics. In contrast, deeper or more complex models did not show significant improvements in performance and, in some instances, even performed worse. The inferior performance of deeper models may be explained by the relatively small size of the \ac{bb}, which may not provide sufficient spatial context for deeper architectures to leverage their increased capacity effectively. This emphasizes the need to tailor model complexity to the specific dataset and task. Since ResNet-18 yielded the best results, we used it as the foundation for our feature fusion analyses.
+The results indicate that lighter-weight architectures may perform competitively in lung nodule classification on the \ac{lidc-idri} dataset, achieving balanced performance across all metrics. In contrast, deeper or more complex models did not show significant improvements in performance and, in some instances, even performed worse. The inferior performance of deeper models may be explained by the relatively small size of the \ac{bb}, which may not provide sufficient spatial context for deeper architectures to leverage their increased capacity effectively. This emphasises the need to tailor model complexity to the specific dataset and task. Since ResNet-18 yielded the best results, we used it as the foundation for our feature fusion analyses.
 
 \FloatBarrier
 
@@ -45,15 +45,15 @@ Shape features consistently demonstrated the highest performance among all teste
 Both \ac{fof} and \ac{lbp} also exhibited strong performance, particularly at the first and second fusion stages, after the first and second ResNet-18 blocks, achieving \ac{auc} scores of 83\%. This underscores the importance of basic intensity and texture information in fusion when fusion occurs at an earlier stage. 
 On the other hand, \ac{hog}, Gabor, and Haralick features produced slightly lower, yet still robust results, with \acp{auc} in the range of 80–82\% across fusion stages. While their impact was not as pronounced as that of shape features, their integration consistently enhanced or matched baseline performance.
 
-For most feature types, the most favorable results were observed when fusion occurred after either the first or second ResNet block.
+For most feature types, the most favourable results were observed when fusion occurred after either the first or second ResNet block.
 This suggests that fusion at an early stage may promote a more effective joint representation, likely because the network can more effectively propagate and refine the complementary information provided by radiomics features through subsequent layers.
- In contrast, fusion at later stages generally yielded marginally lower metrics, potentially due to reduced opportunities for the model to integrate and utilize the auxiliary features as it approached the final decision layers.
+ In contrast, fusion at later stages generally yielded marginally lower metrics, potentially due to reduced opportunities for the model to integrate and utilise the auxiliary features as it approached the final decision layers.
 
-Sensitivity values showed an upward trend when fusion was also conducted at earlier stages. Precision tended to be greatest for Shape, \ac{fof}, and \ac{lbp} features during early fusion stages, demonstrating a favorable balance between false positives and false negatives.
+Sensitivity values showed an upward trend when fusion was also conducted at earlier stages. Precision tended to be greatest for Shape, \ac{fof}, and \ac{lbp} features during early fusion stages, demonstrating a favourable balance between false positives and false negatives.
 
-Across all feature categories, integrating radiomics features with deep ResNet representations typically resulted in modest but steady improvements in classification metrics when compared to the baseline. This proposes that when radiomics features are integrated correctly, they supply additional information that may boost the model’s ability to distinguish between classes.
-%The results indicate that combining individual categories of radiomics features with the ResNet-18 architecture can lead to significant improvements, notably when this fusion occurs at the earlier stages of the network. %Among these, Shape features particularly stand out due to their substantial role in enhancing model performance, highlighting their importance in the characterization of lung nodules.
-These findings lay the groundwork for future experiments focused on investigating multi-feature fusion strategies and optimizing the integration of both handcrafted and deep features to boost classification efficacy.
+Across all feature categories, integrating radiomics features with deep ResNet representations typically resulted in modest but steady improvements in classification metrics when compared to the baseline. This proposes that when radiomics features are integrated correctly, they supply additional information that may boost the model's ability to distinguish between classes.
+%The results indicate that combining individual categories of radiomics features with the ResNet-18 architecture can lead to significant improvements, notably when this fusion occurs at the earlier stages of the network. %Among these, Shape features particularly stand out due to their substantial role in enhancing model performance, highlighting their importance in the characterisation of lung nodules.
+These findings lay the groundwork for future experiments focused on investigating multi-feature fusion strategies and optimising the integration of both handcrafted and deep features to boost classification efficacy.
 
 \begin{table}[htbp]
     \centering
@@ -142,7 +142,7 @@ Feature types that reflect clinically significant changes, like lesion shape, ar
 
 \subsection{Settings and Stages Stability}
 
-A comprehensive evaluation of each radiomic feature fusion was conducted across multiple batch sizes and learning rates to assess the robustness of their performance under varying training conditions. The results, detailed in Tables~\ref{tab:fof_hyperparam}--\ref{tab:lbp_hyperparam} and in~~\ref{tab:hog_hyperparam}--\ref{tab:haralick_hyperparam}, reveal that most features maintain stable \ac{auc} values with low standard deviations across different training settings.
+A comprehensive evaluation of each radiomic feature fusion was conducted across multiple batch sizes and learning rates to assess the robustness of their performance under varying training conditions. The results, detailed in Tables~\ref{tab:fof_hyperparam}--\ref{tab:lbp_hyperparam} and in~\ref{tab:hog_hyperparam}--\ref{tab:haralick_hyperparam}, reveal that most features maintain stable \ac{auc} values with low standard deviations across different training settings.
 
 \begin{table}[htbp]
   \centering
@@ -210,7 +210,7 @@ A comprehensive evaluation of each radiomic feature fusion was conducted across 
   \end{tabular}
 \end{table}
 
-This analysis importantly highlights distinct patterns concerning the optimal fusion stage, specifically, the ResNet layer, where feature fusion produces the best performance. The consistent stability observed in both the \ac{auc} and the optimal fusion stage for Shape, \ac{lbp}, and \ac{fof} features emphasizes their significance. They not only deliver strong performance but also enhance the clarity of model design by reliably identifying the most effective fusion stage.
+This analysis importantly highlights distinct patterns concerning the optimal fusion stage, specifically, the ResNet layer, where feature fusion produces the best performance. The consistent stability observed in both the \ac{auc} and the optimal fusion stage for Shape, \ac{lbp}, and \ac{fof} features emphasises their significance. They not only deliver strong performance but also enhance the clarity of model design by reliably identifying the most effective fusion stage.
 
 \FloatBarrier
 
@@ -228,7 +228,7 @@ This multi-criteria selection aimed to identify features that not only perform w
 
 The results presented in Tables~\ref{tab:resnet18_fusion_metrics}--\ref{tab:convnext_tiny_fusion_metrics} illustrate distinct patterns in the efficacy of radiomics feature fusion across the ResNet-18, EfficientNet-B0, and ConvNeXt-Tiny backbone architectures.
 
-For ResNet-18, fusion was implemented at empirically determined optimal stages, with \ac{lbp} and \ac{fof} features fused at the first optimal stage and Shape features incorporated at the second. This systematic combination of the three top-performing radiomics features yielded significant synergistic benefits. Single-feature fusion resulted in incremental gains over the baseline, with Shape features making the most substantial contribution. Pairwise combinations further enhanced performance. and the highest overall metrics were achieved through the fusion of the three selected features. This highlights that, when guided by optimal feature selection and optimal placement, multi-feature fusion can significantly improve a model's discriminative ability and reliability.
+For ResNet-18, fusion was implemented at empirically determined optimal stages, with \ac{lbp} and \ac{fof} features fused at the first optimal stage and Shape features incorporated at the second. This systematic combination of the three top-performing radiomics features yielded significant synergistic benefits. Single-feature fusion resulted in incremental gains over the baseline, with Shape features making the most substantial contribution. Pairwise combinations further enhanced performance. and the highest overall metrics were achieved through the fusion of the three selected features. This highlights that, when guided by optimal feature selection and optimal placement, multi-feature fusion can significantly improve the model's discriminative ability and reliability.
 
 \begin{table}[htb]
   \centering
@@ -312,16 +312,16 @@ For ResNet-18, fusion was implemented at empirically determined optimal stages, 
   \end{tabular}
 \end{table}
 
-In contrast, the EfficientNet-B0 and ConvNeXt-Tiny backbones utilized a late fusion strategy, integrating features at the final layer, since the study of an optimal stage would be highly time-consuming due to the higher number of possibilities. For EfficientNet-B0, the fusion of two features—especially \ac{lbp} and Shape—yielded the best performance - \ac{auc}: 0.83, Accuracy: 0.84, Precision: 0.86. However, incorporating all three features did not lead to further improvement, indicating that the advantages of fusion may plateau or even decline without careful selection of the fusion stage and configurations. Similarly, ConvNeXt-Tiny displayed only modest gains from feature fusion, with the three-feature model achieving an \ac{auc} of 0.79, which is only slightly above the baseline.
+In contrast, the EfficientNet-B0 and ConvNeXt-Tiny backbones utilised a late fusion strategy, integrating features at the final layer, since the study of an optimal stage would be highly time-consuming due to the higher number of possibilities. For EfficientNet-B0, the fusion of two features—especially \ac{lbp} and Shape—yielded the best performance - \ac{auc}: 0.83, Accuracy: 0.84, Precision: 0.86. However, incorporating all three features did not lead to further improvement, indicating that the advantages of fusion may plateau or even decline without careful selection of the fusion stage and configurations. Similarly, ConvNeXt-Tiny displayed only modest gains from feature fusion, with the three-feature model achieving an \ac{auc} of 0.79, which is only slightly above the baseline.
 
-These findings emphasize that the effectiveness of radiomics feature fusion is highly contingent upon both the backbone architecture and the integration strategy employed. A fusion at an optimal stage, as observed with ResNet-18, could be perceived as more effective, likely due to a better alignment with network representation hierarchies. In architectures where we only employed late fusion, there are still some performance gains, but they tend to be more modest, making the selection of feature combinations more critical.
+These findings emphasise that the effectiveness of radiomics feature fusion is highly contingent upon both the backbone architecture and the integration strategy employed. A fusion at an optimal stage, as observed with ResNet-18, could be perceived as more effective, likely due to a better alignment with network representation hierarchies. In architectures where we only employed late fusion, there are still some performance gains, but they tend to be more modest, making the selection of feature combinations more critical.
 
 
 \FloatBarrier
 
 \section{Dataset Ablation}
 
-The primary objective of this study phase was to compare the performance of the standard ResNet-18 model with that of the fused ResNet-18 architecture across various dataset variations, each representing distinct labelling protocols, imaging resolutions, or data formats. The data obtained from this phase of the research is summarized in Table~\ref{tab:resnet18_vs_fused}.
+The primary objective of this study phase was to compare the performance of the standard ResNet-18 model with that of the fused ResNet-18 architecture across various dataset variations, each representing distinct labelling protocols, imaging resolutions, or data formats. The data obtained from this phase of the research is summarised in Table~\ref{tab:resnet18_vs_fused}.
 
 In the Extreme Scores subset, as anticipated, both models achieve high performance due to the well-separated nodules, which are easier to identify. However, the fused model still exhibits a measurable advantage. When compared directly, the fused model shows an improvement in \ac{auc} by 1\%, as well as enhancements in accuracy and precision by 2\%. Although sensitivity remains unchanged at 97\%, this underscores an increased robustness relative to the baseline.
 
@@ -416,100 +416,41 @@ These findings induce the belief that integrating shallow features within \ac{dl
 
 \subsection{Grad-CAM}
 
-The \ac{cam} generated by applying Grad-CAM to five representative cases offers a visual analysis of how the baseline and fused models emphasize different areas of the image.
+The \ac{cam} generated by applying Grad-CAM to five representative cases offers a visual analysis of how the baseline and fused models emphasise different areas of the image.
 
-The ResNet model without fusion tends to produce more diffuse activation patterns, with heatmaps that sometimes highlight significant regions in the background of the nodule. In contrast, while the heatmaps from the fused model may not always focus directly on the center of the nodule, they more consistently capture areas that closely correspond to the nodule or its edges. 
+The ResNet model without fusion tends to produce more diffuse activation patterns, with heatmaps that sometimes highlight significant regions in the background of the nodule. In contrast, while the heatmaps from the fused model may not always focus directly on the centre of the nodule, they more consistently capture areas that closely correspond to the nodule or its edges. 
 
 These findings indicate that merging radiomics with deep learning representations could not only enhance predictive performance but also improve model interpretability. This shows that the fused model is more adept at identifying the salient regions of lung nodules, thereby providing more meaningful and explainable visual evidence for its decisions when compared to the baseline model.
 
 \begin{figure}[htbp]
     \centering
-    % First row: Original images
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex1/sample_original.png}
-        \caption*{Original 1}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex2/sample_original.png}
-        \caption*{Original 2}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex3/sample_original.png}
-        \caption*{Original 3}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex4/sample_original.png}
-        \caption*{Original 4}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex5/sample_original.png}
-        \caption*{Original 5}
-    \end{subfigure}
-
-    \vspace{2mm}
-
-    % Second row: Fused model heatmaps
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex1/sample_gradcam.png}
-        \caption*{Fused 1}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex2/sample_gradcam.png}
-        \caption*{Fused 2}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex3/sample_gradcam.png}
-        \caption*{Fused 3}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex4/sample_gradcam.png}
-        \caption*{Fused 4}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex5/sample_gradcam.png}
-        \caption*{Fused 5}
-    \end{subfigure}
-
-    \vspace{2mm}
-
-    % Third row: Non-Fused model heatmaps
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex1/sample_gradcam_non_fused.png}
-        \caption*{Non-Fused 1}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex2/sample_gradcam_non_fused.png}
-        \caption*{Non-Fused 2}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex3/sample_gradcam_non_fused.png}
-        \caption*{Non-Fused 3}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex4/sample_gradcam_non_fused.png}
-        \caption*{Non-Fused 4}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.18\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/heatmaps/ex5/sample_gradcam_non_fused.png}
-        \caption*{Non-Fused 5}
-    \end{subfigure}
-
-    \caption[Grad-CAM Heatmap Comparison]{Comparison of Grad-CAM Heatmaps for five samples: Original images (top row), Fused model (middle row), and Non-Fused model (bottom row).}
+    \noindent
+    \makebox[\textwidth][c]{
+        \begin{tabular}{@{}m{0.5cm}|*{5}{m{0.18\textwidth}}@{}}
+            % First row: Original
+            \rotatebox{90}{\textbf{Original}}&
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex1/sample_original.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex2/sample_original.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex3/sample_original.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex4/sample_original.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex5/sample_original.png} \\
+            % Second row: Non-Fused
+            \rotatebox{90}{\textbf{Non-Fused}}&
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex1/sample_gradcam_non_fused.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex2/sample_gradcam_non_fused.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex3/sample_gradcam_non_fused.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex4/sample_gradcam_non_fused.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex5/sample_gradcam_non_fused.png} \\
+            % Third row: Fused
+            \rotatebox{90}{\textbf{Fused}}&
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex1/sample_gradcam.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex2/sample_gradcam.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex3/sample_gradcam.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex4/sample_gradcam.png} &
+            \includegraphics[width=\linewidth]{figures/heatmaps/ex5/sample_gradcam.png} \\
+        \end{tabular}
+    }
+    \caption[Grad-CAM Heatmap Comparison]{Comparison of Grad-CAM Heatmaps for five samples: Original images (top row), Non-Fused model (middle row), and Fused model (bottom row).}
     \label{fig:heatmap_grid}
 \end{figure}
 

@@ -1,7 +1,7 @@
 \chapter{Methodology}
 
 \section{Dataset}
-The experiments conducted in this research utilized the previously mentioned in section \ref{subsec:lidc} \ac{lidc-idri} dataset. 
+The experiments conducted in this research utilised the previously mentioned in section \ref{subsec:lidc} \ac{lidc-idri} dataset. 
 
 \subsection{Data Annotations}
 The dataset annotations provided include \ac{lnva} and \ac{lnm} scores, along with the outlines of nodules that are 3mm or larger.
@@ -15,7 +15,7 @@ Although \acp{lnva} such as subtlety, internal structure, calcification, spheric
 
 We filtered the data to exclude lung nodules, where the mean score of the respective \acp{lnm} was 3 (Indeterminate), and also those annotated by fewer than three radiologists.
 
-The \ac{lidc-idri} dataset consists of lung \ac{ct} scans from multiple institutions, leading to imaging variability from different scanners and protocols. To standardize the data, preprocessing transformations were applied~\cite{rodrigues_efficient-proto-caps_2025}:
+The \ac{lidc-idri} dataset consists of lung \ac{ct} scans from multiple institutions, leading to imaging variability from different scanners and protocols. To standardise the data, preprocessing transformations were applied~\cite{rodrigues_efficient-proto-caps_2025}:
 
 \begin{itemize}
     \item \ac{hu} values above $400$ were capped at $400$, and those below $-1000$ were set to $-1000$, corresponding to the values of hard tissues and air, respectively, as mentioned in section ~\ref{subsec:ct}.
@@ -24,9 +24,9 @@ The \ac{lidc-idri} dataset consists of lung \ac{ct} scans from multiple institut
 
     \item The slice thickness and pixel spacing were adjusted from $1.91 \pm, 0.73$ mm, and $0.68 \pm 0.08$ mm - mean ± standard deviation calculated across the entire dataset -, respectively, to 1.0 mm.
 
-    \item Initially, 2D representations were extracted from the \ac{ct} images by cropping square patches centered on the lung nodule. Two spatial resolutions were considered: $32 \times 32$ and $64 \times 64$ pixels. %These dimensionalities were selected to assess the impact of spatial resolution on model performance while ensuring the region of interest remained centered on the lesion.
+    \item Initially, 2D representations were extracted from the \ac{ct} images by cropping square patches centred on the lung nodule. Two spatial resolutions were considered: $32 \times 32$ and $64 \times 64$ pixels. %These dimensionalities were selected to assess the impact of spatial resolution on model performance while ensuring the region of interest remained centred on the lesion.
 
-    \item Additionally, to the $32 \times 32$ 2D representation, a simplified three-dimensional variant (2.5D) was also generated. This 2.5D consisted of three orthogonal anatomical planes - axial, sagittal, and coronal - each forming one channel of the resulting image, all centered on the nodule. %This approach preserves complementary spatial context and structural cues that may enhance the model's ability to characterize the lesion.
+    \item Additionally, to the $32 \times 32$ 2D representation, a simplified three-dimensional variant (2.5D) was also generated. This 2.5D consisted of three orthogonal anatomical planes - axial, sagittal, and coronal - each forming one channel of the resulting image, all centred on the nodule. %This approach preserves complementary spatial context and structural cues that may enhance the model's ability to characterise the lesion.
 
 
     %\item From the \ac{ct} images two types of lung nodule \acp{bb} were extracted. The first was a single-channel (2D) representation that included the nodule's center in a standard anatomical plane. The second was a three-channel (2.5D) representation, with each channel displaying one of the three orthogonal anatomical planes (axial, sagittal, coronal), also including the nodule's center.
@@ -35,7 +35,7 @@ The \ac{lidc-idri} dataset consists of lung \ac{ct} scans from multiple institut
 
 \subsection{Data Labelling}
 
-To simplify the complexities of the multi-label classification task, we transformed it into a binary classification problem. We defined the labels as either 0 or 1, corresponding to benign and malignant nodules, respectively. Nodules with a \ac{lnm} mean score below 3 were assigned a label of 0, while those with a score above were labeled as 1. This serves as the primary reference set for our experiments.
+To simplify the complexities of the multi-label classification task, we transformed it into a binary classification problem. We defined the labels as either 0 or 1, corresponding to benign and malignant nodules, respectively. Nodules with a \ac{lnm} mean score below 3 were assigned a label of 0, while those with a score above were labelled as 1. This serves as the primary reference set for our experiments.
 
 To comprehensively evaluate the performance of our methods, we prepared several subsets of the \ac{lidc-idri} dataset, each focusing on different labels of the data. These subsets are described below:
 
@@ -52,9 +52,9 @@ To comprehensively evaluate the performance of our methods, we prepared several 
 
 \section{Handcrafted Feature Extraction}
 
-A comprehensive set of handcrafted radiomic features was extracted to characterize lung nodules from multiple complementary perspectives, including intensity, texture, morphology, gradient, and frequency. For each feature category, predefined hyperparameters ensured consistency, reproducibility, and clinical relevance. The extraction of lung nodule \acp{bb} was guided by their corresponding binary masks, both represented as tensors of shape $(C, H, W)$, where $C$ is the number of channels, $H$ and $W$ are the image height and width, respectively.
+A comprehensive set of handcrafted radiomic features was extracted to characterise lung nodules from multiple complementary perspectives, including intensity, texture, morphology, gradient, and frequency. For each feature category, predefined hyperparameters ensured consistency, reproducibility, and clinical relevance. The extraction of lung nodule \acp{bb} was guided by their corresponding binary masks, both represented as tensors of shape $(C, H, W)$, where $C$ is the number of channels, $H$ and $W$ are the image height and width, respectively.
 
-Prior to feature computation, all input underwent a standardized preprocessing pipeline:
+Prior to feature computation, all input underwent a standardised preprocessing pipeline:
 \begin{enumerate}
     \item \textbf{Mask application}: Isolation of the \ac{roi} using the binary mask;
     \item \textbf{NaN handling}: Replacement of invalid values with zero;
@@ -88,24 +88,24 @@ Percentile-Based Statistics   & Minimum, Maximum, 10th Percentile, 90th Percenti
 
 \subsection*{Local Binary Pattern}
 
-The texture information was encoded using a uniform \ac{lbp} approach, with a radius of 1 pixel and 8 sampling points. The 'uniform' method was employed to ensure rotation invariance while maintaining computational efficiency. The resulting \ac{lbp} histogram, computed over the masked region and normalized to create a density distribution, produced a feature vector of size 10, corresponding to the 10 uniform binary patterns.
+The texture information was encoded using a uniform \ac{lbp} approach, with a radius of 1 pixel and 8 sampling points. The 'uniform' method was employed to ensure rotation invariance while maintaining computational efficiency. The resulting \ac{lbp} histogram, computed over the masked region and normalised to create a density distribution, produced a feature vector of size 10, corresponding to the 10 uniform binary patterns.
 
 \subsection*{Histogram of Oriented Gradients}
 
-Edge orientation features were extracted using the \ac{hog} descriptor. The configuration employed 9 gradient orientation bins, with each cell size measuring $8 \times 8$ pixels and a block size of $2 \times 2$ cells. To improve robustness against intensity shifts, L2-Hys normalization was employed. The final 324-dimensional \ac{hog} feature vector was obtained by flattening the concatenated histograms across all cells and blocks.
+Edge orientation features were extracted using the \ac{hog} descriptor. The configuration employed 9 gradient orientation bins, with each cell size measuring $8 \times 8$ pixels and a block size of $2 \times 2$ cells. To improve robustness against intensity shifts, L2-Hys normalisation was employed. The final 324-dimensional \ac{hog} feature vector was obtained by flattening the concatenated histograms across all cells and blocks.
 
 \subsection*{Gabor Filter Features}
 
-Frequency-domain texture characterization was conducted using a Gabor filter bank consisting of 12 filters.
+Frequency-domain texture characterisation was conducted using a Gabor filter bank consisting of 12 filters.
 These filters were created by combining three spatial frequencies (0.1, 0.2, 0.3) with four orientations ($0^\circ$, $45^\circ$, $90^\circ$, $135^\circ$). Each filter was implemented with a $15 \times 15$ kernel. After convolving the masked image with these filters, the mean response within the nodule region was calculated for each filter, resulting in a vector of size 12 that captures texture patterns specific to both scale and orientation.
 
 \subsection*{Shape-based Features}
 
-The morphological properties of the nodules were quantified using shape-based descriptors derived from binary masks. Eight features were extracted: boundary complexity was described using mesh surface, perimeter, and perimeter-surface ratio; size characteristics were captured by maximum diameter, major axis length, and minor axis length. Additionally, roundness and symmetry were evaluated using sphericity and elongation. These geometric characteristics form a feature vector of size 8 and represent clinical criteria that are often utilized in the evaluation of malignancy in radiology.
+The morphological properties of the nodules were quantified using shape-based descriptors derived from binary masks. Eight features were extracted: boundary complexity was described using mesh surface, perimeter, and perimeter-surface ratio; size characteristics were captured by maximum diameter, major axis length, and minor axis length. Additionally, roundness and symmetry were evaluated using sphericity and elongation. These geometric characteristics form a feature vector of size 8 and represent clinical criteria that are often utilised in the evaluation of malignancy in radiology.
 
 \subsection*{Haralick Texture Features}
 
-Texture features based on the \ac{glcm} were calculated to describe the spatial relationships between pixel intensities. The images were quantized to 8 bits, and \ac{glcm}s were created in four directions ($0^\circ$, $45^\circ$, $90^\circ$, $135^\circ$) to ensure rotation invariance. Directional averages were then used to derive a final set of 13 Haralick descriptors, including angular second moment, contrast, correlation, variance, inverse difference moment, sum average, sum variance, sum entropy, entropy, difference variance, difference entropy, and two information measures of correlation. The 13-sized vector effectively captures local intensity patterns and textural regularity.
+Texture features based on the \ac{glcm} were calculated to describe the spatial relationships between pixel intensities. The images were quantised to 8 bits, and \ac{glcm}s were created in four directions ($0^\circ$, $45^\circ$, $90^\circ$, $135^\circ$) to ensure rotation invariance. Directional averages were then used to derive a final set of 13 Haralick descriptors, including angular second moment, contrast, correlation, variance, inverse difference moment, sum average, sum variance, sum entropy, entropy, difference variance, difference entropy, and two information measures of correlation. The 13-sized vector effectively captures local intensity patterns and textural regularity.
 
 \subsection*{Final Feature Composition}
 
@@ -113,28 +113,28 @@ These experiments comprised 18 first-order statistics, 10 \ac{lbp} features, 324
 
 
 \section{Evaluation}
-In the context of health and medicine, for this thesis, we evaluated the models using several of the metrics previously mentioned in \ref{subsec:metrics}: (1) accuracy, which provides an overall model performance; (2) precision, aimed at minimizing the risk of overdiagnosing; (3) sensitivity, to ensure we identify patients with the disease; and (4) \ac{auc} (or \ac{auc-roc}), which captures the balance between sensitivity and specificity.
+In the context of health and medicine, for this thesis, we evaluated the models using several of the metrics previously mentioned in \ref{subsec:metrics}: (1) accuracy, which provides an overall model performance; (2) precision, aimed at minimising the risk of overdiagnosing; (3) sensitivity, to ensure we identify patients with the disease; and (4) \ac{auc} (or \ac{auc-roc}), which captures the balance between sensitivity and specificity.
 
-To ensure reliable and robust evaluations of predictions while preventing overfitting, we utilized a 5-fold cross-validation strategy.
+To ensure reliable and robust evaluations of predictions while preventing overfitting, we utilised a 5-fold cross-validation strategy.
 In this process, we partitioned the data for each fold into 80\% for training and validation (comprising 72\% for training and 8\% for validation) and 20\% for testing. The validation set constitutes 8\% of the total dataset, representing 10\% of the 80\% designated for both training and validation.
 We computed the mean and standard deviation of the selected metrics, gathering insights from all test sets to illustrate our findings more clearly.
 
-%In our context of lung nodule characterization, the input variable, \(X\), consists of matrices of 32 by 32 pixels - \ac{bb} - that represent the \ac{roi} in each provided CT scan. Since we are conducting a binary classification, the output value, \(Y\), for each image will be either 0 or 1, representing benign and malignant nodules, respectively.
+%In our context of lung nodule characterisation, the input variable, \(X\), consists of matrices of 32 by 32 pixels - \ac{bb} - that represent the \ac{roi} in each provided CT scan. Since we are conducting a binary classification, the output value, \(Y\), for each image will be either 0 or 1, representing benign and malignant nodules, respectively.
 
 
 %\section{Workflow}
 
-%In this thesis, we focus on EfficientNet-B0, EfficientNet-B1, and EfficientNet-B2. By using multiple versions of the model, we can compare how increasing the model size and input resolution impacts performance. Unlike the ResNet model, which we employed mid-level fusion, with EfficientNet, we utilized late fusion. This means that we combine handcrafted features and deep features only at the fully connected layer. This decision to use late fusion simplifies the integration process, as we avoid the need to conduct performance tests to determine the optimal layer, while still taking advantage of the strengths offered by both types of features.
+%In this thesis, we focus on EfficientNet-B0, EfficientNet-B1, and EfficientNet-B2. By using multiple versions of the model, we can compare how increasing the model size and input resolution impacts performance. Unlike the ResNet model, which we employed mid-level fusion, with EfficientNet, we utilised late fusion. This means that we combine handcrafted features and deep features only at the fully connected layer. This decision to use late fusion simplifies the integration process, as we avoid the need to conduct performance tests to determine the optimal layer, while still taking advantage of the strengths offered by both types of features.
 
 \section{Experimental Procedures}
 %\subsection{Standardized Setup}
 \subsection{Hyperparameter Optimization}
 
-A standardized configuration was established to ensure fair comparisons and reproducibility across all experimental runs, including baseline models, fusion implementations, and ablation studies. Models were trained using hyperparameter grid search with batch sizes of 32, 64, and 128, and learning rates set to $10^{-3}$, $10^{-4}$, and $10^{-5}$.
-The Adam optimizer was employed with $\beta_1$ and $\beta_2$ defined as $0.9$ and $0.999$, respectively, and the loss function used was binary cross-entropy. Class weights, derived from the training set distribution, were incorporated to address class imbalance.
-Training continued for up to 100 epochs, with early stopping implemented if the validation metric did not improve for 25 consecutive epochs. All models were initialized using pre-trained weights from ImageNet.
+A standardised configuration was established to ensure fair comparisons and reproducibility across all experimental runs, including baseline models, fusion implementations, and ablation studies. Models were trained using hyperparameter grid search with batch sizes of 32, 64, and 128, and learning rates set to $10^{-3}$, $10^{-4}$, and $10^{-5}$.
+The Adam optimiser was employed with $\beta_1$ and $\beta_2$ defined as $0.9$ and $0.999$, respectively, and the loss function used was binary cross-entropy. Class weights, derived from the training set distribution, were incorporated to address class imbalance.
+Training continued for up to 100 epochs, with early stopping implemented if the validation metric did not improve for 25 consecutive epochs. All models were initialised using pre-trained weights from ImageNet.
 
-Experiments were performed on CUDA-enabled \acp{gpu} with mixed precision to accelerate training. The implementation utilized the PyTorch and PyTorch Lightning frameworks. To promote reproducibility, all random seeds were fixed for every stochastic operation, and three different seeds were employed to verify the robustness of the results. We retained the best-performing model checkpoints based on validation loss and validation \ac{auc}, as well as the checkpoint from the last epoch for evaluation purposes. From all the resulting versions, we present the one with the best performance.
+Experiments were performed on CUDA-enabled \acp{gpu} with mixed precision to accelerate training. The implementation utilised the PyTorch and PyTorch Lightning frameworks. To promote reproducibility, all random seeds were fixed for every stochastic operation, and three different seeds were employed to verify the robustness of the results. We retained the best-performing model checkpoints based on validation loss and validation \ac{auc}, as well as the checkpoint from the last epoch for evaluation purposes. From all the resulting versions, we present the one with the best performance.
 
 \begin{table}[ht]
 \centering
@@ -162,10 +162,10 @@ Reproducibility       & Three fixed random seeds \\
 
 %\subsection{Pipeline Design}
 
-The experimental pipeline was designed as a systematic investigation to comprehensively evaluate architecture selection, feature fusion effectiveness, and performance across varied dataset conditions. This structured approach ensured methodological rigor while building upon previous findings at each successive phase.
+The experimental pipeline was designed as a systematic investigation to comprehensively evaluate architecture selection, feature fusion effectiveness, and performance across varied dataset conditions. This structured approach ensured methodological rigour while building upon previous findings at each successive phase.
 
 \subsection{Baseline Selection}
-The initial phase established optimal baseline architectures for both ResNet and EfficientNet families through evaluation on the Base dataset. For ResNet architectures, three variants spanning different depths were systematically compared: ResNet-18 representing a lightweight configuration, ResNet-50 providing moderate complexity, and ResNet-101 offering maximum representational capacity. Each architecture underwent training using the standardized experimental configuration defined.
+The initial phase established optimal baseline architectures for both ResNet and EfficientNet families through evaluation on the Base dataset. For ResNet architectures, three variants spanning different depths were systematically compared: ResNet-18 representing a lightweight configuration, ResNet-50 providing moderate complexity, and ResNet-101 offering maximum representational capacity. Each architecture underwent training using the defined standardised experimental configuration.
 
 Parallel evaluation was conducted for EfficientNet architectures, comparing EfficientNet-B0, EfficientNet-B1, and EfficientNet-B2 variants under identical protocols — this compound scaling evaluation aimed to identify the optimal balance between model complexity and lung nodule classification performance.
 
@@ -180,12 +180,12 @@ To identify the optimal fusion point, feature map fusion was performed after eac
 This phase provided crucial insights into the individual contribution of each radiomics feature category and established the foundation for identifying complementary feature combinations in subsequent phases.
 
 \subsection{Feature Selection}
-The third phase involved the selection of the three most effective radiomics feature categories based on the results from the second phase, along with predictive power evaluation through classification by \ac{svm}. Selection criteria encompassed multiple performance dimensions: improvement in metrics relative to baseline performance, consistency of optimal layer through hyperparameter choice, and complementary nature of the extracted radiomics information. This multi-criteria approach ensured that selected features not only provided individual performance gains but also offered diverse perspectives on nodule characterization that could potentially synergize in combination experiments.
+The third phase involved the selection of the three most effective radiomics feature categories based on the results from the second phase, along with predictive power evaluation through classification by \ac{svm}. Selection criteria encompassed multiple performance dimensions: improvement in metrics relative to baseline performance, consistency of optimal layer through hyperparameter choice, and complementary nature of the extracted radiomics information. This multi-criteria approach ensured that selected features not only provided individual performance gains but also offered diverse perspectives on nodule characterisation that could potentially synergise in combination experiments.
 
 \subsection{Multi-Feature Fusion Combinations}
 The fourth phase explored synergistic effects through the systematic combination of the three top-performing features identified in the third phase. Two-feature combinations were first evaluated through all possible pairings of the three selected features, generating three distinct combination models. Subsequently, a comprehensive three-feature combination model integrating all selected radiomics categories was implemented and evaluated. Each combination maintained the established fusion architecture principles, with feature injection at the now-defined optimal fusion point. The optimal combination was determined through testing, providing the best-performing fusion model for comprehensive dataset evaluation.
 
-In addition to the primary fusion architecture, we also evaluated backbone models based on EfficientNet and ConvNeXt-Tiny, utilizing the same three selected features. For these architectures, we systematically explored all configurations, including combinations of single features, two features, and the full three-feature set. 
+In addition to the primary fusion architecture, we also evaluated backbone models based on EfficientNet and ConvNeXt-Tiny, utilising the same three selected features. For these architectures, we systematically explored all configurations, including combinations of single features, two features, and the full three-feature set. 
 However, since neither model underwent feature selection at an optimal layer, we implemented late fusion at the final layer of the network instead of middle fusion.
 
 This approach enabled a comparative assessment of fusion models against their corresponding non-fused counterparts across different backbone architectures, while ensuring consistency in the feature combination protocols.
@@ -217,9 +217,9 @@ The final ResNet experimentation conducted a comprehensive evaluation of both th
 \FloatBarrier
 
 \subsection{Explainability}
-To study interpretability, we employed Grad-CAM visualization for both the ResNet baseline and the fused ResNet model. Grad-CAM was used to generate class activation maps, offering insights into the specific regions of lung nodule images that affected the classification decisions of each model. This approach facilitated a direct comparison of their attention patterns and highlighted the interpretability improvements achieved through the integration of radiomics features.
+To study interpretability, we employed Grad-CAM visualisation for both the ResNet baseline and the fused ResNet model. Grad-CAM was used to generate class activation maps, offering insights into the specific regions of lung nodule images that affected the classification decisions of each model. This approach facilitated a direct comparison of their attention patterns and highlighted the interpretability improvements achieved through the integration of radiomics features.
 
-Furthermore, \ac{shap} was utilized on the fused ResNet model to further elucidate the contributions of individual radiomic features to the model's predictions. The \ac{shap} analysis offered a quantitative understanding of feature importance and interactions, complementing the insights gained from Grad-CAM. Importantly, \ac{shap} was exclusively applied to the fusion model, as it specifically addresses the interpretability of the integrated radiomics features within the network.
+Furthermore, \ac{shap} was utilised on the fused ResNet model to further elucidate the contributions of individual radiomic features to the model's predictions. The \ac{shap} analysis offered a quantitative understanding of feature importance and interactions, complementing the insights gained from Grad-CAM. Importantly, \ac{shap} was exclusively applied to the fusion model, as it specifically addresses the interpretability of the integrated radiomics features within the network.
     
 %Statistical analysis throughout all experimental phases employed paired t-tests with Bonferroni correction for multiple comparisons to maintain appropriate significance thresholds. Effect sizes were quantified using Cohen's d to distinguish between statistical and practical significance, ensuring robust conclusions regarding both architectural optimality and fusion effectiveness across the comprehensive experimental framework.
 
